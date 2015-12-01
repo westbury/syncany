@@ -45,6 +45,7 @@ import org.syncany.operations.down.actions.NewFileSystemAction;
 import org.syncany.operations.down.actions.NewSymlinkFileSystemAction;
 import org.syncany.operations.down.actions.RenameFileSystemAction;
 import org.syncany.operations.down.actions.SetAttributesFileSystemAction;
+import org.syncany.plugins.transfer.StorageException;
 
 
 /**
@@ -286,7 +287,7 @@ public class FileSystemActionReconciliator {
 	}
 	
 	private void determineActionWithLocalVersionAndLocalFileAsExpected(FileVersion winningLastVersion, File winningLastFile,
-			FileVersion localLastVersion, File localLastFile, MemoryDatabase winnersDatabase, List<FileSystemAction> fileSystemActions) {
+			FileVersion localLastVersion, File localLastFile, MemoryDatabase winnersDatabase, List<FileSystemAction> fileSystemActions) throws StorageException {
 		
 		FileVersionComparison winningVersionToLocalVersionComparison = fileVersionComparator.compare(winningLastVersion, localLastVersion);
 		
@@ -297,7 +298,7 @@ public class FileSystemActionReconciliator {
 			logger.log(Level.INFO, "     -> (8) Equals: Nothing to do, local file equals local version equals winning version: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
 		}
 		else if (winningVersionToLocalVersionComparison.getFileChanges().contains(FileChange.DELETED)) {
-			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, assembler, localLastVersion, winningLastVersion);
+			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, localLastVersion, winningLastVersion);
 			fileSystemActions.add(action);
 
 			logger.log(Level.INFO, "     -> (9) Content changed: Local file does not exist, but it should: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
@@ -336,7 +337,7 @@ public class FileSystemActionReconciliator {
 			changeSet.getChangedFiles().add(winningLastVersion.getPath());
 		}
 		else { // Content changed
-			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, assembler, localLastVersion, winningLastVersion);
+			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, localLastVersion, winningLastVersion);
 			fileSystemActions.add(action);
 
 			logger.log(Level.INFO, "     -> (13) Content changed: Local file differs from winning version: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
@@ -348,13 +349,13 @@ public class FileSystemActionReconciliator {
 
 	private void determineActionWithLocalVersionAndLocalFileDiffers(FileVersion winningLastVersion, File winningLastFile,
 			FileVersion localLastVersion, File localLastFile, MemoryDatabase winnersDatabase, List<FileSystemAction> fileSystemActions,
-			FileVersionComparison localFileToVersionComparison) {
+			FileVersionComparison localFileToVersionComparison) throws StorageException {
 
 		if (localFileToVersionComparison.getFileChanges().contains(FileChange.DELETED)) {	
 			boolean winningLastVersionDeleted = winningLastVersion.getStatus() == FileStatus.DELETED;
 			
 			if (!winningLastVersionDeleted) {
-				FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, assembler, localLastVersion, winningLastVersion);
+				FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, localLastVersion, winningLastVersion);
 				fileSystemActions.add(action);
 		
 				logger.log(Level.INFO, "     -> (14) Content changed: Local file does NOT exist, and winning version changed: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
@@ -367,7 +368,7 @@ public class FileSystemActionReconciliator {
 			}
 		}
 		else {
-			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, assembler, winningLastVersion, localLastVersion);
+			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, winningLastVersion, localLastVersion);
 			fileSystemActions.add(action);
 	
 			logger.log(Level.INFO, "     -> (16) Content changed: Local file differs from last version: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
