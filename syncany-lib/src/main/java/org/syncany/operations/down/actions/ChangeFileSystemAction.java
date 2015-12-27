@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -30,45 +31,74 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import org.syncany.config.Config;
+import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersion;
-import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileVersion.FileStatus;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.database.FileVersionContent;
 import org.syncany.database.MemoryDatabase;
+import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Assembler;
 import org.syncany.operations.Downloader;
 import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.TransferManagerFactory;
-import org.syncany.plugins.transfer.features.PathAware;
-import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
-import org.syncany.plugins.transfer.features.Retriable;
-import org.syncany.plugins.transfer.features.TransactionAware;
-import org.syncany.plugins.transfer.features.TransactionAwareFeatureTransferManager;
 
 public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 
-	private Downloader downloader;
+	/**
+	 * This class represents a version from the remote database.
+	 * <P>
+	 * The winning database will be the branch that won out when divergent branches
+	 * existed in the remote repository.  The version will be some version in the
+	 * winning branch.  Generally the two versions of interest are the head of the
+	 * winning branch and the version in the winning branch from which a local
+	 * file is based (i.e. the last version in the winning branch that is an ancestor
+	 * of the local file). 
+	 *
+	 */
+	private class RemoteFileVersionContents implements FileVersionContent {
+		
+		FileVersion fileVersion; 
+		
+		MemoryDatabase winningDatabase;
+		
+		/**
+		 * @param fileVersion
+		 * @param winningDatabase
+		 */
+		public RemoteFileVersionContents(FileVersion fileVersion, MemoryDatabase winningDatabase) {
+			this.fileVersion = fileVersion;
+			this.winningDatabase = winningDatabase;
+		}
+
+		@Override
+		public File getFile() throws StorageException, IOException {
+			Set<MultiChunkId> unknownMultiChunks = new HashSet<MultiChunkId>(determineMultiChunksToDownload(fileVersion, winningDatabase));
+			
+			downloader.downloadAndDecryptMultiChunks(unknownMultiChunks);
+
+			try {
+				File remoteFile = assembleFileToCache(fileVersion);
+				return remoteFile;
+			}
+			catch (NoSuchAlgorithmException e) {
+				throw new IOException(e);
+			}
+		}
+
+		@Override
+		public InputStream openInputStream() throws FileNotFoundException, StorageException, IOException {
+			return new FileInputStream(getFile());
+		}
+	}
+
 	private SqlDatabase localDatabase;
 
-	public ChangeFileSystemAction(Config config, MemoryDatabase winningDatabase, SqlDatabase localDatabase, Assembler assembler, FileVersion fromFileVersion,
+	public ChangeFileSystemAction(Config config, MemoryDatabase winningDatabase, SqlDatabase localDatabase, Assembler assembler, Downloader downloader, FileVersion fromFileVersion,
 			FileVersion toFileVersion) throws StorageException {
-		super(config, winningDatabase, assembler, fromFileVersion, toFileVersion);
+		super(config, winningDatabase, assembler, downloader, fromFileVersion, toFileVersion);
 		
 		this.localDatabase = localDatabase;
-		
-		TransactionAwareFeatureTransferManager regularFileTransferManager = TransferManagerFactory
-				.build(config)
-				.withFeature(ReadAfterWriteConsistent.class)
-				.withFeature(Retriable.class)
-				.withFeature(PathAware.class)
-				.withFeature(TransactionAware.class)
-				.as(TransactionAware.class);
-
-		TransferManager transferManager = regularFileTransferManager;
-		this.downloader = new Downloader(config, transferManager );
 	}
 	
 	@Override
@@ -125,25 +155,10 @@ public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 				
 				// attempt merge first
 				File actualLocalFile = getAbsolutePathFile(fileVersion2.getPath());
-
-				File commonAncestorFile = assembleFileToCache(fileVersion2);	
+				FileVersionContent latestRemoteFile = new RemoteFileVersionContents(fileVersion1, winningDatabase);
+				FileVersionContent commonAncestorFile = new RemoteFileVersionContents(fileVersion2, winningDatabase);	
 				
-				
-				
-				Set<MultiChunkId> unknownMultiChunks = new HashSet<MultiChunkId>(determineMultiChunksToDownload(fileVersion1, winningDatabase));
-				
-				downloader.downloadAndDecryptMultiChunks(unknownMultiChunks);
-
-				
-				
-				File latestRemoteFile = assembleFileToCache(fileVersion1);
-
-				boolean canMerge = merge(latestRemoteFile, actualLocalFile, commonAncestorFile);
-				if (!canMerge) {
-				moveToConflictFile(fileVersion2);
-				createFileFolderOrSymlink(fileVersion2);
-				
-				}
+				merge(latestRemoteFile, actualLocalFile, commonAncestorFile);
 			}
 			else {
 				if (fileVersion2.getStatus() == FileStatus.DELETED) {
@@ -207,9 +222,12 @@ public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 		return multiChunksToDownload;
 	}
 	
-	private boolean merge(File latestRemoteFile, File localFile, File commonAncestorFile) {
+	private void merge(FileVersionContent latestRemoteFile, File localFile, FileVersionContent commonAncestorFile) throws StorageException {
+		
+		FileMerger defaultMerger = new KeepRemoteDefaultMerger(config);
+
 		try {
-			InputStream in1 = new FileInputStream(latestRemoteFile);
+			InputStream in1 = latestRemoteFile.openInputStream();
 			byte[] buffer = new byte[4000];
 			in1.read(buffer);
 			System.out.println("lastest remote file: \n" + new String(buffer));
@@ -221,11 +239,13 @@ public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 			System.out.println("local file:\n" + new String(buffer));
 			in2.close();
 
-			InputStream in3 = new FileInputStream(commonAncestorFile);
+			InputStream in3 = commonAncestorFile.openInputStream();
 //			byte[] buffer = new byte[4000];
 			in3.read(buffer);
 			System.out.println("common ancestor file:\n" + new String(buffer));
 			in3.close();
+		
+			defaultMerger.merge(latestRemoteFile, localFile, commonAncestorFile);
 		}
 		catch (FileNotFoundException e) {
 			// TODO Log this, then fall thru
@@ -235,8 +255,6 @@ public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

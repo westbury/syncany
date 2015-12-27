@@ -21,11 +21,12 @@ import org.syncany.config.Config;
 import org.syncany.database.FileVersion;
 import org.syncany.database.MemoryDatabase;
 import org.syncany.operations.Assembler;
+import org.syncany.operations.Downloader;
 
 public class NewFileSystemAction extends FileCreatingFileSystemAction {
 
-	public NewFileSystemAction(Config config, MemoryDatabase winningDatabase, Assembler assembler, FileVersion newFileVersion) {
-		super(config, winningDatabase, assembler, null, newFileVersion);
+	public NewFileSystemAction(Config config, MemoryDatabase winningDatabase, Assembler assembler, Downloader downloader, FileVersion newFileVersion) {
+		super(config, winningDatabase, assembler, downloader, null, newFileVersion);
 	}
 	
 	@Override

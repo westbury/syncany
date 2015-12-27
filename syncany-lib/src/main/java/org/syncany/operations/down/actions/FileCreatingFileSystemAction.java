@@ -18,6 +18,8 @@
 package org.syncany.operations.down.actions;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 
 import org.syncany.config.Config;
@@ -25,14 +27,17 @@ import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileType;
 import org.syncany.database.MemoryDatabase;
 import org.syncany.operations.Assembler;
+import org.syncany.operations.Downloader;
 import org.syncany.util.NormalizedPath;
 
 public abstract class FileCreatingFileSystemAction extends FileSystemAction {
 	protected Assembler assembler;
-
-	public FileCreatingFileSystemAction(Config config, MemoryDatabase winningDatabase, Assembler assembler, FileVersion file1, FileVersion file2) {
+	protected Downloader downloader;
+	
+	public FileCreatingFileSystemAction(Config config, MemoryDatabase winningDatabase, Assembler assembler, Downloader downloader, FileVersion file1, FileVersion file2) {
 		super(config, winningDatabase, file1, file2);
 		this.assembler = assembler;
+		this.downloader = downloader;
 	}
 
 	protected void createFileFolderOrSymlink(FileVersion reconstructedFileVersion) throws Exception {
@@ -77,7 +82,13 @@ public abstract class FileCreatingFileSystemAction extends FileSystemAction {
 		moveFileToFinalLocation(reconstructedFileInCache, reconstructedFileVersion);	
 	}
 	
-	protected File assembleFileToCache(FileVersion reconstructedFileVersion) throws Exception {
+	protected File assembleFileToCache(FileVersion reconstructedFileVersion) throws IOException, NoSuchAlgorithmException {
+		
+		// TODO [low] This adds ALL multichunks even though some might be available locally
+//		Set<MultiChunkId> unknownMultiChunks = determineMultiChunksToDownload(reconstructedFileVersion, winningDatabase);
+//		downloader.downloadAndDecryptMultiChunks(unknownMultiChunks);
+
+
 		File reconstructedFileInCache = assembler.assembleToCache(reconstructedFileVersion);
 		 
 		setFileAttributes(reconstructedFileVersion, reconstructedFileInCache);

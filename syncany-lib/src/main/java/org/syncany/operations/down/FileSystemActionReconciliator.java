@@ -38,6 +38,7 @@ import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Assembler;
 import org.syncany.operations.ChangeSet;
+import org.syncany.operations.Downloader;
 import org.syncany.operations.down.actions.ChangeFileSystemAction;
 import org.syncany.operations.down.actions.DeleteFileSystemAction;
 import org.syncany.operations.down.actions.FileSystemAction;
@@ -135,9 +136,11 @@ public class FileSystemActionReconciliator {
 	private SqlDatabase localDatabase;
 	private FileVersionComparator fileVersionComparator;
 	private Assembler assembler;
+	private Downloader downloader;
 	
-	public FileSystemActionReconciliator(Config config, ChangeSet changeSet) {
-		this.config = config; 
+	public FileSystemActionReconciliator(Config config, Downloader downloader, ChangeSet changeSet) {
+		this.config = config;
+		this.downloader = downloader;
 		this.changeSet = changeSet;
 		this.localDatabase = new SqlDatabase(config);
 		this.fileVersionComparator = new FileVersionComparator(config.getLocalDir(), config.getChunker().getChecksumAlgorithm());
@@ -234,7 +237,7 @@ public class FileSystemActionReconciliator {
 			logger.log(Level.INFO, "     -> (1) Equals: Nothing to do, winning version equals winning file: "+winningLastVersion+" AND "+winningLastFile);	
 		}
 		else if (winningFileToVersionComparison.getFileChanges().contains(FileChange.DELETED)) {					
-			FileSystemAction action = new NewFileSystemAction(config, winnersDatabase, assembler, winningLastVersion);
+			FileSystemAction action = new NewFileSystemAction(config, winnersDatabase, assembler, downloader, winningLastVersion);
 			outFileSystemActions.add(action);
 			
 			logger.log(Level.INFO, "     -> (2) Deleted: Local file does NOT exist, but it should, winning version not known: "+winningLastVersion+" AND "+winningLastFile);
@@ -276,7 +279,7 @@ public class FileSystemActionReconciliator {
 			throw new Exception("What happend here?");
 		}
 		else { // Content changed
-			FileSystemAction action = new NewFileSystemAction(config, winnersDatabase, assembler, winningLastVersion);
+			FileSystemAction action = new NewFileSystemAction(config, winnersDatabase, assembler, downloader, winningLastVersion);
 			outFileSystemActions.add(action);
 
 			logger.log(Level.INFO, "     -> (7) Content changed: Winning file differs from winning version: "+winningLastVersion+" AND "+winningLastFile);
@@ -298,7 +301,7 @@ public class FileSystemActionReconciliator {
 			logger.log(Level.INFO, "     -> (8) Equals: Nothing to do, local file equals local version equals winning version: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
 		}
 		else if (winningVersionToLocalVersionComparison.getFileChanges().contains(FileChange.DELETED)) {
-			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, localLastVersion, winningLastVersion);
+			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, downloader, localLastVersion, winningLastVersion);
 			fileSystemActions.add(action);
 
 			logger.log(Level.INFO, "     -> (9) Content changed: Local file does not exist, but it should: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
@@ -337,7 +340,7 @@ public class FileSystemActionReconciliator {
 			changeSet.getChangedFiles().add(winningLastVersion.getPath());
 		}
 		else { // Content changed
-			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, localLastVersion, winningLastVersion);
+			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, downloader, localLastVersion, winningLastVersion);
 			fileSystemActions.add(action);
 
 			logger.log(Level.INFO, "     -> (13) Content changed: Local file differs from winning version: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
@@ -355,7 +358,7 @@ public class FileSystemActionReconciliator {
 			boolean winningLastVersionDeleted = winningLastVersion.getStatus() == FileStatus.DELETED;
 			
 			if (!winningLastVersionDeleted) {
-				FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, localLastVersion, winningLastVersion);
+				FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, downloader, localLastVersion, winningLastVersion);
 				fileSystemActions.add(action);
 		
 				logger.log(Level.INFO, "     -> (14) Content changed: Local file does NOT exist, and winning version changed: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);
@@ -368,7 +371,7 @@ public class FileSystemActionReconciliator {
 			}
 		}
 		else {
-			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, winningLastVersion, localLastVersion);
+			FileSystemAction action = new ChangeFileSystemAction(config, winnersDatabase, localDatabase, assembler, downloader, winningLastVersion, localLastVersion);
 			fileSystemActions.add(action);
 	
 			logger.log(Level.INFO, "     -> (16) Content changed: Local file differs from last version: local file = "+localLastFile+", local version = "+localLastVersion+", winning version = "+winningLastVersion);

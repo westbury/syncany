@@ -85,7 +85,7 @@ public class ApplyChangesOperation extends Operation {
 	public OperationResult execute() throws Exception {
 		logger.log(Level.INFO, "Determine file system actions ...");		
 		
-		FileSystemActionReconciliator actionReconciliator = new FileSystemActionReconciliator(config, result.getChangeSet());
+		FileSystemActionReconciliator actionReconciliator = new FileSystemActionReconciliator(config, downloader, result.getChangeSet());
 		List<FileSystemAction> actions;
 		
 		if (cleanupOccurred) {
@@ -94,11 +94,6 @@ public class ApplyChangesOperation extends Operation {
 		else {
 			actions = actionReconciliator.determineFileSystemActions(winnersDatabase);
 		}
-
-		Set<MultiChunkId> unknownMultiChunks = determineRequiredMultiChunks(actions, winnersDatabase);
-		
-		downloader.downloadAndDecryptMultiChunks(unknownMultiChunks);
-		result.getDownloadedMultiChunks().addAll(unknownMultiChunks);
 
 		applyFileSystemActions(actions);
 		

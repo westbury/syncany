@@ -92,7 +92,7 @@ public class RestoreOperation extends AbstractTransferOperation {
 		// Restore file
 		logger.log(Level.INFO, "- Restoring: " + restoreFileVersion);
 
-		RestoreFileSystemAction restoreAction = new RestoreFileSystemAction(config, assembler, restoreFileVersion, options.getRelativeTargetPath());
+		RestoreFileSystemAction restoreAction = new RestoreFileSystemAction(config, assembler, downloader, restoreFileVersion, options.getRelativeTargetPath());
 		RestoreFileSystemActionResult restoreResult = restoreAction.execute();
 
 		return new RestoreOperationResult(RestoreResultCode.ACK, restoreResult.getTargetFile());

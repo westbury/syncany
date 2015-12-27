@@ -19,8 +19,10 @@ package org.syncany.operations;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -70,8 +72,10 @@ public class Assembler {
 	/**
 	 * Assembles the given file version to the local cache and returns a reference
 	 * to the cached file after successfully assembling the file. 
+	 * @throws IOException 
+	 * @throws NoSuchAlgorithmException 
 	 */
-	public File assembleToCache(FileVersion fileVersion) throws Exception {
+	public File assembleToCache(FileVersion fileVersion) throws IOException, NoSuchAlgorithmException {
 		File reconstructedFileInCache = config.getCache().createTempFile("reconstructedFileVersion");
 		logger.log(Level.INFO, "     - Creating file " + fileVersion.getPath() + " to " + reconstructedFileInCache + " ...");
 
@@ -83,7 +87,7 @@ public class Assembler {
 		
 		// Check consistency!
 		if (fileContent == null && fileVersion.getChecksum() != null) {
-			throw new Exception("Cannot determine file content for checksum "+fileVersion.getChecksum());
+			throw new IOException("Cannot determine file content for checksum "+fileVersion.getChecksum());
 		}
 
 		// Create empty file
@@ -134,7 +138,7 @@ public class Assembler {
 		byte[] reconstructedFileActualChecksum = reconstructedFileChecksum.digest();
 		
 		if (!Arrays.equals(reconstructedFileActualChecksum, reconstructedFileExpectedChecksum)) {
-			throw new Exception("Checksums do not match: expected " + StringUtil.toHex(reconstructedFileExpectedChecksum) + " != actual "
+			throw new IOException("Checksums do not match: expected " + StringUtil.toHex(reconstructedFileExpectedChecksum) + " != actual "
 					+ StringUtil.toHex(reconstructedFileActualChecksum));
 		}
 		
