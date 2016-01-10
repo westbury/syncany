@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.operations.down.actions;
+package org.syncany.plugins.merge;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,8 +27,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileExistsException;
 import org.apache.commons.io.FileUtils;
-import org.syncany.config.Config;
-import org.syncany.database.FileVersionContent;
 import org.syncany.util.FileUtil;
 
 /**
@@ -45,10 +43,10 @@ import org.syncany.util.FileUtil;
 public class KeepRemoteDefaultMerger implements FileMerger {
 	protected static final Logger logger = Logger.getLogger(KeepRemoteDefaultMerger.class.getSimpleName());
 
-	Config config;
+	String userName;
 	
-	KeepRemoteDefaultMerger(Config config) {
-		this.config = config;
+	public KeepRemoteDefaultMerger(String userName) {
+		this.userName = userName;
 	}
 	
 	@Override
@@ -106,17 +104,16 @@ public class KeepRemoteDefaultMerger implements FileMerger {
 	}
 
 	private File findConflictFilename(File conflictingPath) throws Exception {
-		String conflictUserName = (config.getDisplayName() != null) ? config.getDisplayName() : config.getMachineName();
-		boolean conflictUserNameEndsWithS = conflictUserName.endsWith("s");
+		boolean conflictUserNameEndsWithS = userName.endsWith("s");
 		String conflictDate = new SimpleDateFormat("d MMM yy, h-mm a").format(new Date());
 
 		String conflictFilenameSuffix;
 
 		if (conflictUserNameEndsWithS) {
-			conflictFilenameSuffix = String.format("%s' conflicted copy, %s", conflictUserName, conflictDate);
+			conflictFilenameSuffix = String.format("%s' conflicted copy, %s", userName, conflictDate);
 		}
 		else {
-			conflictFilenameSuffix = String.format("%s's conflicted copy, %s", conflictUserName, conflictDate);
+			conflictFilenameSuffix = String.format("%s's conflicted copy, %s", userName, conflictDate);
 		}
 
 		return withSuffix(conflictingPath, conflictFilenameSuffix);

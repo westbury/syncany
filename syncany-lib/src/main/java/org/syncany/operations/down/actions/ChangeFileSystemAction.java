@@ -35,12 +35,14 @@ import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileStatus;
-import org.syncany.database.FileVersionContent;
 import org.syncany.database.MemoryDatabase;
 import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Assembler;
 import org.syncany.operations.Downloader;
+import org.syncany.plugins.merge.FileMerger;
+import org.syncany.plugins.merge.FileVersionContent;
+import org.syncany.plugins.merge.KeepRemoteDefaultMerger;
 import org.syncany.plugins.transfer.StorageException;
 
 public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
@@ -224,7 +226,8 @@ public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 	
 	private void merge(FileVersionContent latestRemoteFile, File localFile, FileVersionContent commonAncestorFile) throws StorageException {
 		
-		FileMerger defaultMerger = new KeepRemoteDefaultMerger(config);
+		String conflictUserName = (config.getDisplayName() != null) ? config.getDisplayName() : config.getMachineName();
+		FileMerger defaultMerger = new KeepRemoteDefaultMerger(conflictUserName);
 
 		try {
 			InputStream in1 = latestRemoteFile.openInputStream();

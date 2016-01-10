@@ -15,23 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.operations.down.actions;
+package org.syncany.plugins.merge;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
-import org.syncany.database.FileVersionContent;
+import org.syncany.plugins.transfer.StorageException;
 
 /**
- * Interface to be implemented by all mergers that
- * know how to merge files.  There will generally
- * be an implementation of this interface for each
- * file type that can be merged.
+ * This interface is designed so that implementations can delay download
+ * of a file version's contents until a stream or file is requested through
+ * the interface.  This avoids unnecessary downloads when the merge strategy
+ * does not require all three versions of the file.
  * 
  * @author Nigel Westbury
  *
  */
-public interface FileMerger {
-
-	void merge(FileVersionContent latestRemoteFile, File localFile, FileVersionContent commonAncestorFile);
-
+public interface FileVersionContent {
+	File getFile() throws StorageException, IOException;
+	
+	InputStream openInputStream() throws FileNotFoundException, StorageException, IOException;
+	
 }
