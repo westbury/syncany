@@ -17,19 +17,24 @@
  */
 package org.syncany.plugins.merge;
 
-import java.io.File;
-
 /**
- * Interface to be implemented by all mergers that
- * know how to merge files.  There will generally
- * be an implementation of this interface for each
- * file type that can be merged.
- * 
- * @author Nigel Westbury
- *
+ * Exception thrown when any of the methods of the {@link Merger}
+ * fail. Usually caused by broken sockets or a not available Internet connection.
+ *  
+ * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public interface FileMerger {
+public class MergingException extends Exception {
+	private static final long serialVersionUID = -311986990752074527L;
 
-	void merge(FileVersionContent latestRemoteFile, File localFile, FileVersionContent commonAncestorFile);
+	public MergingException(Throwable cause) {
+        super(cause);
+    }
 
+    public MergingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MergingException(String message) {
+        super(message);
+    }
 }

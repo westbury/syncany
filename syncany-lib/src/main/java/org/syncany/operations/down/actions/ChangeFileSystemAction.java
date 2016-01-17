@@ -23,7 +23,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +42,13 @@ import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Assembler;
 import org.syncany.operations.Downloader;
-import org.syncany.plugins.merge.FileMerger;
+import org.syncany.plugins.Plugins;
 import org.syncany.plugins.merge.FileVersionContent;
 import org.syncany.plugins.merge.KeepRemoteDefaultMerger;
+import org.syncany.plugins.merge.Merger;
+import org.syncany.plugins.merge.MergerPlugin;
+import org.syncany.plugins.merge.MergerSettings;
+import org.syncany.plugins.merge.MergingException;
 import org.syncany.plugins.transfer.StorageException;
 
 public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
@@ -226,9 +232,52 @@ public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 	
 	private void merge(FileVersionContent latestRemoteFile, File localFile, FileVersionContent commonAncestorFile) throws StorageException {
 		
-		String conflictUserName = (config.getDisplayName() != null) ? config.getDisplayName() : config.getMachineName();
-		FileMerger defaultMerger = new KeepRemoteDefaultMerger(conflictUserName);
+		Map<String, Merger> mergersByMimeType = new HashMap<>();
+		Map<String, Merger> mergersByExtension = new HashMap<>();
 
+		final List<MergerPlugin> plugins = Plugins.list(MergerPlugin.class);
+		for (MergerPlugin plugin : plugins) {
+			try {
+				MergerSettings settings = plugin.createEmptySettings();
+				Merger merger = plugin.createMerger(settings, config);
+				
+				if (merger.getMimeType() != null) {
+					mergersByMimeType.put(merger.getMimeType(), merger);
+				}
+				if (merger.getExtension() != null) {
+					mergersByExtension.put(merger.getExtension(), merger);
+				}
+			}
+			catch (MergingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		/** Mergers to try in this order until one successfully merges */
+		List<Merger> mergersToTry = new ArrayList<>();
+		
+		// TODO See if we can determine the mime type
+		
+		// See if we have a merger for this extension
+		// Extension may be a single extension (eg txt)
+		// or have two or more parts (eg tar.gz)
+		// or be the entire name (eg pom.xml)
+		String [] parts = localFile.getName().split("\\.");
+		for (int i = parts.length-2; i >= 0; i--) {
+			parts[i] += '.' + parts[i+1];
+		}
+		for (int i = 0; i < parts.length; i++) {
+			if (mergersByExtension.containsKey(parts[i])) {
+				mergersToTry.add(mergersByExtension.get(parts[i])); 
+			}
+		}
+		
+		// The default merger
+		String conflictUserName = (config.getDisplayName() != null) ? config.getDisplayName() : config.getMachineName();
+		Merger defaultMerger = new KeepRemoteDefaultMerger(conflictUserName);
+		mergersToTry.add(defaultMerger);
+		
 		try {
 			InputStream in1 = latestRemoteFile.openInputStream();
 			byte[] buffer = new byte[4000];
@@ -248,7 +297,12 @@ public class ChangeFileSystemAction extends FileCreatingFileSystemAction {
 			System.out.println("common ancestor file:\n" + new String(buffer));
 			in3.close();
 		
-			defaultMerger.merge(latestRemoteFile, localFile, commonAncestorFile);
+			for (Merger mergerToTry : mergersToTry) {
+				boolean mergedOk = mergerToTry.merge(latestRemoteFile, localFile, commonAncestorFile);
+				if (mergedOk) {
+					break;
+				}
+			}
 		}
 		catch (FileNotFoundException e) {
 			// TODO Log this, then fall thru

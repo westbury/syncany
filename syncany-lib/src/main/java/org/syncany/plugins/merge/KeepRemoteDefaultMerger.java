@@ -40,7 +40,7 @@ import org.syncany.util.FileUtil;
  * @author Nigel Westbury
  *
  */
-public class KeepRemoteDefaultMerger implements FileMerger {
+public class KeepRemoteDefaultMerger implements Merger {
 	protected static final Logger logger = Logger.getLogger(KeepRemoteDefaultMerger.class.getSimpleName());
 
 	String userName;
@@ -50,7 +50,7 @@ public class KeepRemoteDefaultMerger implements FileMerger {
 	}
 	
 	@Override
-	public void merge(FileVersionContent latestRemoteFile, File localFile, FileVersionContent commonAncestorFile) {
+	public boolean merge(FileVersionContent latestRemoteFile, File localFile, FileVersionContent commonAncestorFile) {
 		try {
 			moveToConflictFile(localFile);
 		}
@@ -69,6 +69,8 @@ public class KeepRemoteDefaultMerger implements FileMerger {
 			throw new RuntimeException("What to do here?!");
 		}
 
+		// This merger can always do the merge (unless an exception is throw)
+		return true;
 	}
 
 	protected void moveToConflictFile(File conflictingPath) throws IOException {
@@ -170,6 +172,20 @@ public class KeepRemoteDefaultMerger implements FileMerger {
 		else {
 			return filename.substring(0, filename.length() - extension.length());
 		}
+	}
+
+	@Override
+	public String getMimeType() {
+		// Indicate that this merger is not restricted to
+		// any particular mime type.
+		return null;
+	}
+
+	@Override
+	public String getExtension() {
+		// Indicate that this merger is not restricted to
+		// any particular extension.
+		return null;
 	}
 	
 }
