@@ -257,7 +257,7 @@ public class Config {
 	}
 
 	public void setMachineName(String machineName) throws ConfigException {
-		if (machineName == null || !VectorClock.MACHINE_PATTERN.matcher(machineName).matches()) {
+		if (machineName == null || !Machine.isUnitNameValid(machineName)) {
 			throw new ConfigException("Machine name cannot be empty and must be only characters (A-Z).");
 		}
 

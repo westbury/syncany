@@ -21,6 +21,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.syncany.config.Machine;
+
 /**
  * Implements a vector clock that records the time stamps of all send and receive
  * events. It contains functions to compare and merge two vector clocks.
@@ -49,8 +51,6 @@ public class VectorClock extends TreeMap<String, Long> {
 	private static final int ENTRY_PATTERN_GROUP_NAME = 1;
 	private static final int ENTRY_PATTERN_GROUP_TIME = 2;
 
-	public static final Pattern MACHINE_PATTERN = Pattern.compile("[a-zA-Z]+");	
-
 	public enum VectorClockComparison {
 		SMALLER, GREATER, EQUAL, SIMULTANEOUS;
 	}
@@ -70,8 +70,8 @@ public class VectorClock extends TreeMap<String, Long> {
 		return newValue;
 	}
 
-	private void validateUnitName(String unit) {
-		if (!MACHINE_PATTERN.matcher(unit).matches()) {
+	private static void validateUnitName(String unit) {
+		if (!Machine.isUnitNameValid(unit)) {
 			throw new RuntimeException("Machine name cannot be empty and must be only characters (A-Z).");
 		}
 	}
