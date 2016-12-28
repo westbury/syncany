@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.syncany.chunk.Transformer;
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.operations.daemon.messages.UpUploadFileInTransactionSyncExternalEvent;
@@ -45,6 +46,12 @@ public class RemoteTransaction {
 
 	private TransferManager transferManager;
 	private Config config;
+	
+	/**
+	 * Used for saving transaction files on the local file system.
+	 */
+	private Cache transactionCache;
+	
 	private TransactionTO transactionTO;
 
 	private LocalEventBus eventBus;
@@ -58,6 +65,8 @@ public class RemoteTransaction {
 		this.transferManager = transferManager;
 		this.transactionTO = transactionTO;
 		this.eventBus = LocalEventBus.getInstance();
+		
+		this.transactionCache = config.getCache();
 	}
 
 	/**
@@ -166,7 +175,7 @@ public class RemoteTransaction {
 	 */
 	private File writeLocalTransactionFile() throws StorageException {
 		try {
-			File localTransactionFile = config.getCache().createTempFile("transaction");
+			File localTransactionFile = transactionCache.createTempFile("transaction");
 			writeToFile(config.getTransformer(), localTransactionFile);
 
 			return localTransactionFile;

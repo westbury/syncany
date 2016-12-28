@@ -30,8 +30,7 @@ public class CacheTest {
 	public void testCacheSizeOkay() throws Exception {
 		File testCacheFolder = TestFileUtil.createTempDirectoryInSystemTemp();
 		
-		Cache cache = new Cache(testCacheFolder);
-		cache.setKeepBytes(50*1024);
+		Cache cache = new Cache(testCacheFolder, 50*1024L);
 		
 		TestFileUtil.createRandomFilesInDirectory(testCacheFolder, 10*1024, 4);
 
@@ -46,8 +45,7 @@ public class CacheTest {
 	public void testCacheNeedsCleaning5Left() throws Exception {
 		File testCacheFolder = TestFileUtil.createTempDirectoryInSystemTemp();
 		
-		Cache cache = new Cache(testCacheFolder);
-		cache.setKeepBytes(50*1024);
+		Cache cache = new Cache(testCacheFolder, 50*1024L);
 		
 		TestFileUtil.createRandomFilesInDirectory(testCacheFolder, 10*1024, 10);
 
@@ -62,8 +60,7 @@ public class CacheTest {
 	public void testCacheNeedsCleaning1Left() throws Exception {
 		File testCacheFolder = TestFileUtil.createTempDirectoryInSystemTemp();
 		
-		Cache cache = new Cache(testCacheFolder);
-		cache.setKeepBytes(50*1024);
+		Cache cache = new Cache(testCacheFolder, 50*1024L);
 		
 		TestFileUtil.createRandomFile(new File(testCacheFolder, "10"), 10*1024);
 		Thread.sleep(1001);	// Linux/ext3 only has 1s accuracy
@@ -90,8 +87,7 @@ public class CacheTest {
 	public void testCacheNeedsCleaning2Left() throws Exception {
 		File testCacheFolder = TestFileUtil.createTempDirectoryInSystemTemp();
 		
-		Cache cache = new Cache(testCacheFolder);
-		cache.setKeepBytes(50*1024);
+		Cache cache = new Cache(testCacheFolder, 50*1024L);
 		
 		TestFileUtil.createRandomFile(new File(testCacheFolder, "40"), 40*1024);
 		Thread.sleep(1001);	// Linux/ext3 only has 1s accuracy

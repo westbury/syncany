@@ -22,17 +22,18 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.syncany.config.Config;
+import org.syncany.config.Cache;
 import org.syncany.plugins.local.LocalTransferManager;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.files.RemoteFile;
 
+// TODO this class is not used.  Remove it???
 public class UnreliableLocalTransferManager extends LocalTransferManager {
 	private static final Logger logger = Logger.getLogger(UnreliableLocalTransferManager.class.getSimpleName());
 	private UnreliableLocalTransferSettings connection;
 
-	public UnreliableLocalTransferManager(UnreliableLocalTransferSettings connection, Config config) {
-		super(connection, config);
+	public UnreliableLocalTransferManager(UnreliableLocalTransferSettings connection, Cache tempCache) {
+		super(connection, tempCache);
 		this.connection = connection;
 	}
 

@@ -503,7 +503,7 @@ public class CleanupOperation extends AbstractTransferOperation {
 		long lastClientVersion = getNewestDatabaseFileVersion(clientName, localDatabase.getKnownDatabases());
 		DatabaseRemoteFile newRemoteMergeDatabaseFile = new DatabaseRemoteFile(clientName, lastClientVersion + 1);
 
-		File newLocalMergeDatabaseFile = config.getCache().getDatabaseFile(newRemoteMergeDatabaseFile.getName());
+		File newLocalMergeDatabaseFile = getDatabaseFile(newRemoteMergeDatabaseFile.getName());
 
 		logger.log(Level.INFO, "   + Writing new merge file (all files up to {0}) to {1} ...", new Object[] { lastClientVersion,
 				newLocalMergeDatabaseFile });
@@ -596,7 +596,7 @@ public class CleanupOperation extends AbstractTransferOperation {
 		}
 
 		// Upload a new cleanup file that indicates changes
-		File newCleanupFile = config.getCache().createTempFile("cleanup");
+		File newCleanupFile = cache.createTempFile("cleanup");
 		long newCleanupNumber = lastRemoteCleanupNumber + 1;
 
 		remoteTransaction.upload(newCleanupFile, new CleanupRemoteFile(newCleanupNumber));

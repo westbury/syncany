@@ -33,7 +33,6 @@ import org.syncany.config.to.RepoTO.MultiChunkerTO;
 import org.syncany.config.to.RepoTO.TransformerTO;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.database.DatabaseConnectionFactory;
-import org.syncany.database.VectorClock;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.transfer.TransferPlugin;
 import org.syncany.plugins.transfer.TransferSettings;
@@ -134,11 +133,7 @@ public class Config {
 	}
 
 	private void initCache(ConfigTO configTO) {
-		cache = new Cache(cacheDir);
-
-		if (configTO.getCacheKeepBytes() != null && configTO.getCacheKeepBytes() >= 0) {
-			cache.setKeepBytes(configTO.getCacheKeepBytes());
-		}
+		cache = new Cache(cacheDir, configTO.getCacheKeepBytes());
 	}
 
 	private void initIgnoredFile() throws ConfigException {
@@ -236,6 +231,7 @@ public class Config {
 		}
 	}
 
+	// Only used in tests...
 	public java.sql.Connection createDatabaseConnection() {
 		return DatabaseConnectionFactory.createConnection(getDatabaseFile(), false);
 	}
@@ -306,10 +302,6 @@ public class Config {
 
 	public Transformer getTransformer() {
 		return transformer;
-	}
-
-	public void setCache(Cache cache) {
-		this.cache = cache;
 	}
 
 	public File getLocalDir() {

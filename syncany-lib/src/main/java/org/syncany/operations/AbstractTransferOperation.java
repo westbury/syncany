@@ -17,19 +17,21 @@
  */
 package org.syncany.operations;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferManagerFactory;
-import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
 import org.syncany.plugins.transfer.features.PathAware;
+import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
 import org.syncany.plugins.transfer.features.Retriable;
 import org.syncany.plugins.transfer.features.TransactionAware;
 import org.syncany.plugins.transfer.features.TransactionAwareFeatureTransferManager;
@@ -59,6 +61,12 @@ public abstract class AbstractTransferOperation extends Operation {
 	 */
 	private static final int ACTION_FILE_DELETE_TIME = ActionFileHandler.ACTION_RENEWAL_INTERVAL + 5 * 60 * 1000; // Minutes
 
+    private static String FILE_FORMAT_DATABASE_FILE_ENCRYPTED = "%s";
+
+    protected Cache cache;
+    
+	protected MultiChunkCache multiChunkCache;
+	
 	protected TransactionAwareFeatureTransferManager transferManager;
 	protected ActionFileHandler actionHandler;
 
@@ -67,6 +75,8 @@ public abstract class AbstractTransferOperation extends Operation {
 	public AbstractTransferOperation(Config config, String operationName) {
 		super(config);
 
+		initCache(config);
+		
 		this.eventBus = LocalEventBus.getInstance();
 
 		try {
@@ -94,6 +104,18 @@ public abstract class AbstractTransferOperation extends Operation {
 			throw new RuntimeException("Unable to create AbstractTransferOperation: Unable to create TransferManager: " + e.getMessage());
 		}
 	}
+
+	private void initCache(Config config) {
+		cache = config.getCache();
+		multiChunkCache = new MultiChunkCache(config.getCache());
+	}
+
+    /**
+     * Returns a file path of a database remote file.
+     */
+	public File getDatabaseFile(String name) { // TODO [low] This should be a database file or another key
+		return cache.getFileInCache(FILE_FORMAT_DATABASE_FILE_ENCRYPTED, name);		
+	}    
 
 	protected void startOperation() throws Exception {
 		actionHandler.start();
@@ -215,6 +237,6 @@ public abstract class AbstractTransferOperation extends Operation {
 	}
 
 	private void clearCache() {
-		config.getCache().clear();
+		cache.clear();
 	}
 }

@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent;
@@ -34,6 +35,7 @@ import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Downloader;
+import org.syncany.operations.MultiChunkCache;
 import org.syncany.operations.Operation;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.down.actions.FileCreatingFileSystemAction;
@@ -59,6 +61,8 @@ import org.syncany.plugins.transfer.TransferManager;
 public class ApplyChangesOperation extends Operation {
 	private static final Logger logger = Logger.getLogger(DownOperation.class.getSimpleName());
 
+	private MultiChunkCache cache;
+	
 	private SqlDatabase localDatabase;
 	private Downloader downloader;
 
@@ -72,9 +76,11 @@ public class ApplyChangesOperation extends Operation {
 			DownOperationResult result, boolean cleanupOccurred, List<PartialFileHistory> preDeleteFileHistoriesWithLastVersion) {
 		
 		super(config);
+	
+		this.cache = new MultiChunkCache(config.getCache());
 		
 		this.localDatabase = localDatabase;
-		this.downloader = new Downloader(config, transferManager);
+		this.downloader = new Downloader(config, cache, transferManager);
 		this.winnersDatabase = winnersDatabase;
 		this.result = result;
 		this.cleanupOccurred = cleanupOccurred;
@@ -85,7 +91,7 @@ public class ApplyChangesOperation extends Operation {
 	public OperationResult execute() throws Exception {
 		logger.log(Level.INFO, "Determine file system actions ...");		
 		
-		FileSystemActionReconciliator actionReconciliator = new FileSystemActionReconciliator(config, result.getChangeSet());
+		FileSystemActionReconciliator actionReconciliator = new FileSystemActionReconciliator(config, cache, result.getChangeSet());
 		List<FileSystemAction> actions;
 		
 		if (cleanupOccurred) {

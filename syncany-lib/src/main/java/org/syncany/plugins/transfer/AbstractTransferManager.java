@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.syncany.config.Config;
+import org.syncany.config.Cache;
 import org.syncany.plugins.transfer.features.Retriable;
 import org.syncany.plugins.transfer.features.TransactionAware;
 import org.syncany.util.StringUtil;
@@ -43,11 +43,11 @@ public abstract class AbstractTransferManager implements TransferManager { // TO
 	private static final Logger logger = Logger.getLogger(AbstractTransferManager.class.getSimpleName());
 
 	protected TransferSettings settings;
-	protected Config config;
+	protected Cache tempCache;
 
-	public AbstractTransferManager(TransferSettings settings, Config config) {
+	public AbstractTransferManager(TransferSettings settings, Cache tempCache) {
 		this.settings = settings;
-		this.config = config;
+		this.tempCache = tempCache;
 	}
 
 	/**
@@ -55,11 +55,11 @@ public abstract class AbstractTransferManager implements TransferManager { // TO
 	 * using the global temporary directory.
 	 */
 	protected File createTempFile(String name) throws IOException {
-		if (config == null) {
+		if (tempCache == null) {
 			return File.createTempFile(String.format("temp-%s-", name), ".tmp");
 		}
 		else {
-			return config.getCache().createTempFile(name);
+			return tempCache.createTempFile(name);
 		}
 	}
 

@@ -24,27 +24,32 @@ import java.util.logging.Level;
 
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
+import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersion;
-import org.syncany.database.ObjectId;
-import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.database.ObjectId;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Assembler;
 import org.syncany.operations.Downloader;
+import org.syncany.operations.MultiChunkCache;
 import org.syncany.operations.daemon.messages.api.FolderRequest;
 import org.syncany.operations.daemon.messages.api.FolderRequestHandler;
 import org.syncany.operations.daemon.messages.api.Response;
 import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.util.StringUtil;
 
+// TODO not used.  Remove this class???
 public class GetFileFolderRequestHandler extends FolderRequestHandler {
+	private MultiChunkCache cache;
 	private SqlDatabase localDatabase;
 	private LocalEventBus eventBus;
 	
 	public GetFileFolderRequestHandler(Config config) {
 		super(config);		
+		
+		this.cache = new MultiChunkCache(config.getCache());
 		
 		this.localDatabase = new SqlDatabase(config);
 		this.eventBus = LocalEventBus.getInstance();
@@ -58,13 +63,14 @@ public class GetFileFolderRequestHandler extends FolderRequestHandler {
 			FileHistoryId fileHistoryId = FileHistoryId.parseFileId(concreteRequest.getFileHistoryId());
 			long version = concreteRequest.getVersion();
 
+			
 			FileVersion fileVersion = localDatabase.getFileVersion(fileHistoryId, version);
 			FileContent fileContent = localDatabase.getFileContent(fileVersion.getChecksum(), true);
 			Map<ChunkChecksum, MultiChunkId> multiChunks = localDatabase.getMultiChunkIdsByChecksums(fileContent.getChunks());
 
 			TransferManager transferManager = config.getTransferPlugin().createTransferManager(config.getConnection(), config);
-			Downloader downloader = new Downloader(config, transferManager);
-			Assembler assembler = new Assembler(config, localDatabase);
+			Downloader downloader = new Downloader(config, cache, transferManager);
+			Assembler assembler = new Assembler(config, cache, localDatabase);
 
 			downloader.downloadAndDecryptMultiChunks(new HashSet<MultiChunkId>(multiChunks.values()));
 

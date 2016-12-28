@@ -31,6 +31,7 @@ import org.syncany.chunk.Chunker;
 import org.syncany.chunk.Deduper;
 import org.syncany.chunk.MultiChunk;
 import org.syncany.chunk.MultiChunker;
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent;
@@ -54,15 +55,17 @@ public class Assembler {
 	private static final Logger logger = Logger.getLogger(Assembler.class.getSimpleName());
 	
 	private Config config;
+	private MultiChunkCache cache;
 	private SqlDatabase localDatabase;
 	private MemoryDatabase memoryDatabase;
 	
-	public Assembler(Config config, SqlDatabase localDatabase) {
-		this(config, localDatabase, null);
+	public Assembler(Config config, MultiChunkCache cache, SqlDatabase localDatabase) {
+		this(config, cache, localDatabase, null);
 	}
 	
-	public Assembler(Config config, SqlDatabase localDatabase, MemoryDatabase memoryDatabase) {
+	public Assembler(Config config, MultiChunkCache cache, SqlDatabase localDatabase, MemoryDatabase memoryDatabase) {
 		this.config = config;
+		this.cache = cache;
 		this.localDatabase = localDatabase;
 		this.memoryDatabase = memoryDatabase;
 	}
@@ -72,7 +75,7 @@ public class Assembler {
 	 * to the cached file after successfully assembling the file. 
 	 */
 	public File assembleToCache(FileVersion fileVersion) throws Exception {
-		File reconstructedFileInCache = config.getCache().createTempFile("reconstructedFileVersion");
+		File reconstructedFileInCache = cache.createTempFile("reconstructedFileVersion");
 		logger.log(Level.INFO, "     - Creating file " + fileVersion.getPath() + " to " + reconstructedFileInCache + " ...");
 
 		FileContent fileContent = localDatabase.getFileContent(fileVersion.getChecksum(), true);
@@ -109,7 +112,7 @@ public class Assembler {
 					multiChunkIdForChunk = memoryDatabase.getMultiChunkIdForChunk(chunkChecksum);
 				}
 
-				File decryptedMultiChunkFile = config.getCache().getDecryptedMultiChunkFile(multiChunkIdForChunk);
+				File decryptedMultiChunkFile = cache.getDecryptedMultiChunkFile(multiChunkIdForChunk);
 
 				MultiChunk multiChunk = multiChunker.createMultiChunk(decryptedMultiChunkFile);
 				InputStream chunkInputStream = multiChunk.getChunkInputStream(chunkChecksum.getBytes());

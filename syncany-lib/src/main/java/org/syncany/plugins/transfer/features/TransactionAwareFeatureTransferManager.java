@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.syncany.chunk.Transformer;
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.operations.up.BlockingTransfersException;
 import org.syncany.plugins.transfer.StorageException;
@@ -59,10 +60,17 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 
 	private final TransferManager underlyingTransferManager;
 	private final Config config;
+	private final Cache tempCache;
 
 	public TransactionAwareFeatureTransferManager(TransferManager originalTransferManager, TransferManager underlyingTransferManager, Config config, TransactionAware transactionAwareAnnotation) {
 		this.underlyingTransferManager = underlyingTransferManager;
 		this.config = config;
+		
+		if (config != null) {
+			this.tempCache = config.getCache();
+		} else {
+			this.tempCache = null;
+		}
 	}
 
 	@Override
@@ -520,11 +528,11 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	protected File createTempFile(String name) throws IOException {
 		// TODO [low] duplicate code with AbstractTransferManager
 
-		if (config == null) {
+		if (tempCache == null) {
 			return File.createTempFile(String.format("temp-%s-", name), ".tmp");
 		}
 		else {
-			return config.getCache().createTempFile(name);
+			return tempCache.createTempFile(name);
 		}
 	}
 }

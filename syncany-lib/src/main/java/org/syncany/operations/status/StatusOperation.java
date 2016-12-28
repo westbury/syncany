@@ -174,7 +174,7 @@ public class StatusOperation extends Operation {
 
 			// Skip .syncany (or app related acc. to config) 		
 			boolean isAppRelatedDir = actualLocalFile.toFile().equals(config.getAppDir())
-					|| actualLocalFile.toFile().equals(config.getCache())
+					|| actualLocalFile.toFile().equals(config.getCacheDir())
 					|| actualLocalFile.toFile().equals(config.getDatabaseDir())
 					|| actualLocalFile.toFile().equals(config.getLogDir());
 

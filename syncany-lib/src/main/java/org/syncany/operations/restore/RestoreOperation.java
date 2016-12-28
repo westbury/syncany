@@ -57,8 +57,8 @@ public class RestoreOperation extends AbstractTransferOperation {
 		
 		this.options = options;
 		this.localDatabase = new SqlDatabase(config);
-		this.downloader = new Downloader(config, transferManager);
-		this.assembler = new Assembler(config, localDatabase, null);
+		this.downloader = new Downloader(config, multiChunkCache, transferManager);
+		this.assembler = new Assembler(config, multiChunkCache, localDatabase, null);
 	}
 
 	@Override

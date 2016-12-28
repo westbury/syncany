@@ -73,8 +73,6 @@ public class ConfigTest {
 
 		assertNotNull(config.getTransformer());
 		assertEquals("NoTransformer", config.getTransformer().getClass().getSimpleName());
-
-		assertNotNull(config.getCache());
 	}
 
 	@Test(expected = ConfigException.class)

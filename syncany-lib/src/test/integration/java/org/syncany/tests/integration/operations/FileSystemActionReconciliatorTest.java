@@ -29,6 +29,7 @@ import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileStatus;
 import org.syncany.database.MemoryDatabase;
 import org.syncany.database.PartialFileHistory;
+import org.syncany.operations.MultiChunkCache;
 import org.syncany.operations.down.DownOperationResult;
 import org.syncany.operations.down.FileSystemActionReconciliator;
 import org.syncany.operations.down.actions.FileSystemAction;
@@ -46,6 +47,7 @@ public class FileSystemActionReconciliatorTest {
 		
 		TestClient clientA = new TestClient("A", testConnection);
 		Config testConfigA = clientA.getConfig();
+		MultiChunkCache testTempCache = new MultiChunkCache(testConfigA.getCache());
 		
 		// - Create first database version
 		clientA.createNewFolder("new folder/some subfolder");
@@ -73,7 +75,7 @@ public class FileSystemActionReconciliatorTest {
 		
 		// Run! Finally!
 		DownOperationResult outDownOperationResult = new DownOperationResult();
-		FileSystemActionReconciliator fileSystemActionReconciliator = new FileSystemActionReconciliator(testConfigA, outDownOperationResult.getChangeSet());
+		FileSystemActionReconciliator fileSystemActionReconciliator = new FileSystemActionReconciliator(testConfigA, testTempCache, outDownOperationResult.getChangeSet());
 		List<FileSystemAction> fileSystemActions = fileSystemActionReconciliator.determineFileSystemActions(winnersDatabase);
 		
 		assertNotNull(fileSystemActions);

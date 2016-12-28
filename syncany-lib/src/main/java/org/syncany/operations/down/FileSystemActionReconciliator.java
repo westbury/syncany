@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileStatus;
@@ -38,6 +39,7 @@ import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Assembler;
 import org.syncany.operations.ChangeSet;
+import org.syncany.operations.MultiChunkCache;
 import org.syncany.operations.down.actions.ChangeFileSystemAction;
 import org.syncany.operations.down.actions.DeleteFileSystemAction;
 import org.syncany.operations.down.actions.FileSystemAction;
@@ -129,14 +131,16 @@ import org.syncany.operations.down.actions.SetAttributesFileSystemAction;
 public class FileSystemActionReconciliator {
 	private static final Logger logger = Logger.getLogger(FileSystemActionReconciliator.class.getSimpleName());
 
-	private Config config; 
+	private Config config;
+	private MultiChunkCache cache;
 	private ChangeSet changeSet;
 	private SqlDatabase localDatabase;
 	private FileVersionComparator fileVersionComparator;
 	private Assembler assembler;
 	
-	public FileSystemActionReconciliator(Config config, ChangeSet changeSet) {
-		this.config = config; 
+	public FileSystemActionReconciliator(Config config, MultiChunkCache cache, ChangeSet changeSet) {
+		this.config = config;
+		this.cache = cache;
 		this.changeSet = changeSet;
 		this.localDatabase = new SqlDatabase(config);
 		this.fileVersionComparator = new FileVersionComparator(config.getLocalDir(), config.getChunker().getChecksumAlgorithm());
@@ -149,7 +153,7 @@ public class FileSystemActionReconciliator {
 
 	public List<FileSystemAction> determineFileSystemActions(MemoryDatabase winnersDatabase, boolean cleanupOccurred,
 			List<PartialFileHistory> localFileHistoriesWithLastVersion) throws Exception {
-		this.assembler = new Assembler(config, localDatabase, winnersDatabase);
+		this.assembler = new Assembler(config, cache, localDatabase, winnersDatabase);
 		
 		List<FileSystemAction> fileSystemActions = new ArrayList<FileSystemAction>();
 		

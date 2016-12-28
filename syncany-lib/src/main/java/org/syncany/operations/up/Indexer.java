@@ -50,6 +50,7 @@ import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.SqlDatabase;
+import org.syncany.operations.MultiChunkCache;
 import org.syncany.operations.daemon.messages.UpIndexChangesDetectedSyncExternalEvent;
 import org.syncany.operations.daemon.messages.UpIndexEndSyncExternalEvent;
 import org.syncany.operations.daemon.messages.UpIndexMidSyncExternalEvent;
@@ -231,6 +232,8 @@ public class Indexer {
 	}
 
 	private class IndexerDeduperListener implements DeduperListener {
+		private MultiChunkCache cache;
+		
 		private FileVersionComparator fileVersionComparator;
 		private SecureRandom secureRandom;
 		private DatabaseVersion newDatabaseVersion;
@@ -243,7 +246,8 @@ public class Indexer {
 		private FileProperties endFileProperties;
 
 		public IndexerDeduperListener(DatabaseVersion newDatabaseVersion) {
-
+			this.cache = new MultiChunkCache(config.getCache());
+			
 			this.fileVersionComparator = new FileVersionComparator(config.getLocalDir(), config.getChunker().getChecksumAlgorithm());
 			this.secureRandom = new SecureRandom();
 			this.newDatabaseVersion = newDatabaseVersion;
@@ -626,7 +630,7 @@ public class Indexer {
 
 		@Override
 		public File getMultiChunkFile(MultiChunkId multiChunkId) {
-			return config.getCache().getEncryptedMultiChunkFile(multiChunkId);
+			return cache.getEncryptedMultiChunkFile(multiChunkId);
 		}
 
 		@Override

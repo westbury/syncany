@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.database.MultiChunkEntry.MultiChunkId;
@@ -46,11 +47,13 @@ public class Downloader {
 	private static final Logger logger = Logger.getLogger(Downloader.class.getSimpleName());
 
 	private Config config;
+	private MultiChunkCache cache;
 	private TransferManager transferManager;
 	private LocalEventBus eventBus;
 
-	public Downloader(Config config, TransferManager transferManager) {
+	public Downloader(Config config, MultiChunkCache cache, TransferManager transferManager) {
 		this.config = config;
+		this.cache = cache;
 		this.transferManager = transferManager;
 		this.eventBus = LocalEventBus.getInstance();
 	}
@@ -65,8 +68,8 @@ public class Downloader {
 		int multiChunkNumber = 0;
 
 		for (MultiChunkId multiChunkId : unknownMultiChunkIds) {
-			File localEncryptedMultiChunkFile = config.getCache().getEncryptedMultiChunkFile(multiChunkId);
-			File localDecryptedMultiChunkFile = config.getCache().getDecryptedMultiChunkFile(multiChunkId);
+			File localEncryptedMultiChunkFile = cache.getEncryptedMultiChunkFile(multiChunkId);
+			File localDecryptedMultiChunkFile = cache.getDecryptedMultiChunkFile(multiChunkId);
 			MultichunkRemoteFile remoteMultiChunkFile = new MultichunkRemoteFile(multiChunkId);
 
 			multiChunkNumber++;

@@ -521,7 +521,7 @@ public class UpOperation extends AbstractTransferOperation {
 		// Save delta database locally
 		long newestLocalDatabaseVersion = getNewestDatabaseFileVersion(config.getMachineName(), localDatabase.getKnownDatabases());
 		DatabaseRemoteFile remoteDeltaDatabaseFile = new DatabaseRemoteFile(config.getMachineName(), newestLocalDatabaseVersion + 1);
-		File localDeltaDatabaseFile = config.getCache().getDatabaseFile(remoteDeltaDatabaseFile.getName());
+		File localDeltaDatabaseFile = getDatabaseFile(remoteDeltaDatabaseFile.getName());
 
 		logger.log(Level.INFO, "Saving local delta database, version {0} to file {1} ... ", new Object[] { deltaDatabaseVersion.getHeader(),
 				localDeltaDatabaseFile });
@@ -659,7 +659,7 @@ public class UpOperation extends AbstractTransferOperation {
 				logger.log(Level.INFO, "- Ignoring multichunk (from dirty database, already uploaded), " + multiChunkEntry.getId() + " ...");
 			}
 			else {
-				File localMultiChunkFile = config.getCache().getEncryptedMultiChunkFile(multiChunkEntry.getId());
+				File localMultiChunkFile = multiChunkCache.getEncryptedMultiChunkFile(multiChunkEntry.getId());
 				MultichunkRemoteFile remoteMultiChunkFile = new MultichunkRemoteFile(multiChunkEntry.getId());
 
 				logger.log(Level.INFO, "- Uploading multichunk {0} from {1} to {2} ...", new Object[] { multiChunkEntry.getId(), localMultiChunkFile,

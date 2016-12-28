@@ -286,7 +286,7 @@ public class DownOperation extends AbstractTransferOperation {
 		int downloadFileIndex = 0;
 
 		for (DatabaseRemoteFile remoteFile : unknownRemoteDatabases) {
-			File unknownRemoteDatabaseFileInCache = config.getCache().getDatabaseFile(remoteFile.getName());
+			File unknownRemoteDatabaseFileInCache = getDatabaseFile(remoteFile.getName());
 			DatabaseRemoteFile unknownDatabaseRemoteFile = new DatabaseRemoteFile(remoteFile.getName());
 
 			logger.log(Level.INFO, "- Downloading {0} to local cache at {1}", new Object[] { remoteFile.getName(), unknownRemoteDatabaseFileInCache });
