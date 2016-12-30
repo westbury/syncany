@@ -22,9 +22,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.syncany.database.ChunkEntry.ChunkChecksum;
+import org.syncany.chunk2.ChunkEntry;
+import org.syncany.chunk2.MultiChunkEntry;
+import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.FileContent.FileChecksum;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 
 /**

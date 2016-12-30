@@ -19,7 +19,7 @@ package org.syncany.tests.unit.database;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.syncany.database.ObjectId;
+import org.syncany.chunk2.ObjectId;
 
 public class ObjectIdTest {	
 	@Test(expected = IllegalArgumentException.class)

@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.syncany.chunk.Chunker.ChunkEnumeration;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 
 /**
  * The Deduper implements the core deduplication algorithm used by Syncany. 

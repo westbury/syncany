@@ -15,7 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.database;
+package org.syncany.chunk2;
+
+import org.syncany.database.FileContent;
 
 /**
  * The chunk entry represents a single chunk reference in the database model

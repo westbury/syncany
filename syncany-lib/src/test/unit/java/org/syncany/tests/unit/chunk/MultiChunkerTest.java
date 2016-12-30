@@ -44,7 +44,7 @@ import org.syncany.chunk.MultiChunker;
 import org.syncany.chunk.NoTransformer;
 import org.syncany.chunk.Transformer;
 import org.syncany.chunk.ZipMultiChunker;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.tests.unit.util.TestFileUtil;
 
 public class MultiChunkerTest {

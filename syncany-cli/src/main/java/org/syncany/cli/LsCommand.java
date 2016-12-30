@@ -34,11 +34,11 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.syncany.chunk2.ObjectId;
 import org.syncany.cli.util.CommandLineUtil;
 import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileStatus;
 import org.syncany.database.FileVersion.FileType;
-import org.syncany.database.ObjectId;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.ls.LsOperation;

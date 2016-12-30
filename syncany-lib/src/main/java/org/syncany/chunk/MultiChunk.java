@@ -20,7 +20,7 @@ package org.syncany.chunk;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 
 /**
  * A multichunk represents the container format that stores one to many {@link Chunk}s.

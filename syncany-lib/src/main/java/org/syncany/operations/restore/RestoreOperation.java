@@ -24,11 +24,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Config;
 import org.syncany.database.FileContent.FileChecksum;
 import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileType;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.AbstractTransferOperation;

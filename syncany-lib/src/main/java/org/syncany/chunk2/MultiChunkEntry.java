@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.database;
+package org.syncany.chunk2;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.syncany.database.ChunkEntry.ChunkChecksum;
+import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
 
 /**
  * The multichunk entry represents the chunk container in which a set of

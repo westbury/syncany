@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.util.StringUtil;
 
 /**

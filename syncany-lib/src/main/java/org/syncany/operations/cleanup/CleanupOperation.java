@@ -33,12 +33,12 @@ import java.util.logging.Logger;
 
 import org.syncany.chunk.Chunk;
 import org.syncany.chunk.MultiChunk;
+import org.syncany.chunk2.MultiChunkEntry;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Config;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersion;
-import org.syncany.database.MultiChunkEntry;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.SqlDatabase;

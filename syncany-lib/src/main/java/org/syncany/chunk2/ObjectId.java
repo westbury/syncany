@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.database;
+package org.syncany.chunk2;
 
 import java.security.SecureRandom;
 import java.util.Arrays;

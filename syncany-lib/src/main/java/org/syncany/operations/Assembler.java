@@ -31,13 +31,13 @@ import org.syncany.chunk.Chunker;
 import org.syncany.chunk.Deduper;
 import org.syncany.chunk.MultiChunk;
 import org.syncany.chunk.MultiChunker;
+import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Cache;
 import org.syncany.config.Config;
-import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersion;
 import org.syncany.database.MemoryDatabase;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.util.StringUtil;
 

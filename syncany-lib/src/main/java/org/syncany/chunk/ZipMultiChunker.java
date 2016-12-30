@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 
 /**
  *

@@ -20,8 +20,8 @@ package org.syncany.operations;
 import java.io.File;
 import java.io.IOException;
 
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Cache;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 
 /**
  * @author Nigel

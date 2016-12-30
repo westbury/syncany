@@ -47,8 +47,9 @@ import java.util.regex.Pattern;
 
 import org.junit.internal.ArrayComparisonFailure;
 import org.syncany.chunk.Transformer;
+import org.syncany.chunk2.ChunkEntry;
+import org.syncany.chunk2.MultiChunkEntry;
 import org.syncany.config.DatabaseConnectionFactory;
-import org.syncany.database.ChunkEntry;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersionComparator;
@@ -56,7 +57,6 @@ import org.syncany.database.FileVersionComparator.FileChange;
 import org.syncany.database.FileVersionComparator.FileProperties;
 import org.syncany.database.FileVersionComparator.FileVersionComparison;
 import org.syncany.database.MemoryDatabase;
-import org.syncany.database.MultiChunkEntry;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.database.VectorClock;
 import org.syncany.tests.unit.util.TestFileUtil;

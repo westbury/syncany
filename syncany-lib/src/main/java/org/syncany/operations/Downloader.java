@@ -28,10 +28,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.operations.daemon.messages.DownDownloadFileSyncExternalEvent;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferManager;

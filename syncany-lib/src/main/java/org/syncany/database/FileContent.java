@@ -21,7 +21,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.syncany.database.ChunkEntry.ChunkChecksum;
+import org.syncany.chunk2.ChunkEntry;
+import org.syncany.chunk2.MultiChunkEntry;
+import org.syncany.chunk2.ObjectId;
+import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
 
 /**
  * A file content represents the content of a file. It contains a list of

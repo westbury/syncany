@@ -28,11 +28,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.chunk2.ChunkEntry;
+import org.syncany.chunk2.MultiChunkEntry;
+import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Config;
-import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent.FileChecksum;
 import org.syncany.database.FileVersion.FileType;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.dao.ApplicationSqlDao;
 import org.syncany.database.dao.ChunkSqlDao;

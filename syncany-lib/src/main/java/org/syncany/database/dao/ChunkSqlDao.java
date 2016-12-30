@@ -25,8 +25,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.syncany.database.ChunkEntry;
-import org.syncany.database.ChunkEntry.ChunkChecksum;
+import org.syncany.chunk2.ChunkEntry;
+import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
 import org.syncany.database.VectorClock;
 
 /**

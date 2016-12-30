@@ -25,9 +25,9 @@ import java.sql.Connection;
 import java.util.Map;
 
 import org.junit.Test;
+import org.syncany.chunk2.ChunkEntry;
+import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
 import org.syncany.config.Config;
-import org.syncany.database.ChunkEntry;
-import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.dao.ChunkSqlDao;
 import org.syncany.tests.util.TestConfigUtil;
 import org.syncany.tests.util.TestDatabaseUtil;

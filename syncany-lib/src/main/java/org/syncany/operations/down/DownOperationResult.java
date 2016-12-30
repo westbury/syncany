@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.database.DatabaseVersionHeader;
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
 import org.syncany.operations.ChangeSet;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.ls_remote.LsRemoteOperationResult;

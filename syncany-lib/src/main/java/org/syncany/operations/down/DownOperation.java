@@ -32,11 +32,11 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.chunk2.MultiChunkEntry;
 import org.syncany.config.Config;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.DatabaseVersionHeader;
 import org.syncany.database.MemoryDatabase;
-import org.syncany.database.MultiChunkEntry;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.database.SqlDatabase;
 import org.syncany.database.VectorClock;

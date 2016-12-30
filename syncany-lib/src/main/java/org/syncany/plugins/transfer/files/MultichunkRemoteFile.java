@@ -20,7 +20,7 @@ package org.syncany.plugins.transfer.files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.util.StringUtil;
 

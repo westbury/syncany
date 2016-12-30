@@ -19,7 +19,7 @@ package org.syncany.chunk;
 
 import java.io.File;
 
-import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 
 /**
  * Listener interface used by the {@link Deduper} to notify the caller of file
