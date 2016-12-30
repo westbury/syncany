@@ -7,6 +7,7 @@ import org.simpleframework.xml.convert.Converter;
 import org.simpleframework.xml.stream.InputNode;
 import org.simpleframework.xml.stream.OutputNode;
 import org.syncany.config.UserConfig;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.ReflectionUtil;
 
 import com.google.common.collect.Lists;

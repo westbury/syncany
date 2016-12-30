@@ -27,7 +27,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
 import org.junit.Test;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 import org.syncany.util.EnvironmentUtil;

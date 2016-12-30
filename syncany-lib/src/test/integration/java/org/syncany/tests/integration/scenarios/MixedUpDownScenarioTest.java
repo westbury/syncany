@@ -23,7 +23,7 @@ import static org.syncany.tests.util.TestAssertUtil.assertFileListEquals;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 

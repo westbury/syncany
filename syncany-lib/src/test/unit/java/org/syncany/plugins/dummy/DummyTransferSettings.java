@@ -23,7 +23,7 @@ import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.plugins.transfer.Encrypted;
 import org.syncany.plugins.transfer.Setup;
 import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 /**
  * @author Christian Roth <christian.roth@port17.de>

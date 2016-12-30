@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.simpleframework.xml.Element;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.ReflectionUtil;
 
 import com.google.common.collect.ImmutableList;

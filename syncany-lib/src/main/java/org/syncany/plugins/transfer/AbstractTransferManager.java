@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import org.syncany.config.Cache;
 import org.syncany.plugins.transfer.features.Retriable;
 import org.syncany.plugins.transfer.features.TransactionAware;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.StringUtil;
 
 /**

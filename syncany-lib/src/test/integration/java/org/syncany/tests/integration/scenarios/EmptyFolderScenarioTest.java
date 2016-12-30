@@ -27,7 +27,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.syncany.database.DatabaseVersionHeader;
 import org.syncany.database.SqlDatabase;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 

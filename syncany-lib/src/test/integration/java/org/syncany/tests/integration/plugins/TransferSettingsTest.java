@@ -42,9 +42,9 @@ import org.syncany.plugins.dummy.DummyTransferPlugin;
 import org.syncany.plugins.dummy.DummyTransferSettings;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferPluginUtil;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferPluginUtil;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestConfigUtil;
 
 public class TransferSettingsTest {

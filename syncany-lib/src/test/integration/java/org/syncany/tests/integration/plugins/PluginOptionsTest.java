@@ -28,7 +28,7 @@ import org.syncany.plugins.dummy.DummyTransferSettings;
 import org.syncany.plugins.transfer.NestedTransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOptions;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.ReflectionUtil;
 
 public class PluginOptionsTest {

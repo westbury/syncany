@@ -54,7 +54,7 @@ public class OAuthTokenWebListener implements Callable<OAuthTokenFinish> {
 	/**
 	 * Create a new {@link OAuthTokenWebListener} with some clever defaults for a {@link OAuthMode}.
 	 *
-	 * @param mode  {@link OAuthMode} supported by the {@link org.syncany.plugins.transfer.TransferPlugin}.
+	 * @param mode  {@link OAuthMode} supported by the {@link org.syncany.plugins.transfer.plugin.TransferPlugin}.
 	 * @return A ready to use {@link OAuthTokenWebListener}.
 	 */
 	public static Builder forMode(OAuthMode mode) {

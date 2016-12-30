@@ -30,7 +30,7 @@ public abstract class OAuthTokenInterceptors {
 	 * If {@link OAuthMode#BROWSER} is used a {@link HashTokenInterceptor}
 	 * is returned and a {@link OAuthTokenInterceptors.RedirectTokenInterceptor} in {@link OAuthMode#SERVER}.
 	 *
-	 * @param mode {@link OAuthMode} supported by the {@link org.syncany.plugins.transfer.TransferPlugin}.
+	 * @param mode {@link OAuthMode} supported by the {@link org.syncany.plugins.transfer.plugin.TransferPlugin}.
 	 * @return Either a {@link HashTokenInterceptor} or a {@link OAuthTokenInterceptors.RedirectTokenInterceptor}
 	 */
 	public static OAuthTokenInterceptor newTokenInterceptorForMode(OAuthMode mode) {

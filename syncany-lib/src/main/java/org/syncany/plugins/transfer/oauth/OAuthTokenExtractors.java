@@ -27,7 +27,7 @@ public abstract class OAuthTokenExtractors {
 	 * {@value #RFC_STATE_FIELD} in {@link OAuthMode#SERVER} and {@value #RFC_ACCESS_TOKEN_FIELD} in {@link OAuthMode#BROWSER}.
 	 * However, {@value #RFC_STATE_FIELD} is used in both cases to identify a potential CSRF value.
 	 *
-	 * @param mode {@link OAuthMode} supported by the {@link org.syncany.plugins.transfer.TransferPlugin}.
+	 * @param mode {@link OAuthMode} supported by the {@link org.syncany.plugins.transfer.plugin.TransferPlugin}.
 	 * @return A corresponding {@link OAuthTokenExtractors.NamedQueryTokenExtractor}.
 	 */
 	public static OAuthTokenExtractor newTokenExtractorForMode(OAuthMode mode) {

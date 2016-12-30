@@ -28,7 +28,7 @@ import org.syncany.plugins.transfer.Setup;
 import org.syncany.plugins.transfer.TransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOptionCallback;
 import org.syncany.plugins.transfer.TransferPluginOptions;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 public class TransferPluginOptionsTest {
 	@Test

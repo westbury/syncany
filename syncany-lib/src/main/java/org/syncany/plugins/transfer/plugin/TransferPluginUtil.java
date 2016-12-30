@@ -15,13 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.plugins.transfer;
+package org.syncany.plugins.transfer.plugin;
 
 import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.syncany.plugins.Plugin;
+import org.syncany.plugins.transfer.TransferManager;
+
 import com.google.common.base.CaseFormat;
 
 /**

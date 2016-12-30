@@ -35,9 +35,9 @@ import org.syncany.plugins.UserInteractionListener;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferManagerFactory.TransferManagerBuilder;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.EnvironmentUtil;
 
 /**

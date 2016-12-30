@@ -28,13 +28,13 @@ import org.syncany.plugins.Plugins;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.features.TransactionAwareFeatureTransferManager;
 import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 import org.syncany.plugins.transfer.files.MasterRemoteFile;
 import org.syncany.plugins.transfer.files.MultichunkRemoteFile;
 import org.syncany.plugins.transfer.files.RemoteFile;
 import org.syncany.plugins.transfer.files.SyncanyRemoteFile;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.util.StringUtil;
 

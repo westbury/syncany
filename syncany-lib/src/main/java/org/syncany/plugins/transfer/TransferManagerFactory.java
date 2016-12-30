@@ -32,6 +32,7 @@ import org.syncany.plugins.transfer.features.FeatureTransferManager;
 import org.syncany.plugins.transfer.features.PathAware;
 import org.syncany.plugins.transfer.features.Retriable;
 import org.syncany.plugins.transfer.features.TransactionAware;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
 import org.syncany.util.ReflectionUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;

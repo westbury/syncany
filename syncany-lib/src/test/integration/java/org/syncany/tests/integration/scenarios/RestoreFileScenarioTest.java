@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.operations.restore.RestoreOperationOptions;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;

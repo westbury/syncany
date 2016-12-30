@@ -67,7 +67,7 @@ import org.syncany.operations.update.UpdateOperationResult;
 import org.syncany.operations.watch.WatchOperation;
 import org.syncany.operations.watch.WatchOperationOptions;
 import org.syncany.plugins.UserInteractionListener;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 
 public class TestClient extends Client {

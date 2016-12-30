@@ -31,7 +31,7 @@ import org.syncany.operations.init.ConnectOperationOptions.ConnectOptionsStrateg
 import org.syncany.operations.init.ConnectOperationResult;
 import org.syncany.operations.init.ConnectOperationResult.ConnectResultCode;
 import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 import static java.util.Arrays.asList;
 

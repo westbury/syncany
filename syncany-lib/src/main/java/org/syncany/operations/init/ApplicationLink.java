@@ -55,9 +55,9 @@ import org.syncany.crypto.CipherUtil;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferPluginUtil;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferPluginUtil;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.Base58;
 
 import com.google.common.primitives.Ints;
@@ -67,7 +67,7 @@ import com.google.common.primitives.Ints;
  * and parsing a link. The class has two modes of operation:
  *
  * <p>To create a new application link from an existing repository, call the
- * {@link #ApplicationLink(org.syncany.plugins.transfer.TransferSettings, boolean)} constructor and subsequently either
+ * {@link #ApplicationLink(org.syncany.plugins.transfer.plugin.TransferSettings, boolean)} constructor and subsequently either
  * call {@link #createPlaintextLink()} or {@link #createEncryptedLink(SaltedSecretKey)}.
  * This method will typically be called during the 'init' or 'genlink' process.
  *

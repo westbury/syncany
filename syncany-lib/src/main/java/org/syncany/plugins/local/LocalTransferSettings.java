@@ -22,7 +22,7 @@ import java.io.File;
 import org.simpleframework.xml.Element;
 import org.syncany.plugins.transfer.FileType;
 import org.syncany.plugins.transfer.Setup;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 /**
  * The local connection represents the settings required to create to a

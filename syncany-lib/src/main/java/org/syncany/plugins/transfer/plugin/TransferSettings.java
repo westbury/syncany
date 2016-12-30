@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.plugins.transfer;
+package org.syncany.plugins.transfer.plugin;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,6 +37,7 @@ import org.syncany.crypto.CipherSpecs;
 import org.syncany.crypto.CipherUtil;
 import org.syncany.plugins.Plugin;
 import org.syncany.plugins.UserInteractionListener;
+import org.syncany.plugins.transfer.StorageException;
 import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
 

@@ -18,7 +18,7 @@
 package org.syncany.plugins.local;
 
 import org.syncany.plugins.Plugin;
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
 
 /**
  * Identifies the local storage {@link Plugin} for Syncany.

@@ -33,7 +33,7 @@ import org.syncany.operations.MultiChunkCache;
 import org.syncany.operations.down.DownOperationResult;
 import org.syncany.operations.down.FileSystemActionReconciliator;
 import org.syncany.operations.down.actions.FileSystemAction;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 import org.syncany.tests.util.TestDatabaseUtil;

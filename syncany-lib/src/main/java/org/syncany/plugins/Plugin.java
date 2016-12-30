@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 /**
  * A plugin can be used to store Syncany's repository files on any remote location. 

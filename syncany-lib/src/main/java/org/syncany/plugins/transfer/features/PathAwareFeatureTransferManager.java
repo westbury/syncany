@@ -32,10 +32,10 @@ import org.syncany.plugins.transfer.FileType;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.StorageTestResult;
 import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.TransferPlugin;
 import org.syncany.plugins.transfer.files.MultichunkRemoteFile;
 import org.syncany.plugins.transfer.files.RemoteFile;
 import org.syncany.plugins.transfer.files.RemoteFileAttributes;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
 import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
 

@@ -46,7 +46,7 @@ import org.syncany.operations.daemon.messages.api.Response;
 import org.syncany.operations.ls.LsOperationOptions;
 import org.syncany.operations.restore.RestoreOperationOptions;
 import org.syncany.operations.status.StatusOperationOptions;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 import org.syncany.tests.util.TestDaemonUtil;

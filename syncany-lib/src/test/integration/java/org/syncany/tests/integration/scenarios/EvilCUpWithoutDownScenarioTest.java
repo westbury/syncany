@@ -24,7 +24,7 @@ import java.io.File;
 import java.util.Map;
 
 import org.junit.Test;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 

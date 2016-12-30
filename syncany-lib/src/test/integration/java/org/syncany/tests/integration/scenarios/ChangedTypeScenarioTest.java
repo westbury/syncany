@@ -21,7 +21,7 @@ import static org.syncany.tests.util.TestAssertUtil.assertFileListEquals;
 import static org.syncany.tests.util.TestAssertUtil.assertSqlDatabaseEquals;
 
 import org.junit.Test;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.integration.scenarios.framework.AbstractClientAction;
 import org.syncany.tests.integration.scenarios.framework.ChangeTypeFileToFolder;
 import org.syncany.tests.integration.scenarios.framework.ClientActions;

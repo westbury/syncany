@@ -17,7 +17,7 @@
  */
 package org.syncany.plugins.unreliable_local;
 
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
 
 /**
  * The unreliable local plugin can be used for test purposes to

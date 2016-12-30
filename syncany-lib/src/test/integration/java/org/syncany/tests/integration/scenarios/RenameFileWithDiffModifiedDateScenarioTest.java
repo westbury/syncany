@@ -25,7 +25,7 @@ import static org.syncany.tests.util.TestAssertUtil.assertSqlDatabaseEquals;
 import org.junit.Test;
 import org.syncany.database.FileVersion;
 import org.syncany.database.PartialFileHistory;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 import org.syncany.tests.util.TestSqlDatabase;

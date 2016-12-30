@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 import org.syncany.config.Logging;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 

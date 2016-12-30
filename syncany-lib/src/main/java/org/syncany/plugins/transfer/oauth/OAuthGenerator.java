@@ -20,8 +20,8 @@ package org.syncany.plugins.transfer.oauth;
 import java.net.URI;
 
 import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 /**
  * For {@link TransferPlugin}s that base their authentication on OAuth,

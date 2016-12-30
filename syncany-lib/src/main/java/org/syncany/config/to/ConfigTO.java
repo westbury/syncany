@@ -30,7 +30,7 @@ import org.syncany.config.ConfigException;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.crypto.SaltedSecretKeyConverter;
 import org.syncany.plugins.transfer.EncryptedTransferSettingsConverter;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 /**
  * The config transfer object is used to create and load the local config

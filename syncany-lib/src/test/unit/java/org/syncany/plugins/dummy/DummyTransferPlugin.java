@@ -17,7 +17,7 @@
  */
 package org.syncany.plugins.dummy;
 
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
 
 /**
  * @author Christian Roth <christian.roth@port17.de>

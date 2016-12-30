@@ -15,13 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.plugins.transfer;
+package org.syncany.plugins.transfer.plugin;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.syncany.config.Config;
 import org.syncany.plugins.Plugin;
+import org.syncany.plugins.transfer.StorageException;
+import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.files.RemoteFile;
 import org.syncany.util.ReflectionUtil;
 
@@ -53,10 +55,10 @@ public abstract class TransferPlugin extends Plugin {
 	}
 
 	/**
-	 * Creates an empty plugin-specific {@link org.syncany.plugins.transfer.TransferSettings} instance.
+	 * Creates an empty plugin-specific {@link org.syncany.plugins.transfer.plugin.TransferSettings} instance.
 	 *
-	 * @return Empty plugin-specific {@link org.syncany.plugins.transfer.TransferSettings} instance.
-	 * @throws StorageException Thrown if no {@link org.syncany.plugins.transfer.TransferSettings} are attached to a
+	 * @return Empty plugin-specific {@link org.syncany.plugins.transfer.plugin.TransferSettings} instance.
+	 * @throws StorageException Thrown if no {@link org.syncany.plugins.transfer.plugin.TransferSettings} are attached to a
 	 *         plugin using {@link org.syncany.plugins.transfer.PluginSettings}
 	 */
 	@SuppressWarnings("unchecked")
@@ -82,7 +84,7 @@ public abstract class TransferPlugin extends Plugin {
 	 * <p>The created instance can be used to upload/download/delete {@link RemoteFile}s
 	 * and query the remote storage for a file list.
 	 *
-	 * @param transferSettings A valid {@link org.syncany.plugins.transfer.TransferSettings} instance.
+	 * @param transferSettings A valid {@link org.syncany.plugins.transfer.plugin.TransferSettings} instance.
 	 * @param config A valid {@link org.syncany.config.Config} instance.
 	 * @return A initialized, plugin-specific {@link org.syncany.plugins.transfer.TransferManager} instance.
 	 * @throws StorageException Thrown if no (valid) {@link org.syncany.plugins.transfer.TransferManager} are attached to

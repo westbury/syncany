@@ -29,7 +29,7 @@ import org.syncany.config.to.RepoTO;
 import org.syncany.crypto.CipherUtil;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.plugins.Plugins;
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
 
 /**
  * The config helper provides convenience functions to load the configuration from
