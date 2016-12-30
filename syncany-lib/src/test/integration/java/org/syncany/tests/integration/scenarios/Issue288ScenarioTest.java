@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.syncany.database.DatabaseConnectionFactory;
+import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.operations.cleanup.CleanupOperationOptions;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.tests.util.TestClient;

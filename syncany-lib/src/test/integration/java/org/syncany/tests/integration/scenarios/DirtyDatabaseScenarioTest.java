@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.syncany.config.Config;
-import org.syncany.database.DatabaseConnectionFactory;
+import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.database.dao.ChunkSqlDao;

@@ -26,7 +26,7 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.syncany.database.DatabaseConnectionFactory;
+import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.operations.restore.RestoreOperationOptions;
 import org.syncany.plugins.transfer.TransferSettings;

@@ -47,8 +47,8 @@ import java.util.regex.Pattern;
 
 import org.junit.internal.ArrayComparisonFailure;
 import org.syncany.chunk.Transformer;
+import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.database.ChunkEntry;
-import org.syncany.database.DatabaseConnectionFactory;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersionComparator;

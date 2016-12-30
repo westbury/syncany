@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.TreeMap;
 
 import org.junit.Test;
+import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.config.Logging;
-import org.syncany.database.DatabaseConnectionFactory;
 import org.syncany.operations.cleanup.CleanupOperationOptions;
 import org.syncany.operations.cleanup.CleanupOperationOptions.TimeUnit;
 import org.syncany.operations.cleanup.CleanupOperationResult;

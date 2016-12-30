@@ -32,7 +32,6 @@ import org.syncany.config.to.RepoTO;
 import org.syncany.config.to.RepoTO.MultiChunkerTO;
 import org.syncany.config.to.RepoTO.TransformerTO;
 import org.syncany.crypto.SaltedSecretKey;
-import org.syncany.database.DatabaseConnectionFactory;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.transfer.TransferPlugin;
 import org.syncany.plugins.transfer.TransferSettings;

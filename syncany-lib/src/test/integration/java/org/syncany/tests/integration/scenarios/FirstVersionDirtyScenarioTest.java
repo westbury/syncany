@@ -20,7 +20,7 @@ package org.syncany.tests.integration.scenarios;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.syncany.database.DatabaseConnectionFactory;
+import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.operations.up.UpOperationOptions;
 import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;

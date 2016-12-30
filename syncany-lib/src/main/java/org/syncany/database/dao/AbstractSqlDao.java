@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.syncany.database.DatabaseConnectionFactory;
+import org.syncany.config.DatabaseConnectionFactory;
 import org.syncany.util.SqlRunner;
 
 /**
