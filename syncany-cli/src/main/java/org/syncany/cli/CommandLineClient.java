@@ -34,6 +34,8 @@ import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.syncany.plugins.Plugins;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
 
 import javax.net.ssl.SSLContext;
 
@@ -61,6 +63,7 @@ import org.syncany.config.ConfigHelper;
 import org.syncany.config.LogFormatter;
 import org.syncany.config.Logging;
 import org.syncany.config.UserConfig;
+import org.syncany.config.to.ConfigTO;
 import org.syncany.config.to.PortTO;
 import org.syncany.operations.OperationOptions;
 import org.syncany.operations.daemon.DaemonOperation;
@@ -260,6 +263,22 @@ public class CommandLineClient extends Client {
 				return showErrorAndExit("Invalid config in " + localDir);
 			}
 
+			/*
+			 * Check that the plugin configured in configTO has been installed.
+			 * I'm not sure why this check was done at Config load time as there
+			 * is no real scenario that is likely to cause this and getting the error
+			 * when the plugin is needed would appear to be fine.
+			 */
+			ConfigTO configTO = config.getConfigTO();
+			String pluginId = (configTO.getTransferSettings() != null) ? configTO.getTransferSettings().getType() : null;
+			TransferPlugin plugin = Plugins.get(pluginId, TransferPlugin.class);
+
+			if (plugin == null) {
+				logger.log(Level.WARNING, "Not loading config! Plugin with id '{0}' does not exist.", pluginId);
+				throw new ConfigException("Plugin with id '" + pluginId + "' does not exist. Try 'sy plugin install " + pluginId + "'.");
+			}
+
+			
 			break;
 
 		case UNINITIALIZED_LOCALDIR:

@@ -28,8 +28,6 @@ import org.syncany.config.to.ConfigTO;
 import org.syncany.config.to.RepoTO;
 import org.syncany.crypto.CipherUtil;
 import org.syncany.crypto.SaltedSecretKey;
-import org.syncany.plugins.Plugins;
-import org.syncany.plugins.transfer.plugin.TransferPlugin;
 
 /**
  * The config helper provides convenience functions to load the configuration from
@@ -67,14 +65,6 @@ public class ConfigHelper {
 
 			ConfigTO configTO = ConfigHelper.loadConfigTO(localDir);
 			RepoTO repoTO = ConfigHelper.loadRepoTO(localDir, configTO);
-
-			String pluginId = (configTO.getTransferSettings() != null) ? configTO.getTransferSettings().getType() : null;
-			TransferPlugin plugin = Plugins.get(pluginId, TransferPlugin.class);
-
-			if (plugin == null) {
-				logger.log(Level.WARNING, "Not loading config! Plugin with id '{0}' does not exist.", pluginId);
-				throw new ConfigException("Plugin with id '" + pluginId + "' does not exist. Try 'sy plugin install " + pluginId + "'.");
-			}
 
 			logger.log(Level.INFO, "Initializing Config instance ...");
 			return new Config(localDir, configTO, repoTO);
