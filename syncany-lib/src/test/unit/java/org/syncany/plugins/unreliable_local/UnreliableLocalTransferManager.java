@@ -27,7 +27,10 @@ import org.syncany.plugins.local.LocalTransferManager;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.files.RemoteFile;
 
-// TODO this class is not used.  Remove it???
+/**
+ * This class is not used in production.  However it is useful to have around
+ * so we can test how Syncany copes with unreliable connections.
+ */
 public class UnreliableLocalTransferManager extends LocalTransferManager {
 	private static final Logger logger = Logger.getLogger(UnreliableLocalTransferManager.class.getSimpleName());
 	private UnreliableLocalTransferSettings connection;

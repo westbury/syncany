@@ -62,7 +62,7 @@ public class TransferSettingsTest {
 	@After
 	public void after() throws Exception {
 		tmpFile.delete();
-		FileUtils.deleteDirectory(((LocalTransferSettings) config.getConnection()).getPath());
+		FileUtils.deleteDirectory((TestConfigUtil.createTestLocalConnection()).getPath());
 		FileUtils.deleteDirectory(config.getLocalDir());
 		config = null;
 	}

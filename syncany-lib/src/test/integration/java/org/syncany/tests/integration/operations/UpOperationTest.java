@@ -72,7 +72,7 @@ public class UpOperationTest {
 		op.execute();
 
 		// Get databases (for comparison)
-		LocalTransferSettings localConnection = (LocalTransferSettings) testConfig.getConnection();
+		LocalTransferSettings localConnection = TestConfigUtil.createTestLocalConnection();
 
 		File localDatabaseDir = testConfig.getDatabaseDir();
 		File remoteDatabaseFile = new File(localConnection.getPath() + "/databases/database-" + testConfig.getMachineName() + "-0000000001");

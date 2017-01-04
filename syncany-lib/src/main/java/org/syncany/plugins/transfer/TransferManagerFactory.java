@@ -26,14 +26,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.syncany.config.Config;
-import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
+import org.syncany.config.ConfigException;
 import org.syncany.plugins.transfer.features.Feature;
 import org.syncany.plugins.transfer.features.FeatureTransferManager;
 import org.syncany.plugins.transfer.features.PathAware;
+import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
 import org.syncany.plugins.transfer.features.Retriable;
 import org.syncany.plugins.transfer.features.TransactionAware;
 import org.syncany.plugins.transfer.plugin.TransferPlugin;
 import org.syncany.util.ReflectionUtil;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
@@ -81,12 +83,18 @@ public class TransferManagerFactory {
 	 * @see TransferManagerBuilder
 	 * @param config Local folder configuration with transfer plugin settings
 	 * @return Transfer manager builder
+	 * @throws ConfigException 
 	 */
 	public static TransferManagerBuilder build(Config config) throws StorageException {
-		TransferManager transferManager = config.getTransferPlugin().createTransferManager(config.getConnection(), config);
-		logger.log(Level.INFO, "Building " + transferManager.getClass().getSimpleName() + " from config '" + config.getLocalDir().getName() + "' ...");
+		try {
+			TransferManager transferManager = new TransferStuff(config).getTransferManager();
+			logger.log(Level.INFO, "Building " + transferManager.getClass().getSimpleName() + " from config '" + config.getLocalDir().getName() + "' ...");
 
-		return new TransferManagerBuilder(config, transferManager);
+			return new TransferManagerBuilder(config, transferManager);
+		}
+		catch (ConfigException e) {
+			throw new StorageException(e);
+		}
 	}
 
 	/**

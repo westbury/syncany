@@ -272,7 +272,7 @@ public class TestClient extends Client {
 		return FileUtils.deleteQuietly(getLocalFile(name));
 	}
 
-	public void deleteTestData() {
+	public void deleteTestData() throws Exception {
 		TestConfigUtil.deleteTestLocalConfigAndData(config);
 	}
 

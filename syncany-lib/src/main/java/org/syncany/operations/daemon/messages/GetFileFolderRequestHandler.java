@@ -38,6 +38,7 @@ import org.syncany.operations.daemon.messages.api.FolderRequest;
 import org.syncany.operations.daemon.messages.api.FolderRequestHandler;
 import org.syncany.operations.daemon.messages.api.Response;
 import org.syncany.plugins.transfer.TransferManager;
+import org.syncany.plugins.transfer.TransferStuff;
 import org.syncany.util.StringUtil;
 
 // TODO not used.  Remove this class???
@@ -68,7 +69,7 @@ public class GetFileFolderRequestHandler extends FolderRequestHandler {
 			FileContent fileContent = localDatabase.getFileContent(fileVersion.getChecksum(), true);
 			Map<ChunkChecksum, MultiChunkId> multiChunks = localDatabase.getMultiChunkIdsByChecksums(fileContent.getChunks());
 
-			TransferManager transferManager = config.getTransferPlugin().createTransferManager(config.getConnection(), config);
+			TransferManager transferManager = new TransferStuff(config).getTransferManager();
 			Downloader downloader = new Downloader(config, cache, transferManager);
 			Assembler assembler = new Assembler(config, cache, localDatabase);
 

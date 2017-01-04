@@ -76,7 +76,7 @@ public class SplitSyncUpOperationTest {
 		assertTrue(opResult.getTransactionsCompleted() == expectedTransactions);
 
 		// Get databases (for comparison)
-		LocalTransferSettings localConnection = (LocalTransferSettings) testConfig.getConnection();
+		LocalTransferSettings localConnection = TestConfigUtil.createTestLocalConnection();
 
 		File localDatabaseDir = testConfig.getDatabaseDir();
 		assertNotNull(localDatabaseDir.listFiles());

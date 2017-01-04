@@ -32,9 +32,6 @@ import org.syncany.config.to.RepoTO;
 import org.syncany.config.to.RepoTO.MultiChunkerTO;
 import org.syncany.config.to.RepoTO.TransformerTO;
 import org.syncany.crypto.SaltedSecretKey;
-import org.syncany.plugins.Plugins;
-import org.syncany.plugins.transfer.plugin.TransferPlugin;
-import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.FileUtil;
 import org.syncany.util.StringUtil;
 
@@ -74,6 +71,8 @@ public class Config {
 	public static final String FILE_TRANSACTION_DATABASE_PATTERN = "transaction-database.%010d.xml";
 	public static final String FILE_TRANSACTION_LIST = "transaction-list.txt";
 
+	private ConfigTO configTO;
+
 	private byte[] repoId;
 	private String machineName;
 	private String displayName;
@@ -87,8 +86,6 @@ public class Config {
 	private SaltedSecretKey masterKey;
 
 	private Cache cache;
-	private TransferPlugin plugin;
-	private TransferSettings transferSettings;
 	private Chunker chunker;
 	private MultiChunker multiChunker;
 	private Transformer transformer;
@@ -104,13 +101,14 @@ public class Config {
 			throw new ConfigException("Arguments aLocalDir, configTO and repoTO cannot be null.");
 		}
 
+		this.configTO = configTO;
+		
 		initNames(configTO);
 		initMasterKey(configTO);
 		initDirectories(aLocalDir);
 		initCache(configTO);
 		initIgnoredFile();
 		initRepo(repoTO);
-		initConnection(configTO);
 	}
 
 	private void initNames(ConfigTO configTO) throws ConfigException {
@@ -213,23 +211,6 @@ public class Config {
 		}
 	}
 
-	private void initConnection(ConfigTO configTO) throws ConfigException {
-		if (configTO.getTransferSettings() != null) {
-			plugin = Plugins.get(configTO.getTransferSettings().getType(), TransferPlugin.class);
-
-			if (plugin == null) {
-				throw new ConfigException("Plugin not supported: " + configTO.getTransferSettings().getType());
-			}
-
-			try {
-				transferSettings = configTO.getTransferSettings();
-			}
-			catch (Exception e) {
-				throw new ConfigException("Cannot initialize storage: " + e.getMessage(), e);
-			}
-		}
-	}
-
 	// Only used in tests...
 	public java.sql.Connection createDatabaseConnection() {
 		return DatabaseConnectionFactory.createConnection(getDatabaseFile(), false);
@@ -265,18 +246,6 @@ public class Config {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
-	}
-
-	public TransferPlugin getTransferPlugin() {
-		return plugin;
-	}
-
-	public TransferSettings getConnection() {
-		return transferSettings;
-	}
-
-	public void setConnection(TransferSettings connection) {
-		transferSettings = connection;
 	}
 
 	public byte[] getRepoId() {
@@ -349,5 +318,9 @@ public class Config {
 
 	public File getTransactionDatabaseFile(long databaseVersionNumber) {
 		return new File(stateDir, String.format(FILE_TRANSACTION_DATABASE_PATTERN, databaseVersionNumber));
+	}
+
+	public ConfigTO getConfigTO() {
+		return this.configTO;
 	}
 }

@@ -190,7 +190,6 @@ public class TestConfigUtil {
 		// Create
 		Config config = new Config(tempLocalDir, configTO, repoTO);
 
-		config.setConnection(connection);
 		config.getAppDir().mkdirs();
 		config.getCacheDir().mkdirs();
 		config.getDatabaseDir().mkdirs();
@@ -253,7 +252,7 @@ public class TestConfigUtil {
 		return initOperationOptions;
 	}
 
-	public static TransferSettings createTestLocalConnection() throws Exception {
+	public static LocalTransferSettings createTestLocalConnection() throws Exception {
 		TransferPlugin plugin = Plugins.get("local", TransferPlugin.class);
 		LocalTransferSettings conn = plugin.createEmptySettings();
 
@@ -287,7 +286,7 @@ public class TestConfigUtil {
 		return unreliableLocalConnection;
 	}
 
-	public static void deleteTestLocalConfigAndData(Config config) {
+	public static void deleteTestLocalConfigAndData(Config config) throws Exception {
 		TestFileUtil.deleteDirectory(config.getLocalDir());
 		TestFileUtil.deleteDirectory(config.getCacheDir());
 		TestFileUtil.deleteDirectory(config.getDatabaseDir());
@@ -302,8 +301,8 @@ public class TestConfigUtil {
 		deleteTestLocalConnection(config);
 	}
 
-	private static void deleteTestLocalConnection(Config config) {
-		LocalTransferSettings connection = (LocalTransferSettings) config.getConnection();
+	private static void deleteTestLocalConnection(Config config) throws Exception {
+		LocalTransferSettings connection = TestConfigUtil.createTestLocalConnection();
 		TestFileUtil.deleteDirectory(connection.getPath());
 	}
 

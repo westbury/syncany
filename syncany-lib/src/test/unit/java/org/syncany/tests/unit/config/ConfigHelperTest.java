@@ -95,7 +95,6 @@ public class ConfigHelperTest {
 		assertEquals(testConfig.getCacheDir(), loadedConfig.getCacheDir());
 		assertNotNull(loadedConfig.getChunker());
 		assertEquals(testConfig.getChunker().toString(), loadedConfig.getChunker().toString());
-		assertNotNull(loadedConfig.getConnection());
 		assertEquals(testConfig.getDatabaseDir(), loadedConfig.getDatabaseDir());		
 		assertEquals(testConfig.getDatabaseFile(), loadedConfig.getDatabaseFile());
 		assertEquals(testConfig.getDisplayName(), loadedConfig.getDisplayName());
