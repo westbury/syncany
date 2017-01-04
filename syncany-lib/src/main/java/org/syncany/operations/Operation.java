@@ -18,6 +18,7 @@
 package org.syncany.operations;
 
 import org.syncany.config.Config;
+import org.syncany.config.to.OperationOptions;
 
 /**
  * Operations represent and implement Syncany's business logic. They typically

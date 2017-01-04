@@ -19,7 +19,7 @@ package org.syncany.cli;
 
 import java.util.List;
 
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.daemon.messages.LsRemoteStartSyncExternalEvent;
 import org.syncany.operations.ls_remote.LsRemoteOperation;

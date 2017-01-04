@@ -18,6 +18,7 @@
 package org.syncany.operations;
 
 import org.simpleframework.xml.Root;
+import org.syncany.config.to.OperationOptions;
 
 /**
  * Marker interface to indicate a result for a given {@link Operation}.

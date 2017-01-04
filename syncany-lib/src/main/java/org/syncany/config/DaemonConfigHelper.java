@@ -27,8 +27,8 @@ import java.util.logging.Logger;
 import org.syncany.config.to.DaemonConfigTO;
 import org.syncany.config.to.FolderTO;
 import org.syncany.config.to.UserTO;
+import org.syncany.config.to.WatchOperationOptions;
 import org.syncany.crypto.CipherUtil;
-import org.syncany.operations.watch.WatchOperationOptions;
 import org.syncany.util.FileUtil;
 
 import com.google.common.base.Predicate;

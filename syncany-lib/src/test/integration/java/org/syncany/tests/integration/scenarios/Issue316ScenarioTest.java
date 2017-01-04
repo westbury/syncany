@@ -26,7 +26,7 @@ import static org.syncany.tests.util.TestAssertUtil.assertConflictingFileNotExis
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.syncany.operations.cleanup.CleanupOperationOptions;
+import org.syncany.config.to.CleanupOperationOptions;
 import org.syncany.operations.cleanup.CleanupOperationResult;
 import org.syncany.operations.cleanup.CleanupOperationResult.CleanupResultCode;
 import org.syncany.plugins.unreliable_local.UnreliableLocalTransferSettings;

@@ -32,6 +32,7 @@ import org.syncany.config.DaemonConfigHelper;
 import org.syncany.config.LocalEventBus;
 import org.syncany.config.to.DaemonConfigTO;
 import org.syncany.config.to.FolderTO;
+import org.syncany.config.to.WatchOperationOptions;
 import org.syncany.operations.daemon.Watch.SyncStatus;
 import org.syncany.operations.daemon.messages.AddWatchManagementRequest;
 import org.syncany.operations.daemon.messages.AddWatchManagementResponse;
@@ -46,7 +47,6 @@ import org.syncany.operations.daemon.messages.api.ManagementRequest;
 import org.syncany.operations.daemon.messages.api.ManagementRequestHandler;
 import org.syncany.operations.daemon.messages.api.Response;
 import org.syncany.operations.watch.WatchOperation;
-import org.syncany.operations.watch.WatchOperationOptions;
 
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;

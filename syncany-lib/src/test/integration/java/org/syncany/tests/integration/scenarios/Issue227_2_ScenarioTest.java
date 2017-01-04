@@ -23,8 +23,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 import org.junit.Test;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.operations.down.DownOperationResult;
-import org.syncany.operations.up.UpOperationOptions;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;

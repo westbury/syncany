@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.simpleframework.xml.core.Persister;
-import org.syncany.operations.up.UpOperationOptions;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferManagerFactory;

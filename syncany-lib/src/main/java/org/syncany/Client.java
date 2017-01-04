@@ -25,8 +25,8 @@ import java.util.Locale;
 import java.util.Properties;
 
 import org.syncany.config.UserConfig;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.operations.Operation;
-import org.syncany.operations.OperationOptions;
 import org.syncany.operations.OperationResult;
 
 /**

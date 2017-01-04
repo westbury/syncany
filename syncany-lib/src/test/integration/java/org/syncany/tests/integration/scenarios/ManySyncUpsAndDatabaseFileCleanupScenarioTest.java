@@ -23,7 +23,7 @@ import static org.syncany.tests.util.TestAssertUtil.assertSqlDatabaseEquals;
 import java.io.File;
 
 import org.junit.Test;
-import org.syncany.operations.cleanup.CleanupOperationOptions;
+import org.syncany.config.to.CleanupOperationOptions;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 import org.syncany.tests.util.TestClient;

@@ -23,7 +23,7 @@ import java.io.PrintStream;
 import org.syncany.cli.util.CarriageReturnPrinter;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.operations.OperationResult;
 
 /**

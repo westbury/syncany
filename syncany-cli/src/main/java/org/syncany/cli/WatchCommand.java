@@ -26,9 +26,9 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.syncany.config.to.WatchOperationOptions;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.watch.WatchOperation;
-import org.syncany.operations.watch.WatchOperationOptions;
 
 public class WatchCommand extends Command {
 	public static final Pattern ANNOUNCEMENTS_PATTERN = Pattern.compile("([^:]+):(\\d+)");

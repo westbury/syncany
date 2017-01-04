@@ -18,7 +18,7 @@
 package org.syncany.operations.daemon.messages.api;
 
 import org.simpleframework.xml.Element;
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 
 public abstract class FolderRequest extends Request {
 	@Element(required = true)

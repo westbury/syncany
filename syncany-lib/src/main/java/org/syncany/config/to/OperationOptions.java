@@ -15,33 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.operations.status;
+package org.syncany.config.to;
 
-import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
-import org.syncany.operations.OperationOptions;
+import org.syncany.operations.Operation;
+import org.syncany.operations.OperationResult;
 
-@Root(name="status")
-public class StatusOperationOptions implements OperationOptions {
-	@Element(required = false)
-	private boolean forceChecksum = false;
-
-	@Element(required = false)
-	private boolean delete = true;
-
-	public boolean isForceChecksum() {
-		return forceChecksum;
-	}
-
-	public void setForceChecksum(boolean forceChecksum) {
-		this.forceChecksum = forceChecksum;
-	}
-	
-	public boolean isDelete() {
-		return delete;
-	}
-
-	public void setDelete(boolean delete) {
-		this.delete = delete;
-	}
+/**
+ * Marker interface to indicate options and flags for any given {@link Operation}.
+ * 
+ * <p>Operation options are passed to an operation (similar to method parameters).
+ * Onve an operation returns, it returns an instance of an {@link OperationResult}.
+ * 
+ * @see Operation
+ * @see OperationResult
+ * @author Philipp C. Heckel <philipp.heckel@gmail.com>
+ */
+@Root(strict = false)
+public interface OperationOptions {
+	// Marker interface for type safety
 }

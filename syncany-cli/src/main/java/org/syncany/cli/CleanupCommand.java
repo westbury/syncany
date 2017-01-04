@@ -23,13 +23,13 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 import org.syncany.cli.util.CommandLineUtil;
+import org.syncany.config.to.CleanupOperationOptions;
+import org.syncany.config.to.StatusOperationOptions;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.cleanup.CleanupOperation;
-import org.syncany.operations.cleanup.CleanupOperationOptions;
 import org.syncany.operations.cleanup.CleanupOperationResult;
 import org.syncany.operations.daemon.messages.CleanupStartCleaningSyncExternalEvent;
 import org.syncany.operations.daemon.messages.CleanupStartSyncExternalEvent;
-import org.syncany.operations.status.StatusOperationOptions;
 
 import com.google.common.eventbus.Subscribe;
 

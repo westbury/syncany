@@ -28,7 +28,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 import org.apache.commons.io.IOUtils;
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.operations.OperationResult;
 
 /**

@@ -20,7 +20,7 @@ package org.syncany.operations.init;
 import java.io.File;
 
 import org.syncany.config.to.ConfigTO;
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 
 public class ConnectOperationOptions implements OperationOptions {
 	public enum ConnectOptionsStrategy {

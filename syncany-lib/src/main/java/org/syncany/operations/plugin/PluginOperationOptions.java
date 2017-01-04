@@ -17,7 +17,7 @@
  */
 package org.syncany.operations.plugin;
 
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 
 public class PluginOperationOptions implements OperationOptions {
 	public enum PluginListMode {

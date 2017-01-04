@@ -15,15 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.operations.cleanup;
+package org.syncany.config.to;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
-import org.syncany.operations.OperationOptions;
-import org.syncany.operations.status.StatusOperationOptions;
 
 public class CleanupOperationOptions implements OperationOptions {
 	@Element(name = "status", required = false)

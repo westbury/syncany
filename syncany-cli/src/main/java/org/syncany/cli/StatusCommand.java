@@ -22,10 +22,10 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.syncany.config.to.StatusOperationOptions;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.daemon.messages.StatusStartSyncExternalEvent;
 import org.syncany.operations.status.StatusOperation;
-import org.syncany.operations.status.StatusOperationOptions;
 import org.syncany.operations.status.StatusOperationResult;
 
 import com.google.common.eventbus.Subscribe;

@@ -18,7 +18,7 @@
 package org.syncany.operations.log;
 
 import org.simpleframework.xml.Element;
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 
 public class LogOperationOptions implements OperationOptions {
 	@Element(required = false)

@@ -17,7 +17,7 @@
  */
 package org.syncany.operations.init;
 
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 
 public class GenlinkOperationOptions implements OperationOptions {	
 	private boolean shortUrl;

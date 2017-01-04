@@ -18,7 +18,7 @@
 package org.syncany.operations.daemon.messages;
 
 import org.simpleframework.xml.Element;
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.operations.daemon.messages.api.FolderRequest;
 import org.syncany.operations.log.LogOperationOptions;
 

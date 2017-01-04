@@ -23,8 +23,8 @@ import java.util.Set;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.database.FileVersion.FileType;
-import org.syncany.operations.OperationOptions;
 
 import com.google.common.collect.Sets;
 

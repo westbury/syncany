@@ -27,8 +27,8 @@ import java.util.TreeMap;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.syncany.operations.cleanup.CleanupOperationOptions;
-import org.syncany.operations.cleanup.CleanupOperationOptions.TimeUnit;
+import org.syncany.config.to.CleanupOperationOptions;
+import org.syncany.config.to.CleanupOperationOptions.TimeUnit;
 import org.syncany.operations.cleanup.CleanupOperationResult;
 import org.syncany.operations.cleanup.CleanupOperationResult.CleanupResultCode;
 import org.syncany.operations.up.UpOperationResult;

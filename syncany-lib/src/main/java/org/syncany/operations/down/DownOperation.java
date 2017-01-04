@@ -34,6 +34,8 @@ import java.util.logging.Logger;
 
 import org.syncany.chunk2.MultiChunkEntry;
 import org.syncany.config.Config;
+import org.syncany.config.to.DownOperationOptions;
+import org.syncany.config.to.DownOperationOptions.DownConflictStrategy;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.DatabaseVersionHeader;
 import org.syncany.database.MemoryDatabase;
@@ -48,7 +50,6 @@ import org.syncany.operations.daemon.messages.DownChangesDetectedSyncExternalEve
 import org.syncany.operations.daemon.messages.DownDownloadFileSyncExternalEvent;
 import org.syncany.operations.daemon.messages.DownEndSyncExternalEvent;
 import org.syncany.operations.daemon.messages.DownStartSyncExternalEvent;
-import org.syncany.operations.down.DownOperationOptions.DownConflictStrategy;
 import org.syncany.operations.down.DownOperationResult.DownResultCode;
 import org.syncany.operations.ls_remote.LsRemoteOperation;
 import org.syncany.operations.ls_remote.LsRemoteOperationResult;

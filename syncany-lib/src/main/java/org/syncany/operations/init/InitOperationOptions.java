@@ -21,9 +21,9 @@ import java.io.File;
 import java.util.List;
 
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.config.to.RepoTO;
 import org.syncany.crypto.CipherSpec;
-import org.syncany.operations.OperationOptions;
 
 public class InitOperationOptions implements OperationOptions {
 	private boolean createTarget;

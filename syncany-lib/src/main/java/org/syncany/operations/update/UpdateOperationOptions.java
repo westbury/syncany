@@ -17,7 +17,7 @@
  */
 package org.syncany.operations.update;
 
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 
 /**
  * Options class to configure the {@link UpdateOperation}.

@@ -22,6 +22,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.syncany.config.to.StatusOperationOptions;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.operations.ChangeSet;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.daemon.messages.LsRemoteStartSyncExternalEvent;
@@ -29,9 +31,7 @@ import org.syncany.operations.daemon.messages.StatusStartSyncExternalEvent;
 import org.syncany.operations.daemon.messages.UpIndexMidSyncExternalEvent;
 import org.syncany.operations.daemon.messages.UpIndexStartSyncExternalEvent;
 import org.syncany.operations.daemon.messages.UpStartSyncExternalEvent;
-import org.syncany.operations.status.StatusOperationOptions;
 import org.syncany.operations.up.UpOperation;
-import org.syncany.operations.up.UpOperationOptions;
 import org.syncany.operations.up.UpOperationResult;
 import org.syncany.operations.up.UpOperationResult.UpResultCode;
 

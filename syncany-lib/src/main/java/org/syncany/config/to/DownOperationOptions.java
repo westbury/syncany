@@ -15,10 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.operations.down;
+package org.syncany.config.to;
 
 import org.simpleframework.xml.Element;
-import org.syncany.operations.OperationOptions;
 
 public class DownOperationOptions implements OperationOptions {
 	public enum DownConflictStrategy {

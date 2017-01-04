@@ -1,7 +1,7 @@
 package org.syncany.tests.integration.scenarios;
 
 import org.junit.Test;
-import org.syncany.operations.up.UpOperationOptions;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 import org.syncany.plugins.unreliable_local.UnreliableLocalTransferSettings;
 import org.syncany.tests.util.TestClient;

@@ -25,9 +25,9 @@ import java.nio.file.attribute.PosixFilePermissions;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.operations.down.DownOperationResult;
 import org.syncany.operations.down.DownOperationResult.DownResultCode;
-import org.syncany.operations.up.UpOperationOptions;
 import org.syncany.operations.up.UpOperationResult;
 import org.syncany.operations.up.UpOperationResult.UpResultCode;
 import org.syncany.plugins.local.LocalTransferSettings;

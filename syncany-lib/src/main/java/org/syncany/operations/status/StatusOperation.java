@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
+import org.syncany.config.to.StatusOperationOptions;
 import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileStatus;
 import org.syncany.database.FileVersionComparator;

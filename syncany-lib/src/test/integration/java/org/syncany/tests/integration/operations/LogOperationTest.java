@@ -24,12 +24,12 @@ import java.util.List;
 
 import org.junit.Test;
 import org.syncany.config.Config;
+import org.syncany.config.to.StatusOperationOptions;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.operations.log.LightweightDatabaseVersion;
 import org.syncany.operations.log.LogOperation;
 import org.syncany.operations.log.LogOperationOptions;
-import org.syncany.operations.status.StatusOperationOptions;
 import org.syncany.operations.up.UpOperation;
-import org.syncany.operations.up.UpOperationOptions;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.tests.util.TestConfigUtil;
 

@@ -26,13 +26,13 @@ import org.syncany.config.Config;
 import org.syncany.config.ConfigException;
 import org.syncany.config.LocalEventBus;
 import org.syncany.config.to.PortTO;
+import org.syncany.config.to.WatchOperationOptions;
 import org.syncany.operations.daemon.messages.AlreadySyncingResponse;
 import org.syncany.operations.daemon.messages.BadRequestResponse;
 import org.syncany.operations.daemon.messages.api.FolderRequest;
 import org.syncany.operations.daemon.messages.api.FolderRequestHandler;
 import org.syncany.operations.daemon.messages.api.Response;
 import org.syncany.operations.watch.WatchOperation;
-import org.syncany.operations.watch.WatchOperationOptions;
 import org.syncany.operations.watch.WatchOperationResult;
 
 import com.google.common.eventbus.Subscribe;

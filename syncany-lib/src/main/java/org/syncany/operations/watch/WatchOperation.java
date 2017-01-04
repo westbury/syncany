@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
+import org.syncany.config.to.WatchOperationOptions;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Operation;
 import org.syncany.operations.cleanup.CleanupOperation;

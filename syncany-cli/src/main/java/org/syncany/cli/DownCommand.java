@@ -27,13 +27,13 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.syncany.config.to.DownOperationOptions;
+import org.syncany.config.to.DownOperationOptions.DownConflictStrategy;
 import org.syncany.operations.ChangeSet;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.daemon.messages.DownDownloadFileSyncExternalEvent;
 import org.syncany.operations.daemon.messages.LsRemoteStartSyncExternalEvent;
 import org.syncany.operations.down.DownOperation;
-import org.syncany.operations.down.DownOperationOptions;
-import org.syncany.operations.down.DownOperationOptions.DownConflictStrategy;
 import org.syncany.operations.down.DownOperationResult;
 import org.syncany.operations.down.DownOperationResult.DownResultCode;
 

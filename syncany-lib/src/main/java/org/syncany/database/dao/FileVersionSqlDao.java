@@ -35,12 +35,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.syncany.database.FileContent.FileChecksum;
+import org.syncany.config.to.CleanupOperationOptions.TimeUnit;
 import org.syncany.database.FileVersion;
 import org.syncany.database.FileVersion.FileStatus;
 import org.syncany.database.FileVersion.FileType;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
-import org.syncany.operations.cleanup.CleanupOperationOptions.TimeUnit;
 import org.syncany.util.StringUtil;
 
 import com.google.common.collect.ImmutableMap;

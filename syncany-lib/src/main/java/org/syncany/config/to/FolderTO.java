@@ -20,7 +20,6 @@ package org.syncany.config.to;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 import org.syncany.operations.watch.WatchOperation;
-import org.syncany.operations.watch.WatchOperationOptions;
 
 /**
  * This class is the access object to configure a folder

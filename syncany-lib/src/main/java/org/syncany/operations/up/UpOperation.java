@@ -39,6 +39,7 @@ import org.syncany.chunk2.ChunkEntry;
 import org.syncany.chunk2.MultiChunkEntry;
 import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Config;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.DatabaseVersionHeader;
 import org.syncany.database.FileContent;

@@ -15,12 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.syncany.operations.up;
+package org.syncany.config.to;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
-import org.syncany.operations.OperationOptions;
-import org.syncany.operations.status.StatusOperationOptions;
 
 @Root(name = "up")
 public class UpOperationOptions implements OperationOptions {

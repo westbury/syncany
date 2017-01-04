@@ -20,7 +20,7 @@ package org.syncany.operations.daemon;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.syncany.operations.OperationOptions;
+import org.syncany.config.to.OperationOptions;
 
 public class DaemonOperationOptions implements OperationOptions {
 	public enum DaemonAction {

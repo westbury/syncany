@@ -33,6 +33,7 @@ import org.syncany.chunk2.MultiChunkEntry;
 import org.syncany.chunk2.ChunkEntry.ChunkChecksum;
 import org.syncany.chunk2.MultiChunkEntry.MultiChunkId;
 import org.syncany.config.Config;
+import org.syncany.config.to.CleanupOperationOptions.TimeUnit;
 import org.syncany.database.FileContent.FileChecksum;
 import org.syncany.database.FileVersion.FileType;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
@@ -43,7 +44,6 @@ import org.syncany.database.dao.FileContentSqlDao;
 import org.syncany.database.dao.FileHistorySqlDao;
 import org.syncany.database.dao.FileVersionSqlDao;
 import org.syncany.database.dao.MultiChunkSqlDao;
-import org.syncany.operations.cleanup.CleanupOperationOptions.TimeUnit;
 import org.syncany.operations.down.DatabaseBranch;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 

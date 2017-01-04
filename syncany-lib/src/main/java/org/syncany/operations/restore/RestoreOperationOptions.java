@@ -18,8 +18,8 @@
 package org.syncany.operations.restore;
 
 import org.simpleframework.xml.Element;
+import org.syncany.config.to.OperationOptions;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
-import org.syncany.operations.OperationOptions;
 
 public class RestoreOperationOptions implements OperationOptions {
 	@Element(required = true)	

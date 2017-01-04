@@ -20,8 +20,8 @@ package org.syncany.tests.integration.scenarios;
 import java.io.File;
 
 import org.junit.Test;
-import org.syncany.operations.cleanup.CleanupOperationOptions;
-import org.syncany.operations.up.UpOperationOptions;
+import org.syncany.config.to.CleanupOperationOptions;
+import org.syncany.config.to.UpOperationOptions;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.tests.util.TestClient;
