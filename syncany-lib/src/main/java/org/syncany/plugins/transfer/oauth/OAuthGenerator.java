@@ -19,6 +19,7 @@ package org.syncany.plugins.transfer.oauth;
 
 import java.net.URI;
 
+import org.syncany.config.ConfigException;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.plugin.TransferPlugin;
 import org.syncany.plugins.transfer.plugin.TransferSettings;
@@ -44,7 +45,7 @@ public interface OAuthGenerator {
 	 * @return A URL to authorize Syncany using the provided redirectUri
 	 * @throws StorageException
 	 */
-	URI generateAuthUrl(URI redirectUri) throws StorageException;
+	URI generateAuthUrl(URI redirectUri) throws ConfigException;
 
 	/**
 	 * Validate the given token and (optional) csrf parameter.
@@ -53,7 +54,7 @@ public interface OAuthGenerator {
 	 * @param csrfState Content of the state parameter (optional).
 	 * @throws StorageException
 	 */
-	void checkToken(String token, /*@Nullable*/ String csrfState) throws StorageException;
+	void checkToken(String token, /*@Nullable*/ String csrfState) throws ConfigException;
 
 	// Annotation don't support concrete instances of objects, only classes. Thus we need to add two additional interfaces
 	// if a plugin requires custom interceptors or extractors
@@ -87,6 +88,6 @@ public interface OAuthGenerator {
 		 * @return A URL with no redirect URL
 		 * @throws StorageException
 		 */
-		URI generateAuthUrl() throws StorageException;
+		URI generateAuthUrl() throws ConfigException;
 	}
 }

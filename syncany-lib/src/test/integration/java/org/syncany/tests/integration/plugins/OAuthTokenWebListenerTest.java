@@ -13,13 +13,13 @@ import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.oauth.OAuthGenerator;
 import org.syncany.plugins.transfer.oauth.OAuthMode;
 import org.syncany.plugins.transfer.oauth.OAuthTokenExtractor;
 import org.syncany.plugins.transfer.oauth.OAuthTokenExtractors;
 import org.syncany.plugins.transfer.oauth.OAuthTokenFinish;
 import org.syncany.plugins.transfer.oauth.OAuthTokenWebListener;
+
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.ScriptException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -155,12 +155,12 @@ public class OAuthTokenWebListenerTest {
 	private static class TestOAuthGenerator implements OAuthGenerator, OAuthGenerator.WithExtractor {
 
 		@Override
-		public URI generateAuthUrl(URI redirectUri) throws StorageException {
+		public URI generateAuthUrl(URI redirectUri) {
 			return URI.create("http://1234/?redirect=" + redirectUri);
 		}
 
 		@Override
-		public void checkToken(String token, String csrfState) throws StorageException {
+		public void checkToken(String token, String csrfState) {
 			// empty
 		}
 

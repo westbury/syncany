@@ -33,10 +33,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-
 import org.syncany.cli.util.InitConsole;
+import org.syncany.config.ConfigException;
 import org.syncany.config.to.ConfigTO;
 import org.syncany.crypto.CipherUtil;
 import org.syncany.operations.daemon.messages.ShowMessageExternalEvent;
@@ -66,6 +64,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.eventbus.Subscribe;
+
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 /**
  * The abstract init command provides multiple shared methods for the 'init'
@@ -151,7 +152,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		return plugin;
 	}
 
-	private TransferSettings askPluginSettings(TransferSettings settings, Map<String, String> knownPluginSettings) throws StorageException {
+	private TransferSettings askPluginSettings(TransferSettings settings, Map<String, String> knownPluginSettings) throws ConfigException {
 		if (isInteractive) {
 			out.println();
 			out.println("Connection details for " + settings.getType() + " connection:");
@@ -173,11 +174,11 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 		catch (NoSuchFieldException e) {
 			logger.log(Level.SEVERE, "No token could be found, maybe user denied access", e);
-			throw new StorageException("No token found. Did you accept the authorization?", e);
+			throw new ConfigException("No token found. Did you accept the authorization?", e);
 		}
 		catch (TimeoutException e) {
 			logger.log(Level.SEVERE, "No token was received in the given time interval", e);
-			throw new StorageException("No token was received in the given time interval", e);
+			throw new ConfigException("No token was received in the given time interval", e);
 		}
 		catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | IOException | InterruptedException | ExecutionException e) {
 			logger.log(Level.SEVERE, "Unable to execute option generator", e);
@@ -189,7 +190,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 				return askPluginSettings(settings, knownPluginSettings);
 			}
 
-			throw new StorageException("Validation failed: " + settings.getReasonForLastValidationFail());
+			throw new ConfigException("Validation failed: " + settings.getReasonForLastValidationFail());
 		}
 
 		logger.log(Level.INFO, "Settings are " + settings.toString());
@@ -197,7 +198,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		return settings;
 	}
 
-	private void printOAuthInformation(TransferSettings settings) throws StorageException, NoSuchMethodException, SecurityException,
+	private void printOAuthInformation(TransferSettings settings) throws ConfigException, NoSuchMethodException, SecurityException,
 					InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException, ExecutionException, InterruptedException, TimeoutException, NoSuchFieldException {
 		OAuth oAuthSettings =	settings.getClass().getAnnotation(OAuth.class);
 
@@ -222,7 +223,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 	}
 
-	private void doOAuthInCopyTokenMode(OAuthGenerator generator) throws StorageException {
+	private void doOAuthInCopyTokenMode(OAuthGenerator generator) throws ConfigException {
 		URI oAuthURL = ((OAuthGenerator.WithNoRedirectMode) generator).generateAuthUrl();
 
 		out.println();
@@ -234,7 +235,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		generator.checkToken(token, null);
 	}
 
-	private void doOAuthInRedirectMode(OAuthGenerator generator, OAuth settings) throws IOException, InterruptedException, ExecutionException, TimeoutException, StorageException {
+	private void doOAuthInRedirectMode(OAuthGenerator generator, OAuth settings) throws IOException, InterruptedException, ExecutionException, TimeoutException, ConfigException {
 		OAuthTokenWebListener.Builder tokenListerBuilder = OAuthTokenWebListener.forMode(settings.mode());
 
 		if (settings.callbackPort() != OAuth.RANDOM_PORT) {
@@ -272,12 +273,12 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 		else {
 			out.println(" canceled");
-			throw new StorageException("Error while acquiring token, perhaps user denied authorization");
+			throw new ConfigException("Error while acquiring token, perhaps user denied authorization");
 		}
 	}
 
 	private void askPluginSettings(TransferSettings settings, TransferPluginOption option, Map<String, String> knownPluginSettings, String nestPrefix)
-			throws IllegalAccessException, InstantiationException, StorageException, IllegalArgumentException, InvocationTargetException,
+			throws IllegalAccessException, InstantiationException, ConfigException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 
 		if (option instanceof NestedTransferPluginOption) {
@@ -298,7 +299,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 
 	private void askNormalPluginSettings(TransferSettings settings, TransferPluginOption option, Map<String, String> knownPluginSettings,
 			String nestPrefix)
-			throws StorageException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+			throws ConfigException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 
 		TransferPluginOptionCallback optionCallback = createOptionCallback(settings, option.getCallback());
@@ -337,7 +338,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 	 */
 	private void askGenericChildPluginSettings(TransferSettings settings, TransferPluginOption option, Map<String, String> knownPluginSettings,
 			String nestPrefix)
-			throws StorageException, IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException,
+			throws ConfigException, IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 
 		TransferPluginOptionCallback optionCallback = createOptionCallback(settings, option.getCallback());
@@ -394,7 +395,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 	 * <tt>private LocalTransferSettings localChildPluginSettings;</tt>
 	 */
 	private void askConreteChildPluginSettings(TransferSettings settings, NestedTransferPluginOption option, Map<String, String> knownPluginSettings,
-			String nestPrefix) throws StorageException, IllegalAccessException, InstantiationException, IllegalArgumentException,
+			String nestPrefix) throws ConfigException, IllegalAccessException, InstantiationException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		TransferPluginOptionCallback optionCallback = createOptionCallback(settings, option.getCallback());
@@ -446,7 +447,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 	}
 
-	private String askPluginOption(TransferSettings settings, TransferPluginOption option) throws StorageException {
+	private String askPluginOption(TransferSettings settings, TransferPluginOption option) throws ConfigException {
 		while (true) {
 			String value;
 
@@ -491,7 +492,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 	}
 
-	private String askPluginOptionNormal(TransferSettings settings, TransferPluginOption option) throws StorageException {
+	private String askPluginOptionNormal(TransferSettings settings, TransferPluginOption option) throws ConfigException {
 		String knownOptionValue = settings.getField(option.getField().getName());
 		String value = knownOptionValue;
 
@@ -511,7 +512,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		return value;
 	}
 
-	private String askPluginOptionOptional(TransferSettings settings, TransferPluginOption option) throws StorageException {
+	private String askPluginOptionOptional(TransferSettings settings, TransferPluginOption option) throws ConfigException {
 		String knownOptionValue = settings.getField(option.getField().getName());
 		String value = knownOptionValue;
 
@@ -537,7 +538,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		return value;
 	}
 
-	private String askPluginOptionSensitive(TransferSettings settings, TransferPluginOption option) throws StorageException {
+	private String askPluginOptionSensitive(TransferSettings settings, TransferPluginOption option) throws ConfigException {
 		String knownOptionValue = settings.getField(option.getField().getName());
 		String value = knownOptionValue;
 		String optionalIndicator = option.isRequired() ? "" : ", optional";

@@ -17,17 +17,22 @@
  */
 package org.syncany.tests.integration.plugins;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.syncany.config.ConfigException;
 import org.syncany.plugins.Plugin;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.features.TransactionAwareFeatureTransferManager;
 import org.syncany.plugins.transfer.TransferManager;
+import org.syncany.plugins.transfer.features.TransactionAwareFeatureTransferManager;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 import org.syncany.plugins.transfer.files.MasterRemoteFile;
 import org.syncany.plugins.transfer.files.MultichunkRemoteFile;
@@ -37,10 +42,6 @@ import org.syncany.plugins.transfer.plugin.TransferPlugin;
 import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.util.StringUtil;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractTransferManagerTest {
 	private File tempLocalSourceDir;
@@ -63,7 +64,7 @@ public abstract class AbstractTransferManagerTest {
 	}
 
 	@Test
-	public void testLoadPluginAndCreateTransferManager() throws StorageException {
+	public void testLoadPluginAndCreateTransferManager() throws ConfigException, StorageException {
 		loadPluginAndCreateTransferManager();
 	}
 
@@ -79,7 +80,7 @@ public abstract class AbstractTransferManagerTest {
 	}
 
 	@Test(expected = StorageException.class)
-	public void testConnectWithInvalidSettings() throws StorageException {
+	public void testConnectWithInvalidSettings() throws ConfigException, StorageException {
 		TransferPlugin plugin = Plugins.get(getPluginId(), TransferPlugin.class);
 
 		TransferSettings connection = plugin.createEmptySettings();
@@ -174,7 +175,7 @@ public abstract class AbstractTransferManagerTest {
 	}
 
 	@Test
-	public void testDeleteNonExistentFile() throws StorageException {
+	public void testDeleteNonExistentFile() throws ConfigException, StorageException {
 		TransferManager transferManager = loadPluginAndCreateTransferManager();
 		transferManager.connect();
 
@@ -183,7 +184,7 @@ public abstract class AbstractTransferManagerTest {
 		assertTrue(deleteSuccess);
 	}
 
-	private TransferManager loadPluginAndCreateTransferManager() throws StorageException {
+	private TransferManager loadPluginAndCreateTransferManager() throws ConfigException, StorageException {
 		TransferPlugin pluginInfo = Plugins.get(getPluginId(), TransferPlugin.class);
 
 		TransferSettings connection = pluginInfo.createEmptySettings();

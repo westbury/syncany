@@ -35,9 +35,8 @@ import org.syncany.config.UserConfig;
 import org.syncany.crypto.CipherException;
 import org.syncany.crypto.CipherSpecs;
 import org.syncany.crypto.CipherUtil;
-import org.syncany.plugins.Plugin;
 import org.syncany.plugins.UserInteractionListener;
-import org.syncany.plugins.transfer.StorageException;
+import org.syncany.config.ConfigException;
 import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
 
@@ -45,7 +44,7 @@ import com.google.common.base.Objects;
 
 /**
  * A connection represents the configuration settings of a storage/connection
- * plugin. It is created through the concrete implementation of a {@link Plugin}.
+ * plugin. It is created through the concrete implementation of a {@link org.syncany.plugins.Plugin}.
  * 
  * <p>Options for a plugin specific {@link TransferSettings} can be defined using the
  * {@link Element} annotation. Furthermore some Syncany-specific annotations are available.
@@ -81,7 +80,7 @@ public abstract class TransferSettings {
 	 * @return The value converted to a string using {@link Class#toString()}
 	 * @throws StorageException Thrown if the field either does not exist or isn't accessible
 	 */
-	public final String getField(String key) throws StorageException {
+	public final String getField(String key) throws ConfigException {
 		try {
 			Field field = this.getClass().getDeclaredField(key);
 			field.setAccessible(true);
@@ -95,7 +94,7 @@ public abstract class TransferSettings {
 			return fieldValueAsObject.toString();
 		}
 		catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new StorageException("Unable to getField named " + key + ": " + e.getMessage());
+			throw new ConfigException("Unable to getField named " + key + ": " + e.getMessage());
 		}
 	}
 
@@ -110,7 +109,7 @@ public abstract class TransferSettings {
 	 *         conversion failed due to invalid field types.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public final void setField(String key, Object value) throws StorageException {
+	public final void setField(String key, Object value) throws ConfigException {
 		try {
 			Field[] elementFields = ReflectionUtil.getAllFieldsWithAnnotation(this.getClass(), Element.class);
 
@@ -153,7 +152,7 @@ public abstract class TransferSettings {
 			}
 		}
 		catch (Exception e) {
-			throw new StorageException("Unable to parse value because its format is invalid: " + e.getMessage(), e);
+			throw new ConfigException("Unable to parse value because its format is invalid: " + e.getMessage(), e);
 		}
 	}
 
@@ -175,7 +174,7 @@ public abstract class TransferSettings {
 		catch (InvocationTargetException | IllegalAccessException e) {
 			logger.log(Level.SEVERE, "Unable to check if option(s) are valid.", e);
 
-			if (e.getCause() instanceof StorageException) { // Dirty hack
+			if (e.getCause() instanceof ConfigException) { // Dirty hack
 				lastValidationFailReason = e.getCause().getMessage();
 				return false;
 			}
@@ -201,7 +200,7 @@ public abstract class TransferSettings {
 	 * @throws StorageException Thrown if the validation failed due to missing field values.
 	 */
 	@Validate
-	public final void validateRequiredFields() throws StorageException {
+	public final void validateRequiredFields() throws ConfigException {
 		logger.log(Level.FINE, "Validating required fields");
 
 		try {
@@ -212,7 +211,7 @@ public abstract class TransferSettings {
 
 				if (field.getAnnotation(Element.class).required() && field.get(this) == null) {
 					logger.log(Level.WARNING, "Missing mandatory field {0}#{1}", new Object[] { this.getClass().getSimpleName(), field.getName() });
-					throw new StorageException("Missing mandatory field " + this.getClass().getSimpleName() + "#" + field.getName());
+					throw new ConfigException("Missing mandatory field " + this.getClass().getSimpleName() + "#" + field.getName());
 				}
 			}
 		}

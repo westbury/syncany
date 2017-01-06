@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.syncany.config.Config;
+import org.syncany.config.ConfigException;
 import org.syncany.plugins.Plugin;
 import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferManager;
@@ -62,11 +63,11 @@ public abstract class TransferPlugin extends Plugin {
 	 *         plugin using {@link org.syncany.plugins.transfer.PluginSettings}
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends TransferSettings> T createEmptySettings() throws StorageException {
+	public final <T extends TransferSettings> T createEmptySettings() throws ConfigException {
 		final Class<? extends TransferSettings> transferSettings = TransferPluginUtil.getTransferSettingsClass(this.getClass());
 
 		if (transferSettings == null) {
-			throw new StorageException("TransferPlugin does not have any settings attached!");
+			throw new ConfigException("TransferPlugin does not have any settings attached!");
 		}
 
 		try {
