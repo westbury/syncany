@@ -35,7 +35,6 @@ import org.syncany.config.UserConfig;
 import org.syncany.crypto.CipherException;
 import org.syncany.crypto.CipherSpecs;
 import org.syncany.crypto.CipherUtil;
-import org.syncany.plugins.UserInteractionListener;
 import org.syncany.config.ConfigException;
 import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
@@ -59,15 +58,6 @@ public abstract class TransferSettings {
 	private String type = findPluginId();
 
 	private String lastValidationFailReason;
-	private UserInteractionListener userInteractionListener;
-
-	public UserInteractionListener getUserInteractionListener() {
-		return userInteractionListener;
-	}
-
-	public void setUserInteractionListener(UserInteractionListener userInteractionListener) {
-		this.userInteractionListener = userInteractionListener;
-	}
 
 	public final String getType() {
 		return type;

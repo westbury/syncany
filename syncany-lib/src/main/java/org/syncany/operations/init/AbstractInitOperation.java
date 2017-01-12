@@ -123,7 +123,6 @@ public abstract class AbstractInitOperation extends Operation {
 		TransferPlugin plugin = Plugins.get(configTo.getTransferSettings().getType(), TransferPlugin.class);
 
 		TransferSettings transferSettings = configTo.getTransferSettings();
-		transferSettings.setUserInteractionListener(listener);
 		TransferManager transferManager = plugin.createTransferManager(transferSettings, config);
 
 		// constructor is not visible and config seems to be null at this point, hence we cannot use the build method here
