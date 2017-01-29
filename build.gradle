@@ -45,6 +45,7 @@ dependencies {
 	compile			project(":syncany-lib")
 	compile			project(":syncany-cli")
 	compile			project(":syncany-util")
+	compile			project(":syncany-api")
 
 	testCompile		project(path: ":syncany-lib", configuration: "tests")
 	testCompile		project(path: ":syncany-cli", configuration: "tests")
