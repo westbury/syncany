@@ -28,6 +28,7 @@ import org.simpleframework.xml.core.Persister;
 import org.syncany.config.Config;
 import org.syncany.config.DaemonConfigHelper;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.config.to.MasterTO;
 import org.syncany.config.to.RepoTO;
 import org.syncany.crypto.CipherException;
@@ -242,8 +243,12 @@ public class ConnectOperation extends AbstractInitOperation {
 					SaltedSecretKey masterKey = createMasterKeyFromPassword(masterPassword, applicationLink.getMasterKeySalt());
 					TransferSettings transferSettings = applicationLink.createTransferSettings(masterKey);
 
+					Connection connection = new Connection();
+					connection.setType(transferSettings.getType());
+					connection.setSettings(transferSettings.getSettings());
+					
 					configTO.setMasterKey(masterKey);
-					configTO.setTransferSettings(transferSettings);
+					configTO.setConnection(connection);
 				}
 				else {
 					logger.log(Level.INFO, " - Link is encrypted. Asking for password.");
@@ -261,8 +266,12 @@ public class ConnectOperation extends AbstractInitOperation {
 						try {
 							TransferSettings transferSettings = applicationLink.createTransferSettings(masterKey);
 
+							Connection connection = new Connection();
+							connection.setType(transferSettings.getType());
+							connection.setSettings(transferSettings.getSettings());
+							
 							configTO.setMasterKey(masterKey);
-							configTO.setTransferSettings(transferSettings);
+							configTO.setConnection(connection);
 
 							retryPassword = false;
 						}
@@ -272,7 +281,7 @@ public class ConnectOperation extends AbstractInitOperation {
 					}
 				}
 
-				if (configTO.getTransferSettings() == null) {
+				if (configTO.getConnection() == null) {
 					throw new CipherException("Unable to decrypt link.");
 				}
 			}
@@ -280,7 +289,12 @@ public class ConnectOperation extends AbstractInitOperation {
 				logger.log(Level.INFO, " - Link is NOT encrypted. No password needed.");
 
 				TransferSettings transferSettings = applicationLink.createTransferSettings();
-				configTO.setTransferSettings(transferSettings);
+
+				Connection connection = new Connection();
+				connection.setType(transferSettings.getType());
+				connection.setSettings(transferSettings.getSettings());
+				
+				configTO.setConnection(connection);
 			}
 		}
 		catch (Exception e) {

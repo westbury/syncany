@@ -20,6 +20,8 @@ package org.syncany.plugins.transfer;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
+
 import org.simpleframework.xml.Element;
 import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.ReflectionUtil;
@@ -62,7 +64,7 @@ public class TransferPluginOptions {
 	}
 
 	private static TransferPluginOption getOptionFromField(Field field, Class<? extends TransferSettings> transferSettingsClass, int level) {
-		Element elementAnnotation = field.getAnnotation(Element.class);
+		XmlElement elementAnnotation = field.getAnnotation(XmlElement.class);
 		Setup setupAnnotation = field.getAnnotation(Setup.class);
 
 		boolean hasName = !elementAnnotation.name().equalsIgnoreCase("");
@@ -124,7 +126,7 @@ public class TransferPluginOptions {
 			}
 		};
 
-		List<Field> fields = Lists.newArrayList(ReflectionUtil.getAllFieldsWithAnnotation(transferSettingsClass, Element.class));
+		List<Field> fields = Lists.newArrayList(ReflectionUtil.getAllFieldsWithAnnotation(transferSettingsClass, XmlElement.class));
 		return ImmutableList.copyOf(byOrderAnnotation.nullsLast().sortedCopy(fields));
 	}
 }

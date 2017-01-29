@@ -20,26 +20,48 @@ package org.syncany.plugins.transfer.plugin;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.io.IOUtils;
 import org.simpleframework.xml.Attribute;
-import org.simpleframework.xml.Element;
 import org.simpleframework.xml.core.Validate;
+import org.syncany.config.ConfigException;
 import org.syncany.config.UserConfig;
 import org.syncany.crypto.CipherException;
 import org.syncany.crypto.CipherSpecs;
 import org.syncany.crypto.CipherUtil;
-import org.syncany.config.ConfigException;
+import org.syncany.plugins.transfer.StorageException;
 import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.google.common.base.Objects;
+import com.sun.xml.internal.stream.writers.XMLDOMWriterImpl;
 
 /**
  * A connection represents the configuration settings of a storage/connection
@@ -101,7 +123,7 @@ public abstract class TransferSettings {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public final void setField(String key, Object value) throws ConfigException {
 		try {
-			Field[] elementFields = ReflectionUtil.getAllFieldsWithAnnotation(this.getClass(), Element.class);
+			Field[] elementFields = ReflectionUtil.getAllFieldsWithAnnotation(this.getClass(), XmlElement.class);
 
 			for (Field field : elementFields) {
 				field.setAccessible(true);
@@ -194,12 +216,12 @@ public abstract class TransferSettings {
 		logger.log(Level.FINE, "Validating required fields");
 
 		try {
-			Field[] elementFields = ReflectionUtil.getAllFieldsWithAnnotation(this.getClass(), Element.class);
+			Field[] elementFields = ReflectionUtil.getAllFieldsWithAnnotation(this.getClass(), XmlElement.class);
 
 			for (Field field : elementFields) {
 				field.setAccessible(true);
 
-				if (field.getAnnotation(Element.class).required() && field.get(this) == null) {
+				if (field.getAnnotation(XmlElement.class).required() && field.get(this) == null) {
 					logger.log(Level.WARNING, "Missing mandatory field {0}#{1}", new Object[] { this.getClass().getSimpleName(), field.getName() });
 					throw new ConfigException("Missing mandatory field " + this.getClass().getSimpleName() + "#" + field.getName());
 				}
@@ -230,7 +252,7 @@ public abstract class TransferSettings {
 	public String toString() {
 		Objects.ToStringHelper toStringHelper = Objects.toStringHelper(this);
 
-		for (Field field : ReflectionUtil.getAllFieldsWithAnnotation(this.getClass(), Element.class)) {
+		for (Field field : ReflectionUtil.getAllFieldsWithAnnotation(this.getClass(), XmlElement.class)) {
 			field.setAccessible(true);
 
 			try {
@@ -257,5 +279,58 @@ public abstract class TransferSettings {
 		byte[] encryptedBytes = CipherUtil.encrypt(plaintextInputStream, CipherSpecs.getDefaultCipherSpecs(), UserConfig.getConfigEncryptionKey());
 
 		return StringUtil.toHex(encryptedBytes);
+	}
+
+	public List<Element> getSettings() {
+		// Serialize this to XML
+		try {
+
+			JAXBContext context = JAXBContext.newInstance();
+			
+			Marshaller jaxbMarshaller = context.createMarshaller();
+			Unmarshaller jaxbUnmarshaller = context.createUnmarshaller();
+
+			DOMResult result = new DOMResult();
+			XMLStreamWriter writer = new XMLDOMWriterImpl(result);
+
+			// output pretty printed
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+			jaxbMarshaller.marshal(this, writer);
+			jaxbMarshaller.marshal(this, System.out);
+
+			Node x = result.getNode();
+
+			// you may prefer to use single instances of Transformer, and
+			// StringWriter rather than create each time. That would be up to your
+			// judgement and whether your app is single threaded etc
+			StreamResult xmlOutput = new StreamResult(new StringWriter());
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.transform(new DOMSource(x), xmlOutput);
+			String y = xmlOutput.getWriter().toString();
+		}
+		catch (TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (TransformerFactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (PropertyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }

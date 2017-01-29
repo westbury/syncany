@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.config.to.DefaultRepoTOFactory;
 import org.syncany.config.to.RepoTO;
 import org.syncany.config.to.RepoTOFactory;
@@ -36,7 +37,10 @@ import org.syncany.operations.init.InitOperation;
 import org.syncany.operations.init.InitOperationOptions;
 import org.syncany.operations.init.InitOperationResult;
 import org.syncany.operations.init.InitOperationResult.InitResultCode;
+import org.syncany.plugins.Plugins;
 import org.syncany.plugins.transfer.StorageTestResult;
+import org.syncany.plugins.transfer.plugin.TransferPlugin;
+import org.syncany.plugins.transfer.plugin.TransferPluginUtil;
 import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 import joptsimple.OptionParser;
@@ -75,7 +79,17 @@ public class InitCommand extends AbstractInitCommand {
 				performOperation = isInteractive && askRetryConnection();
 
 				if (performOperation) {
-					updateTransferSettings(operationOptions.getConfigTO().getTransferSettings());
+					Connection connection = operationOptions.getConfigTO().getConnection();
+					
+					TransferPlugin plugin = (TransferPlugin)Plugins.get(connection.getType());
+					final Class<? extends TransferSettings> transferSettingsClass = TransferPluginUtil.getTransferSettingsClass(plugin.getClass());
+
+					if (transferSettingsClass == null) {
+						throw new RuntimeException("Unable to create transfer manager: No settings class attached");
+					}
+					TransferSettings transferSettings = plugin.deserializeToTransferSettings(transferSettingsClass, connection.getSettings());
+
+					updateTransferSettings(transferSettings);
 				}
 			}
 		}

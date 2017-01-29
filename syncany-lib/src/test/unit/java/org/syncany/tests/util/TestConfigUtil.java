@@ -185,7 +185,7 @@ public class TestConfigUtil {
 		Map<String, String> localConnectionSettings = new HashMap<String, String>();
 		localConnectionSettings.put("path", localConnection.getPath().getAbsolutePath());
 
-		configTO.setTransferSettings(connection);
+		configTO.setConnection(connection);
 
 		// Create
 		Config config = new Config(tempLocalDir, configTO, repoTO);
@@ -223,7 +223,7 @@ public class TestConfigUtil {
 		LocalTransferSettings transferSettings = Plugins.get("local", TransferPlugin.class).createEmptySettings();
 		transferSettings.setPath(tempRepoDir);
 
-		configTO.setTransferSettings(transferSettings);
+		configTO.setConnection(transferSettings);
 
 		InitOperationOptions operationOptions = new InitOperationOptions();
 
@@ -242,12 +242,12 @@ public class TestConfigUtil {
 			throws Exception {
 		InitOperationOptions initOperationOptions = createTestInitOperationOptions(machineName);
 		// createTestInitOperationOptions always returns LocalTransferSettings
-		File tempRpoDir = ((LocalTransferSettings) initOperationOptions.getConfigTO().getTransferSettings()).getPath();
+		File tempRpoDir = ((LocalTransferSettings) initOperationOptions.getConfigTO().getConnection()).getPath();
 		UnreliableLocalTransferSettings transferSettings = Plugins.get("unreliable_local", TransferPlugin.class).createEmptySettings();
 		transferSettings.setPath(tempRpoDir);
 		transferSettings.setFailingOperationPatterns(failingOperationPatterns);
 
-		initOperationOptions.getConfigTO().setTransferSettings(transferSettings);
+		initOperationOptions.getConfigTO().setConnection(transferSettings);
 
 		return initOperationOptions;
 	}

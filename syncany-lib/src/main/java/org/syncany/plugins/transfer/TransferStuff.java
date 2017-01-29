@@ -20,9 +20,9 @@ package org.syncany.plugins.transfer;
 import org.syncany.config.Config;
 import org.syncany.config.ConfigException;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.transfer.plugin.TransferPlugin;
-import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 /**
  * @author Nigel
@@ -32,7 +32,7 @@ public class TransferStuff {
 
 	private Config config;
 	private TransferPlugin plugin;
-	private TransferSettings transferSettings;
+	private Connection transferSettings;
 
 	public TransferStuff(Config config) throws ConfigException {
 		this.config = config;
@@ -40,15 +40,15 @@ public class TransferStuff {
 	}
 
 	private void initConnection(ConfigTO configTO) throws ConfigException {
-		if (configTO.getTransferSettings() != null) {
-			plugin = Plugins.get(configTO.getTransferSettings().getType(), TransferPlugin.class);
+		if (configTO.getConnection() != null) {
+			plugin = Plugins.get(configTO.getConnection().getType(), TransferPlugin.class);
 
 			if (plugin == null) {
-				throw new ConfigException("Plugin not supported: " + configTO.getTransferSettings().getType());
+				throw new ConfigException("Plugin not supported: " + configTO.getConnection().getType());
 			}
 
 			try {
-				transferSettings = configTO.getTransferSettings();
+				transferSettings = configTO.getConnection();
 			}
 			catch (Exception e) {
 				throw new ConfigException("Cannot initialize storage: " + e.getMessage(), e);
@@ -57,7 +57,7 @@ public class TransferStuff {
 	}
 
 	public TransferManager getTransferManager() throws StorageException {
-		return plugin.createTransferManager(transferSettings, config);
+		return plugin.createTransferManager(transferSettings.getSettings(), config);
 	}
 
 	

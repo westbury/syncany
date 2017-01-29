@@ -270,7 +270,7 @@ public class CommandLineClient extends Client {
 			 * when the plugin is needed would appear to be fine.
 			 */
 			ConfigTO configTO = config.getConfigTO();
-			String pluginId = (configTO.getTransferSettings() != null) ? configTO.getTransferSettings().getType() : null;
+			String pluginId = configTO.getConnection().getType();
 			TransferPlugin plugin = Plugins.get(pluginId, TransferPlugin.class);
 
 			if (plugin == null) {

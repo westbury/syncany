@@ -68,7 +68,8 @@ public class ConnectCommand extends AbstractInitCommand {
 				performOperation = isInteractive && askRetryConnection();
 
 				if (performOperation) {
-					updateTransferSettings(operationOptions.getConfigTO().getTransferSettings());
+					// TODO MUST PUT THIS BACK
+//					updateTransferSettings(operationOptions.getConfigTO().getConnection());
 				}
 			}
 		}

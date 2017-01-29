@@ -54,7 +54,7 @@ public class InitOperationTest {
 		InitOperationOptions operationOptions = TestConfigUtil.createTestInitOperationOptions("A");
 		InitOperation op = new InitOperation(operationOptions, null);
 		InitOperationResult res = op.execute();
-		File repoDir = ((LocalTransferSettings) operationOptions.getConfigTO().getTransferSettings()).getPath();
+		File repoDir = ((LocalTransferSettings) operationOptions.getConfigTO().getConnection()).getPath();
 		File localDir = new File(operationOptions.getLocalDir(), ".syncany");
 
 		// Test the repository
@@ -86,7 +86,7 @@ public class InitOperationTest {
 		InitOperationOptions operationOptions = TestConfigUtil.createTestUnreliableInitOperationOptions("A", failingOperationsPattern);
 		InitOperation op = new InitOperation(operationOptions, null);
 
-		File repoDir = ((UnreliableLocalTransferSettings) operationOptions.getConfigTO().getTransferSettings()).getPath();
+		File repoDir = ((UnreliableLocalTransferSettings) operationOptions.getConfigTO().getConnection()).getPath();
 		File localDir = new File(operationOptions.getLocalDir(), ".syncany");
 
 		try {

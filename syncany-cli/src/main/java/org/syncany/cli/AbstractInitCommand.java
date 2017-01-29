@@ -18,10 +18,12 @@
 package org.syncany.cli;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +35,19 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.syncany.cli.util.InitConsole;
 import org.syncany.config.ConfigException;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.crypto.CipherUtil;
 import org.syncany.operations.daemon.messages.ShowMessageExternalEvent;
 import org.syncany.operations.init.GenlinkOperationResult;
@@ -59,6 +71,9 @@ import org.syncany.plugins.transfer.plugin.TransferSettings;
 import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
 import org.syncany.util.StringUtil.StringJoinListener;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
@@ -99,7 +114,47 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		configTO.setDisplayName(getDefaultDisplayName());
 		configTO.setMachineName(getRandomMachineName());
 		configTO.setMasterKey(null);
-		configTO.setTransferSettings(transferSettings); // can be null
+		
+		 // transferSettings can be null???
+		
+		Connection connection = new Connection();
+		connection.setType(transferSettings.getType());
+
+		JAXBContext context = JAXBContext.newInstance(transferSettings.getClass());
+		Marshaller jaxbMarshaller = context.createMarshaller();
+
+		// output pretty printed
+		jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+		DOMResult result = new DOMResult();
+		jaxbMarshaller.marshal(transferSettings, System.out);
+		jaxbMarshaller.marshal(transferSettings, result);
+
+
+		StringBuffer sb = new StringBuffer();
+
+		List<Element> elements = new ArrayList<>();
+
+		NodeList childNodes = result.getNode().getChildNodes().item(0).getChildNodes();
+		for (int i = 0; i < childNodes.getLength(); i++) {
+			Node x = childNodes.item(i);
+
+			elements.add((Element)x);
+
+			// you may prefer to use single instances of Transformer, and
+			// StringWriter rather than create each time. That would be up to your
+			// judgement and whether your app is single threaded etc
+			StreamResult xmlOutput = new StreamResult(new StringWriter());
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.transform(new DOMSource(x), xmlOutput);
+			String y = xmlOutput.getWriter().toString();
+			sb.append(y);
+		}
+
+		connection.setSettings(elements);
+
+		configTO.setConnection(connection);
 
 		return configTO;
 	}

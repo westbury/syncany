@@ -84,7 +84,7 @@ public class ConnectOperationTest {
 		assertTrue(new File(localConnectDirB, Config.FILE_REPO).exists());
 		assertEquals(new File(localConnectDirB, Config.FILE_MASTER).exists(), TestConfigUtil.getCrypto());
 
-		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getTransferSettings()).getPath();
+		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getConnection()).getPath();
 
 		// Tear down
 		TestFileUtil.deleteDirectory(repoDir);
@@ -107,11 +107,11 @@ public class ConnectOperationTest {
 		// B.connect()
 		File localDirB = TestFileUtil.createTempDirectoryInSystemTemp(TestConfigUtil.createUniqueName("client-B", initOperationOptionsA));
 		File localConnectDirB = new File(localDirB, Config.DIR_APPLICATION);
-		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getTransferSettings()).getPath();
+		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getConnection()).getPath();
 
 
 		ConfigTO connectionConfigToB = initOperationOptionsA.getConfigTO();
-		((LocalTransferSettings) connectionConfigToB.getTransferSettings()).setPath(new File("/does/not/exist")); // <<< Point to non-existing repo
+		((LocalTransferSettings) connectionConfigToB.getConnection()).setPath(new File("/does/not/exist")); // <<< Point to non-existing repo
 		connectionConfigToB.setMachineName("client-B" + Math.abs(new Random().nextInt()));
 		connectionConfigToB.setMasterKey(null);
 
@@ -176,7 +176,7 @@ public class ConnectOperationTest {
 		assertTrue(new File(localConnectDirB, Config.FILE_REPO).exists());
 		assertEquals(new File(localConnectDirB, Config.FILE_MASTER).exists(), TestConfigUtil.getCrypto());
 
-		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getTransferSettings()).getPath();
+		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getConnection()).getPath();
 
 		// Tear down
 		TestFileUtil.deleteDirectory(repoDir);

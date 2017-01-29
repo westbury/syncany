@@ -17,9 +17,28 @@
  */
 package org.syncany.plugins.transfer.plugin;
 
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.syncany.config.Cache;
 import org.syncany.config.Config;
 import org.syncany.config.ConfigException;
 import org.syncany.plugins.Plugin;
@@ -27,6 +46,9 @@ import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.files.RemoteFile;
 import org.syncany.util.ReflectionUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * The transfer plugin is a special plugin responsible for transferring files
@@ -85,42 +107,95 @@ public abstract class TransferPlugin extends Plugin {
 	 * <p>The created instance can be used to upload/download/delete {@link RemoteFile}s
 	 * and query the remote storage for a file list.
 	 *
-	 * @param transferSettings A valid {@link org.syncany.plugins.transfer.plugin.TransferSettings} instance.
+	 * @param list A valid {@link org.syncany.plugins.transfer.plugin.TransferSettings} instance.
 	 * @param config A valid {@link org.syncany.config.Config} instance.
 	 * @return A initialized, plugin-specific {@link org.syncany.plugins.transfer.TransferManager} instance.
 	 * @throws StorageException Thrown if no (valid) {@link org.syncany.plugins.transfer.TransferManager} are attached to
 	*  a plugin using {@link org.syncany.plugins.transfer.PluginManager}
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends TransferManager> T createTransferManager(TransferSettings transferSettings, Config config) throws StorageException {
-		if (!transferSettings.isValid()) {
-			throw new StorageException("Unable to create transfer manager: connection isn't valid (perhaps missing some mandatory fields?)");
-		}
-
+	public final <T extends TransferManager> T createTransferManager(List<Element> list, Config config) throws StorageException {
+//		if (!list.isValid()) {
+//			throw new StorageException("Unable to create transfer manager: connection isn't valid (perhaps missing some mandatory fields?)");
+//		}
+		Cache cache = (config==null) ? null : config.getCache();
+		
 		final Class<? extends TransferSettings> transferSettingsClass = TransferPluginUtil.getTransferSettingsClass(this.getClass());
-		final Class<? extends TransferManager> transferManagerClass = TransferPluginUtil.getTransferManagerClass(this.getClass());
 
 		if (transferSettingsClass == null) {
 			throw new RuntimeException("Unable to create transfer manager: No settings class attached");
 		}
 
-		if (transferManagerClass == null) {
-			throw new RuntimeException("Unable to create transfer manager: No manager class attached");
-		}
-
 		try {
+			TransferSettings value = deserializeToTransferSettings(transferSettingsClass, list);
+
+			final Class<? extends TransferManager> transferManagerClass = TransferPluginUtil.getTransferManagerClass(this.getClass());
+
+			if (transferManagerClass == null) {
+				throw new RuntimeException("Unable to create transfer manager: No manager class attached");
+			}
+
 			Constructor<?> potentialConstructor = ReflectionUtil.getMatchingConstructorForClass(transferManagerClass, TransferSettings.class,
-					Config.class);
+					Cache.class);
 
 			if (potentialConstructor == null) {
 				throw new RuntimeException("Invalid arguments for constructor in pluginclass -- must be 2 and subclass of " + TransferSettings.class
 						+ " and " + Config.class);
 			}
 
-			return (T) potentialConstructor.newInstance(transferSettingsClass.cast(transferSettings), config);
+			return (T) potentialConstructor.newInstance(transferSettingsClass.cast(value), cache);
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
 			throw new RuntimeException("Unable to create transfer settings: " + e.getMessage(), e);
 		}
+		catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException("Unable to create transfer settings: " + e.getMessage(), e);
+		}
+		catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException("Unable to create transfer settings: " + e.getMessage(), e);
+		}
+		catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException("Unable to create transfer settings: " + e.getMessage(), e);
+		}
+	}
+
+	public TransferSettings deserializeToTransferSettings(final Class<? extends TransferSettings> transferSettingsClass, List<Element> list)
+			throws ParserConfigurationException, TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException,
+			JAXBException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.newDocument();
+		
+		Element root = doc.createElement("root");
+		doc.appendChild(root);
+		
+		root.setAttribute("type", "ftp");
+		
+		for (Element element : list) {
+			Node elementCopy = doc.importNode(element, true);
+			root.appendChild(elementCopy);
+		}
+		
+		// See what's in the dom
+		StreamResult xmlOutput = new StreamResult(new StringWriter());
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		transformer.transform(new DOMSource(doc), xmlOutput);
+		String y = xmlOutput.getWriter().toString();
+		
+		JAXBContext context = JAXBContext.newInstance(transferSettingsClass);
+		Unmarshaller jaxbUnmarshaller = context.createUnmarshaller();
+
+		JAXBElement<? extends TransferSettings> settings = jaxbUnmarshaller.unmarshal(new DOMSource(doc), transferSettingsClass);
+
+		TransferSettings value = settings.getValue();
+		return value;
 	}
 }

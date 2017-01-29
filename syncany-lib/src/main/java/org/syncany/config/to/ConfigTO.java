@@ -19,18 +19,15 @@ package org.syncany.config.to;
 
 import java.io.File;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.convert.Convert;
-import org.simpleframework.xml.convert.Registry;
-import org.simpleframework.xml.convert.RegistryStrategy;
-import org.simpleframework.xml.core.Persister;
-import org.simpleframework.xml.strategy.Strategy;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.syncany.config.ConfigException;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.crypto.SaltedSecretKeyConverter;
-import org.syncany.plugins.transfer.EncryptedTransferSettingsConverter;
-import org.syncany.plugins.transfer.plugin.TransferSettings;
 
 /**
  * The config transfer object is used to create and load the local config
@@ -44,46 +41,32 @@ import org.syncany.plugins.transfer.plugin.TransferSettings;
  * @see <a href="http://simple.sourceforge.net/">Simple framework</a>
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-@Root(name = "config", strict = false)
+@XmlRootElement(name="config")
 public class ConfigTO {
-	@Element(name = "machineName", required = true)
+
 	private String machineName;
 
-	@Element(name = "displayName", required = false)
 	private String displayName;
 
-	@Element(name = "masterKey", required = false)
-	@Convert(SaltedSecretKeyConverter.class)
 	private SaltedSecretKey masterKey;
 
-	@Element(name = "connection", required = false)
 	// TODO [high] Workaround for 'connect' via GUI and syncany://link; field not needed when link is supplied
-	private TransferSettings transferSettings;
+	private Connection connection;
 
-	@Element(name = "cacheKeepBytes", required = false)
 	private Long cacheKeepBytes;
 
 	public static ConfigTO load(File file) throws ConfigException {
 		try {
-			Registry registry = new Registry();
-			Strategy strategy = new RegistryStrategy(registry);
-			registry.bind(SaltedSecretKey.class, new SaltedSecretKeyConverter());
-			registry.bind(String.class, new EncryptedTransferSettingsConverter());
+			// pluginSettings.toArray(new Class[0])
+			JAXBContext context = JAXBContext.newInstance(ConfigTO.class);
+			Unmarshaller jaxbUnmarshaller = context.createUnmarshaller();
+	
+			ConfigTO result = (ConfigTO) jaxbUnmarshaller.unmarshal(file);
 
-			return new Persister(strategy).read(ConfigTO.class, file);
-		}
-		catch (ClassNotFoundException ex) {
-			// Ugly hack to catch common case of non-existing plugin
-			String message = ex.getMessage();
-
-			if (!message.startsWith("org.syncany.plugins.")) {
-				// Apparently there are other ClassNotFoundExceptions possible.
-				throw new ConfigException("Config file does not exist or is invalid: " + file, ex);
-			}
-
-			message = message.replaceFirst("org.syncany.plugins.", "");
-			message = message.replaceAll("\\..*", "");
-			throw new ConfigException("Is the " + message + " plugin installed?");
+			return result;
+			
+//			registry.bind(SaltedSecretKey.class, new SaltedSecretKeyConverter());
+//			registry.bind(String.class, new EncryptedTransferSettingsConverter());
 		}
 		catch (Exception ex) {
 			throw new ConfigException("Config file does not exist or is invalid: " + file, ex);
@@ -92,12 +75,15 @@ public class ConfigTO {
 
 	public void save(File file) throws ConfigException {
 		try {
-			Registry registry = new Registry();
-			Strategy strategy = new RegistryStrategy(registry);
-			registry.bind(SaltedSecretKey.class, new SaltedSecretKeyConverter());
-			registry.bind(String.class, new EncryptedTransferSettingsConverter(transferSettings.getClass()));
+			JAXBContext context = JAXBContext.newInstance(ConfigTO.class);
+			
+			Marshaller jaxbMarshaller = context.createMarshaller();
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-			new Persister(strategy).write(this, file);
+			jaxbMarshaller.marshal(this, file);
+
+//			registry.bind(SaltedSecretKey.class, new SaltedSecretKeyConverter());
+//			registry.bind(String.class, new EncryptedTransferSettingsConverter(connection.getClass()));
 		}
 		catch (Exception e) {
 			throw new ConfigException("Cannot write config to file " + file, e);
@@ -120,18 +106,19 @@ public class ConfigTO {
 		this.displayName = displayName;
 	}
 
-	public TransferSettings getTransferSettings() {
-		return transferSettings;
+	public Connection getConnection() {
+		return connection;
 	}
 
-	public void setTransferSettings(TransferSettings transferSettings) {
-		this.transferSettings = transferSettings;
+	public void setConnection(Connection connection) {
+		this.connection = connection;
 	}
 
 	public SaltedSecretKey getMasterKey() {
 		return masterKey;
 	}
 
+	@XmlJavaTypeAdapter( SaltedSecretKeyConverter.class )
 	public void setMasterKey(SaltedSecretKey masterKey) {
 		this.masterKey = masterKey;
 	}

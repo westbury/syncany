@@ -79,10 +79,10 @@ public class TransferSettingsTest {
 		final InitOperationOptions initOperationOptions = TestConfigUtil.createTestInitOperationOptions("syncanytest");
 		final ConfigTO conf = initOperationOptions.getConfigTO();
 
-		File repoDir = ((LocalTransferSettings) initOperationOptions.getConfigTO().getTransferSettings()).getPath();
+		File repoDir = ((LocalTransferSettings) initOperationOptions.getConfigTO().getConnection()).getPath();
 		File localDir = initOperationOptions.getLocalDir();
 
-		conf.setTransferSettings(ts);
+		conf.setConnection(ts);
 
 		ts.foo = fooTest;
 		ts.baz = bazTest;
@@ -97,10 +97,10 @@ public class TransferSettingsTest {
 		System.out.println(new String(Files.readAllBytes(Paths.get(tmpFile.toURI()))));
 
 		ConfigTO confRestored = ConfigTO.load(tmpFile);
-		TransferPlugin plugin = Plugins.get(confRestored.getTransferSettings().getType(), TransferPlugin.class);
+		TransferPlugin plugin = Plugins.get(confRestored.getConnection().getType(), TransferPlugin.class);
 		assertNotNull(plugin);
 
-		TransferSettings tsRestored = confRestored.getTransferSettings();
+		TransferSettings tsRestored = confRestored.getConnection();
 		assertNotNull(tsRestored);
 
 		DummyTransferManager transferManager = plugin.createTransferManager(tsRestored, config);
@@ -138,11 +138,11 @@ public class TransferSettingsTest {
 
 		ConfigTO confRestored = ConfigTO.load(tmpFile);
 
-		assertEquals(LocalTransferSettings.class, confRestored.getTransferSettings().getClass());
+		assertEquals(LocalTransferSettings.class, confRestored.getConnection().getClass());
 
 		// Tear down
 		FileUtils.deleteDirectory(initOperationOptions.getLocalDir());
-		FileUtils.deleteDirectory(((LocalTransferSettings) initOperationOptions.getConfigTO().getTransferSettings()).getPath());
+		FileUtils.deleteDirectory(((LocalTransferSettings) initOperationOptions.getConfigTO().getConnection()).getPath());
 	}
 
 	@Test(expected = ElementException.class)

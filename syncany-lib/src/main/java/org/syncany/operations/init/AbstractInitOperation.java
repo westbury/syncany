@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.operations.Operation;
 import org.syncany.operations.daemon.messages.ShowMessageExternalEvent;
 import org.syncany.plugins.Plugins;
@@ -120,10 +121,10 @@ public abstract class AbstractInitOperation extends Operation {
 					InvocationTargetException, InstantiationException, NoSuchMethodException, StorageException {
 
 		// Init plugin and transfer manager
-		TransferPlugin plugin = Plugins.get(configTo.getTransferSettings().getType(), TransferPlugin.class);
+		TransferPlugin plugin = Plugins.get(configTo.getConnection().getType(), TransferPlugin.class);
 
-		TransferSettings transferSettings = configTo.getTransferSettings();
-		TransferManager transferManager = plugin.createTransferManager(transferSettings, config);
+		Connection transferSettings = configTo.getConnection();
+		TransferManager transferManager = plugin.createTransferManager(transferSettings.getSettings(), config);
 
 		// constructor is not visible and config seems to be null at this point, hence we cannot use the build method here
 		Constructor<TransferManagerBuilder> tmbConstructor = TransferManagerBuilder.class.getDeclaredConstructor(Config.class, TransferManager.class);

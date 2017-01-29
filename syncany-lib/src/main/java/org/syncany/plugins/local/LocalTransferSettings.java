@@ -19,7 +19,11 @@ package org.syncany.plugins.local;
 
 import java.io.File;
 
-import org.simpleframework.xml.Element;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.syncany.plugins.transfer.FileType;
 import org.syncany.plugins.transfer.Setup;
 import org.syncany.plugins.transfer.plugin.TransferSettings;
@@ -32,8 +36,10 @@ import org.syncany.plugins.transfer.plugin.TransferSettings;
  *
  * @author Philipp C. Heckel
  */
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class LocalTransferSettings extends TransferSettings {
-	@Element(required = true)
+	@XmlElement(required = true)
 	@Setup(order = 1, fileType = FileType.FOLDER, description = "Path to local repository")
 	public File path;
 
