@@ -57,7 +57,7 @@ public class GenlinkOperation extends AbstractInitOperation {
 			configTO = ConfigHelper.loadConfigTO(config.getLocalDir());
 		}
 
-		ApplicationLink applicationLink = new ApplicationLink(configTO.getTransferSettings(), options.isShortUrl());
+		ApplicationLink applicationLink = new ApplicationLink(configTO.getConnection(), options.isShortUrl());
 
 		if (configTO.getMasterKey() != null) {	
 			String encryptedLinkStr = applicationLink.createEncryptedLink(configTO.getMasterKey());

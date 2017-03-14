@@ -21,12 +21,14 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
 import org.syncany.chunk.Transformer;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.operations.daemon.messages.UpUploadFileInTransactionSyncExternalEvent;
 import org.syncany.operations.daemon.messages.UpUploadFileSyncExternalEvent;
-import org.syncany.plugins.transfer.files.RemoteFile;
+import org.syncany.plugins.transfer.files.AbstractRemoteFile;
 import org.syncany.plugins.transfer.files.TempRemoteFile;
 import org.syncany.plugins.transfer.files.TransactionRemoteFile;
 import org.syncany.plugins.transfer.to.ActionTO;
@@ -70,7 +72,7 @@ public class RemoteTransaction {
 	/**
 	 * Adds a file to this transaction. Generates a temporary file to store it.
 	 */
-	public void upload(File localFile, RemoteFile remoteFile) throws StorageException {
+	public void upload(File localFile, AbstractRemoteFile remoteFile) throws StorageException {
 		TempRemoteFile temporaryRemoteFile = new TempRemoteFile(remoteFile);
 
 		logger.log(Level.INFO, "- Adding file to TX for UPLOAD: " + localFile + " -> Temp. remote file: " + temporaryRemoteFile
@@ -89,7 +91,7 @@ public class RemoteTransaction {
 	 * Adds the deletion of a file to this transaction. Generates a temporary file
 	 * to store it while the transaction is being finalized.
 	 */
-	public void delete(RemoteFile remoteFile) throws StorageException {
+	public void delete(AbstractRemoteFile remoteFile) throws StorageException {
 		TempRemoteFile temporaryRemoteFile = new TempRemoteFile(remoteFile);
 
 		logger.log(Level.INFO, "- Adding file to TX for DELETE: " + remoteFile + "-> Temp. remote file: " + temporaryRemoteFile);
@@ -110,8 +112,8 @@ public class RemoteTransaction {
 	 *
 	 * <p>The method first writes a {@link TransactionRemoteFile} containing
 	 * all actions to be performed and then uploads this file. Then it uploads
-	 * new files (added by {@link #upload(File, RemoteFile) upload()} and moves
-	 * deleted files to a temporary location (deleted by {@link #delete(RemoteFile) delete()}.
+	 * new files (added by {@link #upload(File, AbstractRemoteFile) upload()} and moves
+	 * deleted files to a temporary location (deleted by {@link #delete(AbstractRemoteFile) delete()}.
 	 *
 	 * <p>If this was successful, the transaction file is deleted and the
 	 * temporary files. After deleting the transaction file, the transaction
@@ -208,7 +210,7 @@ public class RemoteTransaction {
 		for (ActionTO action : transactionTO.getActions()) {
 			if (action.getStatus().equals(ActionStatus.UNSTARTED)) {
 				// If we are resuming, this has not been started yet.
-				RemoteFile tempRemoteFile = action.getTempRemoteFile();
+				AbstractRemoteFile tempRemoteFile = action.getTempRemoteFile();
 
 				if (action.getType().equals(ActionType.UPLOAD)) {
 					// The action is an UPLOAD, upload file to temporary remote location
@@ -224,7 +226,7 @@ public class RemoteTransaction {
 				}
 				else if (action.getType().equals(ActionType.DELETE)) {
 					// The action is a DELETE, move file to temporary remote location.
-					RemoteFile remoteFile = action.getRemoteFile();
+					AbstractRemoteFile remoteFile = action.getRemoteFile();
 
 					try {
 						logger.log(Level.INFO, "- Moving {0} to temp. file {1} ...", new Object[] { remoteFile, tempRemoteFile });
@@ -266,8 +268,8 @@ public class RemoteTransaction {
 	private void moveToFinalLocation() throws StorageException {
 		for (ActionTO action : transactionTO.getActions()) {
 			if (action.getType().equals(ActionType.UPLOAD)) {
-				RemoteFile tempRemoteFile = action.getTempRemoteFile();
-				RemoteFile finalRemoteFile = action.getRemoteFile();
+				AbstractRemoteFile tempRemoteFile = action.getTempRemoteFile();
+				AbstractRemoteFile finalRemoteFile = action.getRemoteFile();
 
 				logger.log(Level.INFO, "- Moving temp. file {0} to final location {1} ...", new Object[] { tempRemoteFile, finalRemoteFile });
 				transferManager.move(tempRemoteFile, finalRemoteFile);
@@ -304,7 +306,7 @@ public class RemoteTransaction {
 			if (action.getStatus().equals(ActionStatus.STARTED)) {
 				// If we are resuming, this action has not been comopleted.
 				if (action.getType().equals(ActionType.DELETE)) {
-					RemoteFile tempRemoteFile = action.getTempRemoteFile();
+					AbstractRemoteFile tempRemoteFile = action.getTempRemoteFile();
 
 					logger.log(Level.INFO, "- Deleting temp. file {0}  ...", new Object[] { tempRemoteFile });
 					try {

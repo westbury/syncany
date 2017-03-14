@@ -21,12 +21,12 @@ import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementMap;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.convert.AnnotationStrategy;
-import org.simpleframework.xml.convert.Convert;
-import org.simpleframework.xml.core.Persister;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.syncany.config.ConfigException;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.crypto.SaltedSecretKeyConverter;
@@ -41,18 +41,14 @@ import org.syncany.crypto.SaltedSecretKeyConverter;
  * @see <a href="http://simple.sourceforge.net/">Simple framework</a>
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-@Root(name = "userConfig", strict = false)
+@XmlRootElement(name = "userConfig")
 public class UserConfigTO {
-	@ElementMap(name = "systemProperties", entry = "property", key = "name", required = false, attribute = true)
 	private TreeMap<String, String> systemProperties;
 
-	@Element(name = "preventStandby", required = false)
 	private boolean preventStandby;
 
-	@Element(name = "configEncryptionKey", required = true)
-	@Convert(SaltedSecretKeyConverter.class)
 	private SaltedSecretKey configEncryptionKey;
-
+	
 	public UserConfigTO() {
 		this.systemProperties = new TreeMap<String, String>();
 		this.preventStandby = false;
@@ -74,13 +70,17 @@ public class UserConfigTO {
 		return configEncryptionKey;
 	}
 
+	@XmlJavaTypeAdapter( SaltedSecretKeyConverter.class )
 	public void setConfigEncryptionKey(SaltedSecretKey configEncryptionKey) {
 		this.configEncryptionKey = configEncryptionKey;
 	}
 
+
 	public static UserConfigTO load(File file) throws ConfigException {
 		try {
-			return new Persister(new AnnotationStrategy()).read(UserConfigTO.class, file);
+			JAXBContext context = JAXBContext.newInstance(UserConfigTO.class);
+			Unmarshaller jaxbUnmarshaller = context.createUnmarshaller();
+			return (UserConfigTO) jaxbUnmarshaller.unmarshal(file);
 		}
 		catch (Exception e) {
 			throw new ConfigException("User config file cannot be read or is invalid: " + file, e);
@@ -89,7 +89,10 @@ public class UserConfigTO {
 
 	public void save(File file) throws ConfigException {
 		try {
-			new Persister(new AnnotationStrategy()).write(this, file);
+			JAXBContext context = JAXBContext.newInstance();
+			Marshaller jaxbMarshaller = context.createMarshaller();
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			jaxbMarshaller.marshal(this, file);
 		}
 		catch (Exception e) {
 			throw new ConfigException("Cannot write user config to file " + file, e);

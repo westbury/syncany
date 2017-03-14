@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.Test;
+import org.syncany.api.transfer.TransferPlugin;
 import org.syncany.config.UserConfig;
 import org.syncany.operations.plugin.ExtendedPluginInfo;
 import org.syncany.operations.plugin.PluginOperationAction;
@@ -33,7 +34,6 @@ import org.syncany.operations.plugin.PluginOperationOptions;
 import org.syncany.operations.plugin.PluginOperationOptions.PluginListMode;
 import org.syncany.operations.plugin.PluginOperationResult;
 import org.syncany.operations.plugin.PluginOperationResult.PluginResultCode;
-import org.syncany.plugins.Plugin;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
@@ -56,7 +56,7 @@ public class PluginOperationTest {
 
 		// Run
 		PluginOperationResult pluginResult = client.plugin(pluginOptions);
-		List<Plugin> pluginList = Plugins.list(); // for comparison only!
+		List<TransferPlugin> pluginList = Plugins.transferPlugins(); // for comparison only!
 
 		// Test
 		assertNotNull(pluginResult);
@@ -76,7 +76,7 @@ public class PluginOperationTest {
 			assertNotNull(pluginInfo.getLocalPluginInfo().getPluginVersion());
 			// The rest is not important for processing ...
 
-			assertNotNull(Plugins.get(pluginInfo.getLocalPluginInfo().getPluginId()));
+			assertNotNull(Plugins.getTransferPlugin(pluginInfo.getLocalPluginInfo().getPluginId()));
 		}
 
 		// Tear down

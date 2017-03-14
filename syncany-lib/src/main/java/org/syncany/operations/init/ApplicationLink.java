@@ -30,6 +30,14 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.Header;
@@ -48,17 +56,19 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.simpleframework.xml.core.Persister;
-import org.simpleframework.xml.stream.Format;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
+import org.syncany.config.to.Connection;
 import org.syncany.crypto.CipherSpec;
 import org.syncany.crypto.CipherSpecs;
 import org.syncany.crypto.CipherUtil;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.plugins.Plugins;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferPluginUtil;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.util.Base58;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.google.common.primitives.Ints;
 
@@ -101,7 +111,7 @@ public class ApplicationLink {
 
 	private static final int INTEGER_BYTES = 4;
 
-	private TransferSettings transferSettings;
+	private Connection transferSettings;
 	private boolean shortUrl;
 
 	private boolean encrypted;
@@ -109,7 +119,7 @@ public class ApplicationLink {
 	private byte[] encryptedSettingsBytes;
 	private byte[] plaintextSettingsBytes;
 
-	public ApplicationLink(TransferSettings transferSettings, boolean shortUrl) {
+	public ApplicationLink(Connection transferSettings, boolean shortUrl) {
 		this.transferSettings = transferSettings;
 		this.shortUrl = shortUrl;
 	}
@@ -343,14 +353,13 @@ public class ApplicationLink {
 
 		// Create transfer settings object
 		try {
-			TransferPlugin plugin = Plugins.get(pluginId, TransferPlugin.class);
+			TransferPlugin plugin = Plugins.getTransferPlugin(pluginId);
 
 			if (plugin == null) {
 				throw new StorageException("Link contains unknown connection type '" + pluginId + "'. Corresponding plugin not found.");
 			}
 
-			Class<? extends TransferSettings> pluginTransferSettingsClass = TransferPluginUtil.getTransferSettingsClass(plugin.getClass());
-			TransferSettings transferSettings = new Persister().read(pluginTransferSettingsClass, pluginSettings);
+			TransferSettings transferSettings = plugin.createEmptySettings();
 
 			logger.log(Level.INFO, "(Decrypted) link contains: " + pluginId + " -- " + pluginSettings);
 
@@ -367,8 +376,27 @@ public class ApplicationLink {
 		plaintextOutputStream.writeInt(transferSettings.getType().getBytes().length);
 		plaintextOutputStream.write(transferSettings.getType().getBytes());
 
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
+
+		Document document = documentBuilder.newDocument();
+
+		String settingsElementName = transferSettings.getType() + "TransferSettings";
+		org.w3c.dom.Element element = document.createElement(settingsElementName);
+		document.appendChild(element);
+		element.setAttribute("type", transferSettings.getType());
+		for (Element propertyElement : transferSettings.getSettings()) {
+			Node importedNode = document.importNode(propertyElement, true);
+			element.appendChild(importedNode);
+		}
+
 		GZIPOutputStream plaintextGzipOutputStream = new GZIPOutputStream(plaintextOutputStream);
-		new Persister(new Format(0)).write(transferSettings, plaintextGzipOutputStream);
+
+		StreamResult xmlOutput = new StreamResult(plaintextGzipOutputStream);
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		transformer.transform(new DOMSource(document), xmlOutput);
+
 		plaintextGzipOutputStream.close();
 
 		return plaintextByteArrayOutputStream.toByteArray();

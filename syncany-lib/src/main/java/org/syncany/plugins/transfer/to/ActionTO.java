@@ -23,8 +23,8 @@ import java.util.logging.Logger;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.files.RemoteFile;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.plugins.transfer.files.AbstractRemoteFile;
 import org.syncany.plugins.transfer.files.TempRemoteFile;
 
 /**
@@ -76,12 +76,12 @@ public class ActionTO {
 		this.status = status;
 	}
 
-	public void setRemoteLocation(RemoteFile remoteFile) {
+	public void setRemoteLocation(AbstractRemoteFile remoteFile) {
 		remoteLocation = remoteFile.getName();
 	}
 
-	public RemoteFile getRemoteFile() throws StorageException {
-		return RemoteFile.createRemoteFile(remoteLocation);
+	public AbstractRemoteFile getRemoteFile() throws StorageException {
+		return AbstractRemoteFile.createRemoteFile(remoteLocation);
 	}
 
 	public void setRemoteTempLocation(TempRemoteFile tempRemoteFile) {
@@ -90,7 +90,7 @@ public class ActionTO {
 
 	public TempRemoteFile getTempRemoteFile() {
 		try {
-			return RemoteFile.createRemoteFile(remoteTempLocation, TempRemoteFile.class);
+			return new TempRemoteFile(remoteTempLocation);
 		}
 		catch (StorageException e) {
 			logger.log(Level.INFO, "Invalid remote temporary filename: " + remoteTempLocation, e);

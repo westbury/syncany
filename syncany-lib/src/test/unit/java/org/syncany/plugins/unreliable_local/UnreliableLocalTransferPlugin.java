@@ -17,7 +17,8 @@
  */
 package org.syncany.plugins.unreliable_local;
 
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 
 /**
  * The unreliable local plugin can be used for test purposes to
@@ -27,8 +28,29 @@ import org.syncany.plugins.transfer.TransferPlugin;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class UnreliableLocalTransferPlugin extends TransferPlugin {
+public class UnreliableLocalTransferPlugin implements TransferPlugin {
 	public UnreliableLocalTransferPlugin() {
-		super("unreliable_local");
+		super();
+	}
+
+	@Override
+	public String getId() {
+		return "unreliable_local";
+	}
+
+	@Override
+	public String getName() {
+		return "Unreliable Local";
+	}
+
+	@Override
+	public String getVersion() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TransferSettings createEmptySettings() {
+		return new UnreliableLocalTransferSettings();
 	}
 }

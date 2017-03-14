@@ -17,11 +17,8 @@
  */
 package org.syncany.plugins.transfer;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-
-import org.syncany.util.ReflectionUtil;
+import org.syncany.api.transfer.TransferSettings;
+import org.w3c.dom.Element;
 
 /**
  * A plugin option represents a single setting of a transfer plugin
@@ -31,72 +28,31 @@ import org.syncany.util.ReflectionUtil;
  *
  * @author Christian Roth <christian.roth@port17.de>
  */
-public class TransferPluginOption {
+public abstract class TransferPluginOption {
 	public enum ValidationResult {
 		VALID, INVALID_TYPE, INVALID_NOT_SET
 	}
 
-	private final Field field;
-	private final String name;
-	private final String description;
-	private final Type type;
-	private final FileType fileType;
-	private final boolean encrypted;
-	private final boolean sensitive;
-	private final boolean singular;
+	private final String id;
+	private final String displayName;
 	private final boolean visible;
 	private final boolean required;
 	private final Class<? extends TransferPluginOptionCallback> callback;
-	private final Class<? extends TransferPluginOptionConverter> converter;
-
-	public TransferPluginOption(Field field, String name, String description, Type type, FileType fileType, boolean encrypted, boolean sensitive,
-			boolean singular, boolean visible, boolean required, Class<? extends TransferPluginOptionCallback> callback,
-			Class<? extends TransferPluginOptionConverter> converter) {
-
-		this.field = field;
-		this.name = name;
-		this.description = description;
-		this.type = type;
-		this.fileType = fileType;
-		this.encrypted = encrypted;
-		this.sensitive = sensitive;
-		this.singular = singular;
+	
+	public TransferPluginOption(String id, String displayName, boolean visible, boolean required, Class<? extends TransferPluginOptionCallback> callback) {
+		this.id = id;
+		this.displayName = displayName;
 		this.visible = visible;
 		this.required = required;
 		this.callback = callback;
-		this.converter = converter;
 	}
 
-	public Field getField() {
-		return field;
-	}
-
-	public String getName() {
-		return name;
+	public String getId() {
+		return id;
 	}
 
 	public String getDescription() {
-		return description;
-	}
-
-	public Type getType() {
-		return type;
-	}
-
-	public FileType getFileType() {
-		return fileType;
-	}
-
-	public boolean isEncrypted() {
-		return encrypted;
-	}
-
-	public boolean isSensitive() {
-		return sensitive;
-	}
-
-	public boolean isSingular() {
-		return singular;
+		return displayName;
 	}
 
 	public boolean isVisible() {
@@ -111,58 +67,5 @@ public class TransferPluginOption {
 		return callback;
 	}
 
-	public Class<? extends TransferPluginOptionConverter> getConverter() {
-		return converter;
-	}
-
-	public ValidationResult isValid(String value) {
-		if (!validateInputMandatory(value)) {
-			return ValidationResult.INVALID_NOT_SET;
-		}
-
-		if (!validateInputType(value)) {
-			return ValidationResult.INVALID_TYPE;
-		}
-
-		return ValidationResult.VALID;
-	}
-
-	private boolean validateInputMandatory(String value) {
-		return !isRequired() || (value != null && !value.equals(""));
-	}
-
-	private boolean validateInputType(String value) {
-		if (type == String.class) {
-			return true;
-		}
-		else if (type == Integer.TYPE) {
-			try {
-				Integer.toString(Integer.parseInt(value));
-				return true;
-			}
-			catch (NumberFormatException e) {
-				return false;
-			}
-		}
-		else if (type == Boolean.TYPE) {
-			return true;
-		}
-		else if (ReflectionUtil.getClassFromType(type).isEnum()) {
-			return ReflectionUtil.isValidEnum(value.toUpperCase(), ReflectionUtil.getClassFromType(type));
-		}
-		else if (type == File.class) {
-			if (isRequired()) {
-				if (value != null) {
-					return true;
-				}
-				return false;
-			}
-			else {
-				return true;
-			}
-		}
-		else {
-			throw new RuntimeException("Unknown type: " + type);
-		}
-	}
+	public abstract void setValueFromXml(Element element);
 }

@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.syncany.api.FileType;
+
 /**
  * The {@link org.syncany.plugins.transfer.Setup} annotation alters the initialization process.
  *

@@ -17,6 +17,8 @@
  */
 package org.syncany.plugins.transfer;
 
+import org.syncany.api.transfer.StorageException;
+
 /**
  * The storage move exception is thrown if moving a file on 
  * the remote storage fails. This usually happens if the original file

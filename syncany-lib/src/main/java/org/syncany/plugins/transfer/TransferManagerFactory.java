@@ -25,14 +25,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.features.Feature;
+import org.syncany.api.transfer.features.PathAware;
+import org.syncany.api.transfer.features.ReadAfterWriteConsistent;
+import org.syncany.api.transfer.features.Retriable;
+import org.syncany.api.transfer.features.TransactionAware;
 import org.syncany.config.Config;
-import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
-import org.syncany.plugins.transfer.features.Feature;
 import org.syncany.plugins.transfer.features.FeatureTransferManager;
-import org.syncany.plugins.transfer.features.PathAware;
-import org.syncany.plugins.transfer.features.Retriable;
-import org.syncany.plugins.transfer.features.TransactionAware;
 import org.syncany.util.ReflectionUtil;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
@@ -64,7 +68,7 @@ import com.google.common.collect.Sets;
 public class TransferManagerFactory {
 	private static final Logger logger = Logger.getLogger(TransferManagerFactory.class.getSimpleName());
 
-	private static final String FEATURE_TRANSFER_MANAGER_FORMAT = Feature.class.getPackage().getName() + ".%s" + FeatureTransferManager.class.getSimpleName();
+	private static final String FEATURE_TRANSFER_MANAGER_FORMAT = FeatureTransferManager.class.getPackage().getName() + ".%s" + FeatureTransferManager.class.getSimpleName();
 	private static final List<Class<? extends Annotation>> FEATURE_LIST = ImmutableList.<Class<? extends Annotation>> builder()
 			.add(TransactionAware.class)
 			.add(Retriable.class)
@@ -82,7 +86,7 @@ public class TransferManagerFactory {
 	 * @return Transfer manager builder
 	 */
 	public static TransferManagerBuilder build(Config config) throws StorageException {
-		TransferManager transferManager = config.getTransferPlugin().createTransferManager(config.getConnection(), config);
+		TransferManager transferManager = config.getConnection().createTransferManager(config.getCache());
 		logger.log(Level.INFO, "Building " + transferManager.getClass().getSimpleName() + " from config '" + config.getLocalDir().getName() + "' ...");
 
 		return new TransferManagerBuilder(config, transferManager);
@@ -216,7 +220,7 @@ public class TransferManagerFactory {
 			String featureTransferManagerClassName = String.format(FEATURE_TRANSFER_MANAGER_FORMAT, featureAnnotation.getSimpleName());
 
 			try {
-				return (Class<? extends TransferManager>) Class.forName(featureTransferManagerClassName).asSubclass(TransferManager.class);
+				return Class.forName(featureTransferManagerClassName).asSubclass(TransferManager.class);
 			}
 			catch (Exception e) {
 				throw new RuntimeException("Unable to find class with feature " + featureAnnotation.getSimpleName() + ". Tried " + featureTransferManagerClassName, e);

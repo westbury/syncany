@@ -17,7 +17,7 @@
  */
 package org.syncany.tests.unit.operations.watch;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

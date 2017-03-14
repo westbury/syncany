@@ -18,21 +18,23 @@
 package org.syncany.plugins.unreliable_local;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.syncany.config.Config;
+import org.syncany.api.transfer.LocalDiskCache;
+import org.syncany.api.transfer.RemoteFile;
+import org.syncany.api.transfer.RemoteFileFactory;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.plugins.local.LocalTransferManager;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.files.RemoteFile;
 
 public class UnreliableLocalTransferManager extends LocalTransferManager {
 	private static final Logger logger = Logger.getLogger(UnreliableLocalTransferManager.class.getSimpleName());
 	private UnreliableLocalTransferSettings connection;
 
-	public UnreliableLocalTransferManager(UnreliableLocalTransferSettings connection, Config config) {
-		super(connection, config);
+	public UnreliableLocalTransferManager(LocalDiskCache cache, UnreliableLocalTransferSettings connection) throws StorageException {
+		super(cache, connection.getPath());
 		this.connection = connection;
 	}
 
@@ -89,12 +91,12 @@ public class UnreliableLocalTransferManager extends LocalTransferManager {
 	}
 
 	@Override
-	public void init(boolean createIfRequired) throws StorageException {
+	public void init(boolean createIfRequired, RemoteFile syncanyRemoteFile) throws StorageException {
 		String operationType = "init";
 		String operationDescription = "init";
 
 		if (isNextOperationSuccessful(operationType, operationDescription)) {
-			super.init(createIfRequired);
+			super.init(createIfRequired, syncanyRemoteFile);
 		}
 		else {
 			throw new StorageException("Operation failed: " + operationDescription);
@@ -154,12 +156,12 @@ public class UnreliableLocalTransferManager extends LocalTransferManager {
 	}
 
 	@Override
-	public <T extends RemoteFile> Map<String, T> list(Class<T> remoteFileClass) throws StorageException {
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
 		String operationType = "list";
-		String operationDescription = "list(" + remoteFileClass.getSimpleName() + ")";
+		String operationDescription = "list(" + remoteFileType + ")";
 
 		if (isNextOperationSuccessful(operationType, operationDescription)) {
-			return super.list(remoteFileClass);
+			return super.list(remoteFileType, factory);
 		}
 		else {
 			throw new StorageException("Operation failed: " + operationDescription);

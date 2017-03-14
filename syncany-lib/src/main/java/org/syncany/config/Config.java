@@ -21,6 +21,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.chunk.Chunker;
 import org.syncany.chunk.CipherTransformer;
 import org.syncany.chunk.FixedChunker;
@@ -35,8 +37,6 @@ import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.database.DatabaseConnectionFactory;
 import org.syncany.database.VectorClock;
 import org.syncany.plugins.Plugins;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.util.FileUtil;
 import org.syncany.util.StringUtil;
 
@@ -220,15 +220,16 @@ public class Config {
 	}
 
 	private void initConnection(ConfigTO configTO) throws ConfigException {
-		if (configTO.getTransferSettings() != null) {
-			plugin = Plugins.get(configTO.getTransferSettings().getType(), TransferPlugin.class);
+		if (configTO.getConnection() != null) {
+			plugin = Plugins.getTransferPlugin(configTO.getConnection().getType());
 
 			if (plugin == null) {
-				throw new ConfigException("Plugin not supported: " + configTO.getTransferSettings().getType());
+				throw new ConfigException("Plugin not supported: " + configTO.getConnection().getType());
 			}
 
 			try {
-				transferSettings = configTO.getTransferSettings();
+				transferSettings = plugin.createEmptySettings();
+				configTO.getConnection().fillTransferSettings(transferSettings);
 			}
 			catch (Exception e) {
 				throw new ConfigException("Cannot initialize storage: " + e.getMessage(), e);

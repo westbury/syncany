@@ -17,17 +17,15 @@
  */
 package org.syncany.tests.integration.scenarios;
 
+import static junit.framework.Assert.assertEquals;
+
 import java.io.File;
 
 import org.junit.Test;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
-import org.syncany.tests.util.TestAssertUtil;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
-
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class Issue520NoResumeOnCorruptXmlScenarioTest {
 	@Test

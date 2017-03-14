@@ -23,27 +23,23 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.syncany.config.Config;
-import org.syncany.plugins.transfer.AbstractTransferManager;
-import org.syncany.plugins.transfer.StorageException;
+import org.syncany.api.transfer.LocalDiskCache;
+import org.syncany.api.transfer.RemoteFile;
+import org.syncany.api.transfer.RemoteFileFactory;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.plugins.transfer.StorageFileNotFoundException;
 import org.syncany.plugins.transfer.StorageMoveException;
-import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.files.ActionRemoteFile;
-import org.syncany.plugins.transfer.files.CleanupRemoteFile;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 import org.syncany.plugins.transfer.files.MultichunkRemoteFile;
-import org.syncany.plugins.transfer.files.RemoteFile;
-import org.syncany.plugins.transfer.files.SyncanyRemoteFile;
-import org.syncany.plugins.transfer.files.TempRemoteFile;
-import org.syncany.plugins.transfer.files.TransactionRemoteFile;
-
-import com.google.common.collect.Maps;
 
 /**
  * Implements a {@link TransferManager} based on a local storage backend for the
@@ -65,9 +61,11 @@ import com.google.common.collect.Maps;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class LocalTransferManager extends AbstractTransferManager {
+public class LocalTransferManager implements TransferManager {
 	private static final Logger logger = Logger.getLogger(LocalTransferManager.class.getSimpleName());
 
+	private LocalDiskCache cache;
+	
 	private Path repoPath;
 	private Path multichunksPath;
 	private Path databasesPath;
@@ -75,10 +73,14 @@ public class LocalTransferManager extends AbstractTransferManager {
 	private Path transactionsPath;
 	private Path temporaryPath;
 
-	public LocalTransferManager(LocalTransferSettings connection, Config config) {
-		super(connection, config);
-
-		this.repoPath = Paths.get(connection.getPath().toURI()); // absolute file to get abs. path!
+	public LocalTransferManager(LocalDiskCache cache, File path) throws StorageException {
+		this.cache = cache;
+		
+		if (path == null) {
+			throw new StorageException("Repository folder '" + path + "' does not exist or is not writable.");
+		}
+		
+		this.repoPath = Paths.get(path.toURI()); // absolute file to get abs. path!
 		this.multichunksPath = repoPath.resolve("multichunks");
 		this.databasesPath = repoPath.resolve("databases");
 		this.actionsPath = repoPath.resolve("actions");
@@ -88,9 +90,6 @@ public class LocalTransferManager extends AbstractTransferManager {
 
 	@Override
 	public void connect() throws StorageException {
-		if (repoPath == null) {
-			throw new StorageException("Repository folder '" + repoPath + "' does not exist or is not writable.");
-		}
 	}
 
 	@Override
@@ -99,7 +98,7 @@ public class LocalTransferManager extends AbstractTransferManager {
 	}
 
 	@Override
-	public void init(boolean createIfRequired) throws StorageException {
+	public void init(boolean createIfRequired, RemoteFile repoFile) throws StorageException {
 		connect();
 
 		try {
@@ -145,7 +144,7 @@ public class LocalTransferManager extends AbstractTransferManager {
 		}
 
 		try {
-			File tempLocalFile = createTempFile("local-tm-download");
+			File tempLocalFile = cache.createTempFile("local-tm-download");
 			tempLocalFile.deleteOnExit();
 
 			FileUtils.copyFile(repoFile, tempLocalFile);
@@ -215,20 +214,20 @@ public class LocalTransferManager extends AbstractTransferManager {
 	}
 
 	@Override
-	public <T extends RemoteFile> Map<String, T> list(Class<T> remoteFileClass) throws StorageException {
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
 		connect();
 
-		Path folder = Paths.get(getRemoteFilePath(remoteFileClass));
-		Map<String, T> files = Maps.newHashMap();
+		Path folder = Paths.get(getRemoteFilePath(remoteFileType));
+		List<T> files = new ArrayList<>();
 
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(folder)) {
 			for (Path path : directoryStream) {
 				try {
-					T remoteFile = RemoteFile.createRemoteFile(path.getFileName().toString(), remoteFileClass);
-					files.put(path.getFileName().toString(), remoteFile);
+					T remoteFile = factory.createRemoteFile(path.getFileName().toString());
+					files.add(remoteFile);
 				}
 				catch (StorageException e) {
-					logger.log(Level.INFO, "Cannot create instance of " + remoteFileClass.getSimpleName() + " for file " + path
+					logger.log(Level.INFO, "Cannot create instance of " + remoteFileType + " for file " + path
 									+ "; maybe invalid file name pattern. Ignoring file.");
 				}
 			}
@@ -241,29 +240,26 @@ public class LocalTransferManager extends AbstractTransferManager {
 	}
 
 	@Override
-	public String getRemoteFilePath(Class<? extends RemoteFile> remoteFile) {
-		if (remoteFile.equals(MultichunkRemoteFile.class)) {
+	public String getRemoteFilePath(PathAwareRemoteFileType remoteFileType) {
+		switch (remoteFileType) {
+		case Multichunk:
 			return multichunksPath.toString();
-		}
-		else if (remoteFile.equals(DatabaseRemoteFile.class) || remoteFile.equals(CleanupRemoteFile.class)) {
+		case Database:
+		case Cleanup:
 			return databasesPath.toString();
-		}
-		else if (remoteFile.equals(ActionRemoteFile.class)) {
+		case Action:
 			return actionsPath.toString();
-		}
-		else if (remoteFile.equals(TransactionRemoteFile.class)) {
+		case Transaction:
 			return transactionsPath.toString();
-		}
-		else if (remoteFile.equals(TempRemoteFile.class)) {
+		case Temp:
 			return temporaryPath.toString();
-		}
-		else {
+		default:
 			return repoPath.toString();
 		}
 	}
 
 	private File getRemoteFile(RemoteFile remoteFile) {
-		String rootPath = getRemoteFilePath(remoteFile.getClass());
+		String rootPath = getRemoteFilePath(remoteFile.getPathAwareType());
 		return Paths.get(rootPath, remoteFile.getName()).toFile();
 	}
 
@@ -305,9 +301,9 @@ public class LocalTransferManager extends AbstractTransferManager {
 	}
 
 	@Override
-	public boolean testRepoFileExists() {
+	public boolean testRepoFileExists(RemoteFile syncanyRemoteFile) {
 		try {
-			File repoFile = getRemoteFile(new SyncanyRemoteFile());
+			File repoFile = getRemoteFile(syncanyRemoteFile);
 
 			if (repoFile.exists()) {
 				logger.log(Level.INFO, "testRepoFileExists: Repo file exists, list(syncany) returned one result.");

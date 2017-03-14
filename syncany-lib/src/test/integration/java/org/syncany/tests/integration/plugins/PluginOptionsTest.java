@@ -24,11 +24,11 @@ import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.plugins.dummy.DummyTransferSettings;
 import org.syncany.plugins.transfer.NestedTransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOptions;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.util.ReflectionUtil;
 
 public class PluginOptionsTest {
@@ -39,8 +39,9 @@ public class PluginOptionsTest {
 	public void nestedSettingsTest() throws Exception {
 		DummyTransferSettings dts = new DummyTransferSettings();
 
-		for (TransferPluginOption option : TransferPluginOptions.getOrderedOptions(DummyTransferSettings.class)) {
-			askNestedPluginSettings(dts, option, 0);
+		for (TransferPluginOption option : TransferPluginOptions.getOrderedOptions(dts)) {
+			NestedTransferPluginOption<?> nestedOptions = (NestedTransferPluginOption<?>) option;
+			askNestedPluginSettings(dts, nestedOptions, 0);
 		}
 
 		assertNotNull(dts.baz);
@@ -49,22 +50,25 @@ public class PluginOptionsTest {
 		assertNotNull(dts.subsettings);
 	}
 
-	private void askNestedPluginSettings(TransferSettings settings, TransferPluginOption option, int wrap) throws Exception {
+	private <T extends TransferSettings> void askNestedPluginSettings(TransferSettings settings, NestedTransferPluginOption<T> option, int wrap) throws Exception {
 
 		if (option instanceof NestedTransferPluginOption) {
-			assertNotNull(ReflectionUtil.getClassFromType(option.getType()));
-			System.out.println(new String(new char[wrap]).replace("\0", "\t") + ReflectionUtil.getClassFromType(option.getType()) + "#"
-					+ option.getField().getName() + " (nested)");
-			TransferSettings nestedSettings = (TransferSettings) ReflectionUtil.getClassFromType(option.getType()).newInstance();
-			settings.setField(option.getField().getName(), nestedSettings);
+			NestedTransferPluginOption<?> nestedOptions = (NestedTransferPluginOption) option;
+			assertNotNull(ReflectionUtil.getClassFromType(nestedOptions.getTransferSettingsClass()));
+			System.out.println(new String(new char[wrap]).replace("\0", "\t") + ReflectionUtil.getClassFromType(nestedOptions.getTransferSettingsClass()) + "#"
+					+ option.getId() + " (nested)");
+			TransferSettings nestedSettings = (TransferSettings) ReflectionUtil.getClassFromType(nestedOptions.getTransferSettingsClass()).newInstance();
+			nestedOptions.setNestedSettings(nestedSettings);
 
-			for (TransferPluginOption nItem : ((NestedTransferPluginOption) option).getOptions()) {
-				askNestedPluginSettings(nestedSettings, nItem, ++wrap);
+			for (TransferPluginOption nItem : nestedOptions.getOptions()) {
+				NestedTransferPluginOption<?> nestedItem = (NestedTransferPluginOption<?>) option;
+				askNestedPluginSettings(nestedSettings, nestedItem, ++wrap);
 			}
 		}
 		else {
-			System.out.println(new String(new char[wrap]).replace("\0", "\t") + settings.getClass() + "#" + option.getField().getName());
-			settings.setField(option.getField().getName(), String.valueOf(settings.hashCode()));
+			System.out.println(new String(new char[wrap]).replace("\0", "\t") + settings.getClass() + "#" + option.getId());
+			// TODO what's this about? Nigel
+//			settings.setField(option.getField().getName(), String.valueOf(settings.hashCode()));
 		}
 	}
 
@@ -72,11 +76,13 @@ public class PluginOptionsTest {
 	@Ignore
 	public void testOrderingOfOptions() throws Exception {
 		final String[] expectedOrder = new String[] { "foo", "number", "baz", "nest" };
-		List<TransferPluginOption> items = TransferPluginOptions.getOrderedOptions(DummyTransferSettings.class);
+
+		DummyTransferSettings dts = new DummyTransferSettings();
+		List<TransferPluginOption> items = TransferPluginOptions.getOrderedOptions(dts);
 
 		int i = 0;
 		for (TransferPluginOption item : items) {
-			assertEquals(expectedOrder[i++], item.getName());
+			assertEquals(expectedOrder[i++], item.getId());
 		}
 	}
 

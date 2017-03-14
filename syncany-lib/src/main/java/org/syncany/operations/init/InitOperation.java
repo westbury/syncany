@@ -23,6 +23,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.logging.Level;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.StorageTestResult;
+import org.syncany.api.transfer.TransferManager;
 import org.syncany.config.Config;
 import org.syncany.config.DaemonConfigHelper;
 import org.syncany.config.to.ConfigTO;
@@ -32,9 +35,7 @@ import org.syncany.crypto.CipherUtil;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.operations.init.InitOperationResult.InitResultCode;
 import org.syncany.plugins.UserInteractionListener;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferManager;
+import org.syncany.plugins.transfer.AbstractTransferManager;
 import org.syncany.plugins.transfer.files.MasterRemoteFile;
 import org.syncany.plugins.transfer.files.SyncanyRemoteFile;
 
@@ -181,7 +182,7 @@ public class InitOperation extends AbstractInitOperation {
 
 	private boolean performRepoTest() {
 		boolean testCreateTarget = options.isCreateTarget();
-		StorageTestResult testResult = transferManager.test(testCreateTarget);
+		StorageTestResult testResult = new AbstractTransferManager(transferManager).test(testCreateTarget);
 
 		logger.log(Level.INFO, "Storage test result ist " + testResult);
 
@@ -206,7 +207,7 @@ public class InitOperation extends AbstractInitOperation {
 	private void initRemoteRepository(File configFile) throws Exception {
 		try {
 			// Create 'syncany' and 'master' file, and all the remote folders
-			transferManager.init(options.isCreateTarget());
+			transferManager.init(options.isCreateTarget(), new SyncanyRemoteFile());
 
 			// Some plugins change the transfer settings, re-save
 			options.getConfigTO().save(configFile);

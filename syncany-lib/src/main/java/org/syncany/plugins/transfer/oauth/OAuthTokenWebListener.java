@@ -18,9 +18,11 @@ import java.util.logging.Logger;
 
 import org.syncany.plugins.transfer.oauth.OAuthTokenExtractors.NamedQueryTokenExtractor;
 import org.syncany.plugins.transfer.oauth.OAuthTokenInterceptors.RedirectTokenInterceptor;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Range;
+
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;

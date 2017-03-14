@@ -25,19 +25,21 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.LocalDiskCache;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
+import org.syncany.api.transfer.features.ReadAfterWriteConsistent;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.operations.Operation;
 import org.syncany.operations.daemon.messages.ShowMessageExternalEvent;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.UserInteractionListener;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferManagerFactory.TransferManagerBuilder;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferSettings;
-import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
 import org.syncany.util.EnvironmentUtil;
 
 /**
@@ -120,11 +122,26 @@ public abstract class AbstractInitOperation extends Operation {
 					InvocationTargetException, InstantiationException, NoSuchMethodException, StorageException {
 
 		// Init plugin and transfer manager
-		TransferPlugin plugin = Plugins.get(configTo.getTransferSettings().getType(), TransferPlugin.class);
+		TransferPlugin plugin = Plugins.getTransferPlugin(configTo.getConnection().getType());
 
-		TransferSettings transferSettings = configTo.getTransferSettings();
-		transferSettings.setUserInteractionListener(listener);
-		TransferManager transferManager = plugin.createTransferManager(transferSettings, config);
+		
+//		TransferSettings transferSettings = configTo.getTransferSettings();
+//		transferSettings.setUserInteractionListener(listener);
+//		TransferManager transferManager = plugin.createTransferManager(transferSettings, config);
+		Connection connection = configTo.getConnection();
+		TransferSettings transferSettings = plugin.createEmptySettings();
+		connection.fillTransferSettings(transferSettings);
+		
+		// config is null so create a cache that puts files in the
+		// temp directory.
+		LocalDiskCache cache = new LocalDiskCache() {
+			@Override
+			public File createTempFile(String name) throws IOException {
+				return File.createTempFile(String.format("temp-%s-", name), ".tmp");
+			}
+		};
+		
+		TransferManager transferManager = transferSettings.createTransferManager(cache);
 
 		// constructor is not visible and config seems to be null at this point, hence we cannot use the build method here
 		Constructor<TransferManagerBuilder> tmbConstructor = TransferManagerBuilder.class.getDeclaredConstructor(Config.class, TransferManager.class);

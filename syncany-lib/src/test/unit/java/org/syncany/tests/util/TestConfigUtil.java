@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Random;
 
 import org.simpleframework.xml.core.Persister;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.chunk.Chunker;
 import org.syncany.chunk.CipherTransformer;
 import org.syncany.chunk.GzipTransformer;
@@ -33,6 +35,7 @@ import org.syncany.chunk.ZipMultiChunker;
 import org.syncany.config.Config;
 import org.syncany.config.UserConfig;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.config.to.RepoTO;
 import org.syncany.config.to.RepoTO.ChunkerTO;
 import org.syncany.config.to.RepoTO.MultiChunkerTO;
@@ -42,12 +45,13 @@ import org.syncany.crypto.CipherUtil;
 import org.syncany.crypto.SaltedSecretKey;
 import org.syncany.operations.init.InitOperationOptions;
 import org.syncany.plugins.Plugins;
+import org.syncany.plugins.local.LocalTransferPlugin;
 import org.syncany.plugins.local.LocalTransferSettings;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.files.SyncanyRemoteFile;
 import org.syncany.plugins.unreliable_local.UnreliableLocalTransferPlugin;
 import org.syncany.plugins.unreliable_local.UnreliableLocalTransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
+import org.w3c.dom.Element;
 
 import com.google.common.collect.Lists;
 
@@ -55,6 +59,7 @@ public class TestConfigUtil {
 	private static final String RUNDATE = new SimpleDateFormat("yyMMddHHmmssSSS").format(new Date());
 	private static boolean cryptoEnabled = false;
 	private static SaltedSecretKey masterKey = null;
+	private static TransferPlugin localTransferPlugin = new LocalTransferPlugin();
 
 	static {
 		try {
@@ -166,8 +171,8 @@ public class TestConfigUtil {
 		return new Config(new File("/dummy"), configTO, repoTO);
 	}
 
-	public static Config createTestLocalConfig(String machineName, TransferSettings connection) throws Exception {
-		File tempLocalDir = TestFileUtil.createTempDirectoryInSystemTemp(createUniqueName("client-" + machineName, connection));
+	public static Config createTestLocalConfig(String machineName, TransferSettings transferSettings) throws Exception {
+		File tempLocalDir = TestFileUtil.createTempDirectoryInSystemTemp(createUniqueName("client-" + machineName, transferSettings));
 		tempLocalDir.mkdirs();
 
 		RepoTO repoTO = createRepoTO();
@@ -180,17 +185,21 @@ public class TestConfigUtil {
 		SaltedSecretKey masterKey = getMasterKey();
 		configTO.setMasterKey(masterKey);
 
-		LocalTransferSettings localConnection = (LocalTransferSettings) connection;
+		LocalTransferSettings localConnection = (LocalTransferSettings) transferSettings;
 		// Create connection TO
 		Map<String, String> localConnectionSettings = new HashMap<String, String>();
 		localConnectionSettings.put("path", localConnection.getPath().getAbsolutePath());
 
-		configTO.setTransferSettings(connection);
+		List<Element> elements = Connection.buildElementsFromSettings(transferSettings);
+		Connection connection = new Connection();
+		connection.setType("local");
+		connection.setSettings(elements);
+		configTO.setConnection(connection);
 
 		// Create
 		Config config = new Config(tempLocalDir, configTO, repoTO);
 
-		config.setConnection(connection);
+		config.setConnection(transferSettings);
 		config.getAppDir().mkdirs();
 		config.getCacheDir().mkdirs();
 		config.getDatabaseDir().mkdirs();
@@ -198,7 +207,7 @@ public class TestConfigUtil {
 		config.getStateDir().mkdirs();
 
 		// Write to config folder (required for some tests)
-		new Persister().write(configTO, new File(config.getAppDir() + "/" + Config.FILE_CONFIG));
+		configTO.save(new File(config.getAppDir() + "/" + Config.FILE_CONFIG));
 		new Persister().write(repoTO, new File(config.getAppDir() + "/" + Config.FILE_REPO));
 
 		return config;
@@ -221,10 +230,14 @@ public class TestConfigUtil {
 		configTO.setMasterKey(masterKey);
 
 		// Generic connection settings wont work anymore, because they are plugin dependent now.
-		LocalTransferSettings transferSettings = Plugins.get("local", TransferPlugin.class).createEmptySettings();
+		LocalTransferSettings transferSettings = (LocalTransferSettings)new LocalTransferPlugin().createEmptySettings();
 		transferSettings.setPath(tempRepoDir);
 
-		configTO.setTransferSettings(transferSettings);
+		List<Element> elements = Connection.buildElementsFromSettings(transferSettings);
+		Connection connection = new Connection();
+		connection.setType("local");
+		connection.setSettings(elements);
+		configTO.setConnection(connection);
 
 		InitOperationOptions operationOptions = new InitOperationOptions();
 
@@ -243,25 +256,34 @@ public class TestConfigUtil {
 			throws Exception {
 		InitOperationOptions initOperationOptions = createTestInitOperationOptions(machineName);
 		// createTestInitOperationOptions always returns LocalTransferSettings
-		File tempRpoDir = ((LocalTransferSettings) initOperationOptions.getConfigTO().getTransferSettings()).getPath();
-		UnreliableLocalTransferSettings transferSettings = Plugins.get("unreliable_local", TransferPlugin.class).createEmptySettings();
+		
+		LocalTransferSettings settings = (LocalTransferSettings)localTransferPlugin.createEmptySettings();
+		Connection connection = initOperationOptions.getConfigTO().getConnection();
+		connection.fillTransferSettings(settings);
+		File tempRpoDir = settings.getPath();
+		
+		UnreliableLocalTransferSettings transferSettings = (UnreliableLocalTransferSettings)Plugins.getTransferPlugin("unreliable_local").createEmptySettings();
 		transferSettings.setPath(tempRpoDir);
 		transferSettings.setFailingOperationPatterns(failingOperationPatterns);
 
-		initOperationOptions.getConfigTO().setTransferSettings(transferSettings);
+		List<Element> elements = Connection.buildElementsFromSettings(transferSettings);
+		Connection connection2 = new Connection();
+		connection2.setType("local");
+		connection2.setSettings(elements);
+		initOperationOptions.getConfigTO().setConnection(connection2);
 
 		return initOperationOptions;
 	}
 
 	public static TransferSettings createTestLocalConnection() throws Exception {
-		TransferPlugin plugin = Plugins.get("local", TransferPlugin.class);
-		LocalTransferSettings conn = plugin.createEmptySettings();
+		TransferPlugin plugin = new LocalTransferPlugin();
+		LocalTransferSettings conn = (LocalTransferSettings)plugin.createEmptySettings();
 
 		File tempRepoDir = TestFileUtil.createTempDirectoryInSystemTemp(createUniqueName("repo", conn));
 		conn.setPath(tempRepoDir);
 
 		// TODO [medium] : possible problem
-		plugin.createTransferManager(conn, null).init(true);
+		conn.createTransferManager(null).init(true, new SyncanyRemoteFile());
 
 		return conn;
 	}
@@ -271,14 +293,14 @@ public class TestConfigUtil {
 		UnreliableLocalTransferSettings unreliableLocalConnection = createTestUnreliableLocalConnectionWithoutInit(unreliableLocalPlugin,
 				failingOperationPatterns);
 
-		unreliableLocalPlugin.createTransferManager(unreliableLocalConnection, null).init(true);
+		unreliableLocalConnection.createTransferManager(null).init(true, new SyncanyRemoteFile());
 
 		return unreliableLocalConnection;
 	}
 
 	public static UnreliableLocalTransferSettings createTestUnreliableLocalConnectionWithoutInit(UnreliableLocalTransferPlugin unreliableLocalPlugin,
 			List<String> failingOperationPatterns) throws Exception {
-		UnreliableLocalTransferSettings unreliableLocalConnection = unreliableLocalPlugin.createEmptySettings();
+		UnreliableLocalTransferSettings unreliableLocalConnection = (UnreliableLocalTransferSettings)unreliableLocalPlugin.createEmptySettings();
 
 		File tempRepoDir = TestFileUtil.createTempDirectoryInSystemTemp(createUniqueName("repo", new Random().nextFloat()));
 

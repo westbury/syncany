@@ -18,23 +18,25 @@
 package org.syncany.plugins.transfer.features;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.RemoteFile;
+import org.syncany.api.transfer.RemoteFileFactory;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.api.transfer.features.Retriable;
 import org.syncany.config.Config;
-import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.StorageMoveException;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.files.RemoteFile;
 
 /**
  * The retriable transfer manager implements a simple try-sleep-retry mechanism
- * for regular {@link org.syncany.plugins.transfer.TransferManager}s. 
+ * for regular {@link org.syncany.api.transfer.TransferManager}s. 
  * 
  * <p>It encapsules a single transfer manager and proxies all of its methods. If a
- * method fails with a {@link org.syncany.plugins.transfer.StorageException}, the
+ * method fails with a {@link org.syncany.api.transfer.StorageException}, the
  * method is retried N times before the exception is actually thrown to the caller.
  * Between retries, the method waits M seconds.
  *
@@ -84,11 +86,11 @@ public class RetriableFeatureTransferManager implements FeatureTransferManager {
 	}
 
 	@Override
-	public void init(final boolean createIfRequired) throws StorageException {
+	public void init(boolean createIfRequired, RemoteFile syncanyRemoteFile) throws StorageException {
 		retryMethod(new RetriableMethod() {
 			@Override
 			public Object execute() throws StorageException {
-				underlyingTransferManager.init(createIfRequired);
+				underlyingTransferManager.init(createIfRequired, syncanyRemoteFile);
 				return null;
 			}
 		});
@@ -138,24 +140,18 @@ public class RetriableFeatureTransferManager implements FeatureTransferManager {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends RemoteFile> Map<String, T> list(final Class<T> remoteFileClass) throws StorageException {
-		return (Map<String, T>) retryMethod(new RetriableMethod() {
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
+		return (Collection<T>) retryMethod(new RetriableMethod() {
 			@Override
 			public Object execute() throws StorageException {
-				return underlyingTransferManager.list(remoteFileClass);
+				return underlyingTransferManager.list(remoteFileType, factory);
 			}
 		});
 	}
 
 	@Override
-	public String getRemoteFilePath(Class<? extends RemoteFile> remoteFileClass) {
-		return underlyingTransferManager.getRemoteFilePath(remoteFileClass);
-	}
-
-	@Override
-	public StorageTestResult test(boolean testCreateTarget) {
-		return underlyingTransferManager.test(testCreateTarget);
+	public String getRemoteFilePath(PathAwareRemoteFileType remoteFileType) {
+		return underlyingTransferManager.getRemoteFilePath(remoteFileType);
 	}
 
 	@Override
@@ -189,11 +185,11 @@ public class RetriableFeatureTransferManager implements FeatureTransferManager {
 	}
 
 	@Override
-	public boolean testRepoFileExists() throws StorageException {
+	public boolean testRepoFileExists(RemoteFile syncanyRemoteFile) throws StorageException {
 		return (Boolean) retryMethod(new RetriableMethod() {
 			@Override
 			public Object execute() throws StorageException {
-				return underlyingTransferManager.testRepoFileExists();
+				return underlyingTransferManager.testRepoFileExists(syncanyRemoteFile);
 			}
 		});
 	}

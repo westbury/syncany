@@ -18,21 +18,23 @@
 package org.syncany.plugins.dummy;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
 
-import org.syncany.config.Config;
-import org.syncany.plugins.transfer.AbstractTransferManager;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.files.RemoteFile;
+import org.syncany.api.transfer.LocalDiskCache;
+import org.syncany.api.transfer.RemoteFile;
+import org.syncany.api.transfer.RemoteFileFactory;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 
 /**
  * @author Christian Roth <christian.roth@port17.de>
  */
 
-public class DummyTransferManager extends AbstractTransferManager {
+public class DummyTransferManager implements TransferManager {
 
-	public DummyTransferManager(DummyTransferSettings settings, Config config) {
-		super(settings, config);
+	public DummyTransferManager(DummyTransferSettings settings, LocalDiskCache cache) {
+// Nigel		super(settings, cache);
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public class DummyTransferManager extends AbstractTransferManager {
 	}
 
 	@Override
-	public void init(boolean createIfRequired) throws StorageException {
+	public void init(boolean createIfRequired, RemoteFile syncanyRemoteFile) throws StorageException {
 
 	}
 
@@ -71,7 +73,7 @@ public class DummyTransferManager extends AbstractTransferManager {
 	}
 
 	@Override
-	public <T extends RemoteFile> Map<String, T> list(Class<T> remoteFileClass) throws StorageException {
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
 		return null;
 	}
 
@@ -91,12 +93,12 @@ public class DummyTransferManager extends AbstractTransferManager {
 	}
 
 	@Override
-	public boolean testRepoFileExists() throws StorageException {
+	public boolean testRepoFileExists(RemoteFile syncanyRemoteFile) throws StorageException {
 		return false;
 	}
 
 	@Override
-	public String getRemoteFilePath(Class<? extends RemoteFile> remoteFileClass) {
+	public String getRemoteFilePath(PathAwareRemoteFileType remoteFileType) {
 		return "";
 	}
 }

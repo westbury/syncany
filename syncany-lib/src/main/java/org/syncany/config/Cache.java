@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.LocalDiskCache;
 import org.syncany.database.MultiChunkEntry.MultiChunkId;
 
 /**
@@ -42,7 +43,7 @@ import org.syncany.database.MultiChunkEntry.MultiChunkId;
  * 
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class Cache {
+public class Cache implements LocalDiskCache {
 	private static final Logger logger = Logger.getLogger(Cache.class.getSimpleName());
 
     private static long DEFAULT_CACHE_KEEP_BYTES = 500*1024*1024;

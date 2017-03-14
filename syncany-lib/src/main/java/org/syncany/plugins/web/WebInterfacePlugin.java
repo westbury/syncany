@@ -17,9 +17,10 @@
  */
 package org.syncany.plugins.web;
 
+import org.syncany.api.transfer.Plugin;
+
 import io.undertow.server.HttpHandler;
 
-import org.syncany.plugins.Plugin;
 
 /**
  * Web interface plugins implement a web frontend by implementing this
@@ -27,9 +28,12 @@ import org.syncany.plugins.Plugin;
  * 
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public abstract class WebInterfacePlugin extends Plugin {
+public abstract class WebInterfacePlugin implements Plugin {
+	
+	protected String pluginId;
+	
 	public WebInterfacePlugin(String pluginId) {
-		super(pluginId);
+		this.pluginId = pluginId;
 	}
 	
 	public abstract void start();

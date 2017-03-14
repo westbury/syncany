@@ -17,14 +17,15 @@
  */
 package org.syncany.plugins.transfer;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.syncany.config.Config;
-import org.syncany.plugins.transfer.features.Retriable;
-import org.syncany.plugins.transfer.features.TransactionAware;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.StorageTestResult;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.Retriable;
+import org.syncany.api.transfer.features.TransactionAware;
+import org.syncany.plugins.transfer.files.SyncanyRemoteFile;
 import org.syncany.util.StringUtil;
 
 /**
@@ -37,58 +38,60 @@ import org.syncany.util.StringUtil;
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  * @author Christian Roth <christian.roth@port17.de>
  */
-@TransactionAware
-@Retriable(numberRetries = 3, sleepInterval = 3000)
-public abstract class AbstractTransferManager implements TransferManager { // TODO [medium] Rename this to AbstractReliableTransferManager
+// TODO Nigel this has been transformed to a wrapper class that adds a class to
+// do the tests.  Probably
+// needs to be removed altogether.
+// These two annotations moved to each transfer manager:
+//@TransactionAware
+//@Retriable(numberRetries = 3, sleepInterval = 3000)
+public class AbstractTransferManager { // TODO [medium] Rename this to AbstractReliableTransferManager
 	private static final Logger logger = Logger.getLogger(AbstractTransferManager.class.getSimpleName());
 
-	protected TransferSettings settings;
-	protected Config config;
+	protected TransferManager manager;
 
-	public AbstractTransferManager(TransferSettings settings, Config config) {
-		this.settings = settings;
-		this.config = config;
+	public AbstractTransferManager(TransferManager manager) {
+		this.manager = manager;
 	}
 
 	/**
-	 * Creates a temporary file, either using the config (if initialized) or
-	 * using the global temporary directory.
-	 */
-	protected File createTempFile(String name) throws IOException {
-		if (config == null) {
-			return File.createTempFile(String.format("temp-%s-", name), ".tmp");
-		}
-		else {
-			return config.getCache().createTempFile(name);
-		}
-	}
-
-	/**
-	 * Checks whether the settings given to this transfer manager can be
-	 * used to create or connect to a remote repository.
+	 * Tests whether the repository parameters are valid. In particular, the method tests
+	 * whether a target (folder, bucket, etc.) exists or, if not, whether it can be created.
+	 * It furthermore tests whether a repository at the target already exists by checking if the
+	 * {@link SyncanyRemoteFile} exists.
 	 *
-	 * <p>Tests if the target exists, if it can be written to and if a
-	 * repository can be created.
+	 * <p>The relevant result is determined by the following methods:
+	 *
+	 * <ul>
+	 *  <li>{@link #testTargetExists()}: Tests whether the target exists.</li>
+	 *  <li>{@link #testTargetCanWrite()}: Tests whether the target is writable.</li>
+	 *  <li>{@link #testTargetCanCreate()}: Tests whether the target can be created if it does not
+	 *      exist already. This is only called if <tt>testCreateTarget</tt> is set.</li>
+	 *  <li>{@link #testRepoFileExists()}: Tests whether the repo file exists.</li>
+	 * </ul>
+	 *
+	 * @return Returns the result of testing the repository.
+	 * @param testCreateTarget If <tt>true</tt>, the test will test if the target can be created in case
+	 *        it does not exist. If <tt>false</tt>, this test will be skipped.
+	 * @see StorageTestResult
 	 */
-	@Override
 	public StorageTestResult test(boolean testCreateTarget) {
 		logger.log(Level.INFO, "Performing storage test TM.test() ...");
 		StorageTestResult result = new StorageTestResult();
 
 		try {
 			logger.log(Level.INFO, "- Running connect() ...");
-			connect();
+			manager.connect();
 
-			result.setTargetExists(testTargetExists());
-			result.setTargetCanWrite(testTargetCanWrite());
-			result.setRepoFileExists(testRepoFileExists());
+			result.setTargetExists(manager.testTargetExists());
+			result.setTargetCanWrite(manager.testTargetCanWrite());
+			result.setRepoFileExists(manager.testRepoFileExists(new SyncanyRemoteFile()));
 
 			if (result.isTargetExists()) {
 				result.setTargetCanCreate(true);
 			}
 			else {
 				if (testCreateTarget) {
-					result.setTargetCanCreate(testTargetCanCreate());
+					result.setTargetCanCreate(manager.testTargetCanCreate());
 				}
 				else {
 					result.setTargetCanCreate(false);
@@ -105,7 +108,7 @@ public abstract class AbstractTransferManager implements TransferManager { // TO
 		}
 		finally {
 			try {
-				disconnect();
+				manager.disconnect();
 			}
 			catch (StorageException e) {
 				logger.log(Level.FINE, "Could not disconnect", e);

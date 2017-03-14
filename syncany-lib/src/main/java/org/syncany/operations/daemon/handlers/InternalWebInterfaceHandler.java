@@ -17,10 +17,6 @@
  */
 package org.syncany.operations.daemon.handlers;
 
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Headers;
-
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +25,10 @@ import org.syncany.plugins.Plugins;
 import org.syncany.plugins.web.WebInterfacePlugin;
 import org.syncany.util.StringUtil;
 import org.syncany.util.StringUtil.StringJoinListener;
+
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
 
 /**
  * InternalWebInterfaceHandler is responsible for handling requests 
@@ -44,7 +44,7 @@ public class InternalWebInterfaceHandler implements HttpHandler {
 	private HttpHandler requestHandler;
 	
 	public InternalWebInterfaceHandler() {
-		webInterfacePlugins = Plugins.list(WebInterfacePlugin.class);
+		webInterfacePlugins = Plugins.webInterfacePlugins();
 		
 		if (webInterfacePlugins.size() == 1) {
 			initWebInterfacePlugin();

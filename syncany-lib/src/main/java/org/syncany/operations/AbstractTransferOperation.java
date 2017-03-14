@@ -18,20 +18,22 @@
 package org.syncany.operations;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAware;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.api.transfer.features.ReadAfterWriteConsistent;
+import org.syncany.api.transfer.features.Retriable;
+import org.syncany.api.transfer.features.TransactionAware;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferManagerFactory;
-import org.syncany.plugins.transfer.features.ReadAfterWriteConsistent;
-import org.syncany.plugins.transfer.features.PathAware;
-import org.syncany.plugins.transfer.features.Retriable;
-import org.syncany.plugins.transfer.features.TransactionAware;
+import org.syncany.plugins.transfer.features.RemoteFileFactories;
 import org.syncany.plugins.transfer.features.TransactionAwareFeatureTransferManager;
 import org.syncany.plugins.transfer.files.ActionRemoteFile;
 import org.syncany.plugins.transfer.files.CleanupRemoteFile;
@@ -109,12 +111,12 @@ public abstract class AbstractTransferOperation extends Operation {
 
 	protected boolean otherRemoteOperationsRunning(String... operationIdentifiers) throws StorageException {
 		logger.log(Level.INFO, "Looking for other running remote operations ...");
-		Map<String, ActionRemoteFile> actionRemoteFiles = transferManager.list(ActionRemoteFile.class);
+		Collection<ActionRemoteFile> actionRemoteFiles = transferManager.list(PathAwareRemoteFileType.Action, RemoteFileFactories::createActionFile);
 
 		boolean otherRemoteOperationsRunning = false;
 		List<String> disallowedOperationIdentifiers = Arrays.asList(operationIdentifiers);
 
-		for (ActionRemoteFile actionRemoteFile : actionRemoteFiles.values()) {
+		for (ActionRemoteFile actionRemoteFile : actionRemoteFiles) {
 			String operationName = actionRemoteFile.getOperationName();
 			String machineName = actionRemoteFile.getClientName();
 
@@ -143,9 +145,9 @@ public abstract class AbstractTransferOperation extends Operation {
 
 	private void cleanActionFiles() throws StorageException {
 		logger.log(Level.INFO, "Cleaning own old action files ...");
-		Map<String, ActionRemoteFile> actionRemoteFiles = transferManager.list(ActionRemoteFile.class);
+		Collection<ActionRemoteFile> actionRemoteFiles = transferManager.list(PathAwareRemoteFileType.Action, RemoteFileFactories::createActionFile);
 
-		for (ActionRemoteFile actionRemoteFile : actionRemoteFiles.values()) {
+		for (ActionRemoteFile actionRemoteFile : actionRemoteFiles) {
 			String machineName = actionRemoteFile.getClientName();
 
 			boolean isOwnActionFile = machineName.equals(config.getMachineName());
@@ -189,11 +191,11 @@ public abstract class AbstractTransferOperation extends Operation {
 		return clientVersion;
 	}
 
-	protected long getLastRemoteCleanupNumber(Map<String, CleanupRemoteFile> cleanupFiles) {
+	protected long getLastRemoteCleanupNumber(Collection<CleanupRemoteFile> cleanupFiles) {
 		long cleanupNumber = 0;
 
 		// Find the number of the last cleanup
-		for (CleanupRemoteFile cleanupRemoteFile : cleanupFiles.values()) {
+		for (CleanupRemoteFile cleanupRemoteFile : cleanupFiles) {
 			cleanupNumber = Math.max(cleanupNumber, cleanupRemoteFile.getCleanupNumber());
 		}
 

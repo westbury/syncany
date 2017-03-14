@@ -21,10 +21,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.database.PartialFileHistory;
 import org.syncany.operations.ls.LsOperationOptions;
 import org.syncany.operations.ls.LsOperationResult;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 /**

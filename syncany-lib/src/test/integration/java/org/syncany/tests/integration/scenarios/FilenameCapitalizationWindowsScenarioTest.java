@@ -17,14 +17,14 @@
  */
 package org.syncany.tests.integration.scenarios;
 
-import org.junit.Test;
-import org.syncany.plugins.transfer.TransferSettings;
-import org.syncany.tests.util.TestClient;
-import org.syncany.tests.util.TestConfigUtil;
-
 import static org.junit.Assert.assertEquals;
 import static org.syncany.tests.util.TestAssertUtil.assertFileListEquals;
 import static org.syncany.tests.util.TestAssertUtil.assertSqlDatabaseEquals;
+
+import org.junit.Test;
+import org.syncany.api.transfer.TransferSettings;
+import org.syncany.tests.util.TestClient;
+import org.syncany.tests.util.TestConfigUtil;
 
 public class FilenameCapitalizationWindowsScenarioTest {
 	// TODO [medium] Windows: LARGE/small capitalization --> Dropbox makes a file "name (Case Conflict 1)"; define expected/desired behavior

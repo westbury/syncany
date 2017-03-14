@@ -33,15 +33,18 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.RemoteFile;
+import org.syncany.api.transfer.RemoteFileFactory;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.api.transfer.features.TransactionAware;
 import org.syncany.chunk.Transformer;
 import org.syncany.config.Config;
 import org.syncany.operations.up.BlockingTransfersException;
-import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.transfer.StorageFileNotFoundException;
 import org.syncany.plugins.transfer.StorageMoveException;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.files.RemoteFile;
+import org.syncany.plugins.transfer.files.AbstractRemoteFile;
 import org.syncany.plugins.transfer.files.TempRemoteFile;
 import org.syncany.plugins.transfer.files.TransactionRemoteFile;
 import org.syncany.plugins.transfer.to.ActionTO;
@@ -76,8 +79,8 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	}
 
 	@Override
-	public void init(final boolean createIfRequired) throws StorageException {
-		underlyingTransferManager.init(createIfRequired);
+	public void init(boolean createIfRequired, RemoteFile syncanyRemoteFile) throws StorageException {
+		underlyingTransferManager.init(createIfRequired, syncanyRemoteFile);
 	}
 
 	@Override
@@ -96,7 +99,7 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	 * for the given remote file. If there is a temporary file, the file is downloaded
 	 * instead of the original file.
 	 *
-	 * <p>This method is <b>expensive</b>, but it is only called by {@link #download(RemoteFile, File) download()}
+	 * <p>This method is <b>expensive</b>, but it is only called by {@link #download(AbstractRemoteFile, File) download()}
 	 * if a file does not exist.
 	 */
 	private void downloadDeletedTempFileInTransaction(RemoteFile remoteFile, File localFile) throws StorageException {
@@ -144,13 +147,13 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	}
 
 	@Override
-	public <T extends RemoteFile> Map<String, T> list(final Class<T> remoteFileClass) throws StorageException {
-		return addAndFilterFilesInTransaction(remoteFileClass, underlyingTransferManager.list(remoteFileClass));
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
+		return addAndFilterFilesInTransaction(remoteFileType, underlyingTransferManager.list(remoteFileType, factory));
 	}
 
 	@Override
-	public String getRemoteFilePath(Class<? extends RemoteFile> remoteFileClass) {
-		return underlyingTransferManager.getRemoteFilePath(remoteFileClass);
+	public String getRemoteFilePath(PathAwareRemoteFileType remoteFileType) {
+		return underlyingTransferManager.getRemoteFilePath(remoteFileType);
 	}
 
 	/**
@@ -310,7 +313,7 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	public void removeUnreferencedTemporaryFiles() throws StorageException {
 		// Retrieve all transactions
 		Map<TransactionTO, TransactionRemoteFile> transactions = retrieveRemoteTransactions();
-		Collection<TempRemoteFile> tempRemoteFiles = list(TempRemoteFile.class).values();
+		Collection<TempRemoteFile> tempRemoteFiles = list(PathAwareRemoteFileType.Temp, RemoteFileFactories::createTempFile);
 
 		// Find all remoteFiles that are referenced in a transaction
 		Set<TempRemoteFile> tempRemoteFilesInTransactions = new HashSet<TempRemoteFile>();
@@ -385,11 +388,6 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	}
 
 	@Override
-	public StorageTestResult test(boolean testCreateTarget) {
-		return underlyingTransferManager.test(testCreateTarget);
-	}
-
-	@Override
 	public boolean testTargetExists() throws StorageException {
 		return underlyingTransferManager.testTargetExists();
 	}
@@ -405,27 +403,27 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	}
 
 	@Override
-	public boolean testRepoFileExists() throws StorageException {
-		return underlyingTransferManager.testRepoFileExists();
+	public boolean testRepoFileExists(RemoteFile syncanyRemoteFile) throws StorageException {
+		return underlyingTransferManager.testRepoFileExists(syncanyRemoteFile);
 	}
 
 	/**
 	 * Returns a list of remote files, excluding the files in transactions.
 	 * The method is used to hide unfinished transactions from other clients.
 	 */
-	protected <T extends RemoteFile> Map<String, T> addAndFilterFilesInTransaction(Class<T> remoteFileClass, Map<String, T> remoteFiles)
+	protected <T extends RemoteFile> Collection<T> addAndFilterFilesInTransaction(PathAwareRemoteFileType remoteFileType, Collection<T> remoteFiles)
 			throws StorageException {
 
-		Map<String, T> filteredFiles = new HashMap<String, T>();
+		Collection<T> filteredFiles = new HashSet<>();
 
 		Set<TransactionTO> transactions = new HashSet<TransactionTO>();
-		Set<RemoteFile> dummyDeletedFiles = new HashSet<RemoteFile>();
-		Set<RemoteFile> filesToIgnore = new HashSet<RemoteFile>();
+		Set<AbstractRemoteFile> dummyDeletedFiles = new HashSet<AbstractRemoteFile>();
+		Set<AbstractRemoteFile> filesToIgnore = new HashSet<AbstractRemoteFile>();
 
 		// Ignore files currently listed in a transaction,
 		// unless we are listing transaction files
 
-		boolean ignoreFilesInTransactions = !remoteFileClass.equals(TransactionRemoteFile.class);
+		boolean ignoreFilesInTransactions = remoteFileType != PathAwareRemoteFileType.Transaction;
 
 		if (ignoreFilesInTransactions) {
 			transactions = retrieveRemoteTransactions().keySet();
@@ -433,16 +431,16 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 			dummyDeletedFiles = getDummyDeletedFiles(transactions);
 		}
 
-		for (RemoteFile deletedFile : dummyDeletedFiles) {
-			if (deletedFile.getClass().equals(remoteFileClass)) {
-				T concreteDeletedFile = remoteFileClass.cast(deletedFile);
-				filteredFiles.put(concreteDeletedFile.getName(), concreteDeletedFile);
+		for (AbstractRemoteFile deletedFile : dummyDeletedFiles) {
+			if (deletedFile.getPathAwareType() == remoteFileType) {
+				T concreteDeletedFile = (T)deletedFile;
+				filteredFiles.add(concreteDeletedFile);
 			}
 		}
 
-		for (String fileName : remoteFiles.keySet()) {
-			if (!filesToIgnore.contains(remoteFiles.get(fileName))) {
-				filteredFiles.put(fileName, remoteFiles.get(fileName));
+		for (T remoteFile : remoteFiles) {
+			if (!filesToIgnore.contains(remoteFile)) {
+				filteredFiles.add(remoteFile);
 			}
 		}
 
@@ -453,8 +451,8 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	 * Returns a Set of all files that are not temporary, but are listed in a
 	 * transaction file. These belong to an unfinished transaction and should be ignored.
 	 */
-	protected Set<RemoteFile> getFilesInTransactions(Set<TransactionTO> transactions) throws StorageException {
-		Set<RemoteFile> filesInTransaction = new HashSet<RemoteFile>();
+	protected Set<AbstractRemoteFile> getFilesInTransactions(Set<TransactionTO> transactions) throws StorageException {
+		Set<AbstractRemoteFile> filesInTransaction = new HashSet<AbstractRemoteFile>();
 
 		for (TransactionTO transaction : transactions) {
 			for (ActionTO action : transaction.getActions()) {
@@ -467,8 +465,8 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 		return filesInTransaction;
 	}
 
-	private Set<RemoteFile> getDummyDeletedFiles(Set<TransactionTO> transactions) throws StorageException {
-		Set<RemoteFile> dummyDeletedFiles = new HashSet<RemoteFile>();
+	private Set<AbstractRemoteFile> getDummyDeletedFiles(Set<TransactionTO> transactions) throws StorageException {
+		Set<AbstractRemoteFile> dummyDeletedFiles = new HashSet<AbstractRemoteFile>();
 
 		for (TransactionTO transaction : transactions) {
 			for (ActionTO action : transaction.getActions()) {
@@ -482,10 +480,10 @@ public class TransactionAwareFeatureTransferManager implements FeatureTransferMa
 	}
 
 	private Map<TransactionTO, TransactionRemoteFile> retrieveRemoteTransactions() throws StorageException {
-		Map<String, TransactionRemoteFile> transactionFiles = list(TransactionRemoteFile.class);
+		Collection<TransactionRemoteFile> transactionFiles = list(PathAwareRemoteFileType.Transaction, RemoteFileFactories::createTransactionFile);
 		Map<TransactionTO, TransactionRemoteFile> transactions = new HashMap<TransactionTO, TransactionRemoteFile>();
 
-		for (TransactionRemoteFile transaction : transactionFiles.values()) {
+		for (TransactionRemoteFile transaction : transactionFiles) {
 			try {
 				File transactionFile = createTempFile("transaction");
 				try {

@@ -20,8 +20,9 @@ package org.syncany.plugins.transfer.files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.plugins.transfer.RemoteTransaction;
-import org.syncany.plugins.transfer.StorageException;
 
 /**
  * The transaction file represents a manifest of a transaction on the remote storage. 
@@ -31,7 +32,7 @@ import org.syncany.plugins.transfer.StorageException;
  * 
  * @author Pim Otte
  */
-public class TransactionRemoteFile extends RemoteFile {
+public class TransactionRemoteFile extends AbstractRemoteFile {
 	private static final Pattern NAME_PATTERN = Pattern.compile("transaction-([a-f0-9]+)");
 	private static final String NAME_FORMAT = "transaction-%s";
 
@@ -64,5 +65,10 @@ public class TransactionRemoteFile extends RemoteFile {
 		}
 
 		return name;
+	}
+
+	@Override
+	public PathAwareRemoteFileType getPathAwareType() {
+		return PathAwareRemoteFileType.Transaction;
 	}
 }

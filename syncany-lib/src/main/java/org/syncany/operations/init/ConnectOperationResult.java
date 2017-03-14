@@ -17,8 +17,8 @@
  */
 package org.syncany.operations.init;
 
+import org.syncany.api.transfer.StorageTestResult;
 import org.syncany.operations.OperationResult;
-import org.syncany.plugins.transfer.StorageTestResult;
 
 public class ConnectOperationResult implements OperationResult {
 	public enum ConnectResultCode {

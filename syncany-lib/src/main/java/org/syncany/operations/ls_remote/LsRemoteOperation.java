@@ -18,21 +18,23 @@
 package org.syncany.operations.ls_remote;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAware;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Operation;
 import org.syncany.operations.daemon.messages.LsRemoteEndSyncExternalEvent;
 import org.syncany.operations.daemon.messages.LsRemoteStartSyncExternalEvent;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferManagerFactory;
-import org.syncany.plugins.transfer.features.PathAware;
+import org.syncany.plugins.transfer.features.RemoteFileFactories;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 
 /**
@@ -104,9 +106,9 @@ public class LsRemoteOperation extends Operation {
 		List<DatabaseRemoteFile> unknownRemoteDatabases = new ArrayList<DatabaseRemoteFile>();
 
 		// List all remote database files
-		Map<String, DatabaseRemoteFile> remoteDatabaseFiles = transferManager.list(DatabaseRemoteFile.class);
+		Collection<DatabaseRemoteFile> remoteDatabaseFiles = transferManager.list(PathAwareRemoteFileType.Database, RemoteFileFactories::createDatabaseFile);
 
-		for (DatabaseRemoteFile remoteDatabaseFile : remoteDatabaseFiles.values()) {
+		for (DatabaseRemoteFile remoteDatabaseFile : remoteDatabaseFiles) {
 			// This does NOT filter 'lock' files!
 			if (knownDatabases.contains(remoteDatabaseFile)) {
 				logger.log(Level.INFO, "- Remote database {0} is already known (in local database). Ignoring.", remoteDatabaseFile.getName());

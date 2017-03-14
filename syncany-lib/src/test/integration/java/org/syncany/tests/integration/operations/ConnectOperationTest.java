@@ -27,8 +27,10 @@ import java.util.Random;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.syncany.api.transfer.TransferPlugin;
 import org.syncany.config.Config;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.operations.init.ConnectOperation;
 import org.syncany.operations.init.ConnectOperationOptions;
 import org.syncany.operations.init.ConnectOperationOptions.ConnectOptionsStrategy;
@@ -37,6 +39,7 @@ import org.syncany.operations.init.ConnectOperationResult.ConnectResultCode;
 import org.syncany.operations.init.InitOperation;
 import org.syncany.operations.init.InitOperationOptions;
 import org.syncany.operations.init.InitOperationResult;
+import org.syncany.plugins.local.LocalTransferPlugin;
 import org.syncany.plugins.local.LocalTransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.tests.util.TestConfigUtil;
@@ -48,6 +51,8 @@ import org.syncany.tests.util.TestConfigUtil;
  * @author Pim Otte
  */
 public class ConnectOperationTest {
+	private TransferPlugin localTransferPlugin = new LocalTransferPlugin();
+
 	@Test
 	public void testConnectOperationSuccess() throws Exception {
 		// A.init()
@@ -84,7 +89,10 @@ public class ConnectOperationTest {
 		assertTrue(new File(localConnectDirB, Config.FILE_REPO).exists());
 		assertEquals(new File(localConnectDirB, Config.FILE_MASTER).exists(), TestConfigUtil.getCrypto());
 
-		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getTransferSettings()).getPath();
+		LocalTransferSettings settings = (LocalTransferSettings)localTransferPlugin.createEmptySettings();
+		Connection connection = initOperationOptionsA.getConfigTO().getConnection();
+		connection.fillTransferSettings(settings);
+		File repoDir = settings.getPath();
 
 		// Tear down
 		TestFileUtil.deleteDirectory(repoDir);
@@ -107,11 +115,16 @@ public class ConnectOperationTest {
 		// B.connect()
 		File localDirB = TestFileUtil.createTempDirectoryInSystemTemp(TestConfigUtil.createUniqueName("client-B", initOperationOptionsA));
 		File localConnectDirB = new File(localDirB, Config.DIR_APPLICATION);
-		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getTransferSettings()).getPath();
-
+		
+		LocalTransferSettings settings = (LocalTransferSettings)localTransferPlugin.createEmptySettings();
+		Connection connection = initOperationOptionsA.getConfigTO().getConnection();
+		connection.fillTransferSettings(settings);
+		File repoDir = settings.getPath();
 
 		ConfigTO connectionConfigToB = initOperationOptionsA.getConfigTO();
-		((LocalTransferSettings) connectionConfigToB.getTransferSettings()).setPath(new File("/does/not/exist")); // <<< Point to non-existing repo
+
+//Nigel		((LocalTransferSettings) connectionConfigToB.getConnection()).setPath(new File("/does/not/exist")); // <<< Point to non-existing repo
+
 		connectionConfigToB.setMachineName("client-B" + Math.abs(new Random().nextInt()));
 		connectionConfigToB.setMasterKey(null);
 
@@ -176,7 +189,10 @@ public class ConnectOperationTest {
 		assertTrue(new File(localConnectDirB, Config.FILE_REPO).exists());
 		assertEquals(new File(localConnectDirB, Config.FILE_MASTER).exists(), TestConfigUtil.getCrypto());
 
-		File repoDir = ((LocalTransferSettings) initOperationOptionsA.getConfigTO().getTransferSettings()).getPath();
+		LocalTransferSettings settings = (LocalTransferSettings)localTransferPlugin.createEmptySettings();
+		Connection connection = initOperationOptionsA.getConfigTO().getConnection();
+		connection.fillTransferSettings(settings);
+		File repoDir = settings.getPath();
 
 		// Tear down
 		TestFileUtil.deleteDirectory(repoDir);

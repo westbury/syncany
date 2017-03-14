@@ -28,12 +28,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Test;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.config.Config;
 import org.syncany.operations.init.InitOperation;
 import org.syncany.operations.init.InitOperationOptions;
 import org.syncany.operations.init.InitOperationResult;
 import org.syncany.plugins.local.LocalTransferSettings;
-import org.syncany.plugins.transfer.StorageException;
 import org.syncany.plugins.unreliable_local.UnreliableLocalTransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.tests.util.TestConfigUtil;
@@ -54,7 +55,11 @@ public class InitOperationTest {
 		InitOperationOptions operationOptions = TestConfigUtil.createTestInitOperationOptions("A");
 		InitOperation op = new InitOperation(operationOptions, null);
 		InitOperationResult res = op.execute();
-		File repoDir = ((LocalTransferSettings) operationOptions.getConfigTO().getTransferSettings()).getPath();
+		
+		TransferSettings settings = new LocalTransferSettings();
+		operationOptions.getConfigTO().getConnection().fillTransferSettings(settings);
+		File repoDir = ((LocalTransferSettings) settings).getPath();
+		
 		File localDir = new File(operationOptions.getLocalDir(), ".syncany");
 
 		// Test the repository
@@ -86,7 +91,10 @@ public class InitOperationTest {
 		InitOperationOptions operationOptions = TestConfigUtil.createTestUnreliableInitOperationOptions("A", failingOperationsPattern);
 		InitOperation op = new InitOperation(operationOptions, null);
 
-		File repoDir = ((UnreliableLocalTransferSettings) operationOptions.getConfigTO().getTransferSettings()).getPath();
+		TransferSettings settings = new UnreliableLocalTransferSettings();
+		operationOptions.getConfigTO().getConnection().fillTransferSettings(settings);
+		File repoDir = ((UnreliableLocalTransferSettings) settings).getPath();
+
 		File localDir = new File(operationOptions.getLocalDir(), ".syncany");
 
 		try {

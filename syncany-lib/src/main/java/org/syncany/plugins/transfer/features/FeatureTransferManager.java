@@ -17,7 +17,9 @@
  */
 package org.syncany.plugins.transfer.features;
 
-import org.syncany.plugins.transfer.TransferManager;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.Feature;
+import org.syncany.api.transfer.features.FeatureExtension;
 import org.syncany.plugins.transfer.TransferManagerFactory;
 
 /**

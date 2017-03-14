@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+	compile			project(':syncany-api')
 	compile			project(':syncany-util')
 
 	compile			"commons-io:commons-io:2.4"
@@ -27,6 +28,7 @@ dependencies {
 	compile			"com.google.code.gson:gson:2.2.4"
 
 	testCompile		project(path: ':syncany-util', configuration: 'tests')
+	testCompile		project(path: ':syncany-plugin-tests', configuration: 'tests')
 	testCompile		"org.mockito:mockito-all:1.10.19"
 	testCompile		"junit:junit:4.9"
 	testCompile		"net.sourceforge.htmlunit:htmlunit:2.15"

@@ -1,0 +1,2 @@
+org.syncany.plugins.local.LocalTransferPlugin
+org.syncany.plugins.dummy.DummyTransferPlugin

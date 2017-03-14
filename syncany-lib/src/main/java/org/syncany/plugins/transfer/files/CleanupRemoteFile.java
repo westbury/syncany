@@ -20,7 +20,8 @@ package org.syncany.plugins.transfer.files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.syncany.plugins.transfer.StorageException;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 
 /**
  * The transaction file only exists as an indicator to other clients a cleanup has occurred.
@@ -30,7 +31,7 @@ import org.syncany.plugins.transfer.StorageException;
  * 
  * @author Pim Otte
  */
-public class CleanupRemoteFile extends RemoteFile {
+public class CleanupRemoteFile extends AbstractRemoteFile {
 	private static final Pattern NAME_PATTERN = Pattern.compile("cleanup-([0-9]+)");
 	private static final String NAME_FORMAT = "cleanup-%s";
 
@@ -71,5 +72,10 @@ public class CleanupRemoteFile extends RemoteFile {
 
 	public long getCleanupNumber() {
 		return cleanupNumber;
+	}
+
+	@Override
+	public PathAwareRemoteFileType getPathAwareType() {
+		return PathAwareRemoteFileType.Cleanup;
 	}
 }

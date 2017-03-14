@@ -32,6 +32,9 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.config.Config;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.DatabaseVersionHeader;
@@ -53,8 +56,7 @@ import org.syncany.operations.down.DownOperationResult.DownResultCode;
 import org.syncany.operations.ls_remote.LsRemoteOperation;
 import org.syncany.operations.ls_remote.LsRemoteOperationResult;
 import org.syncany.operations.up.UpOperation;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferManager;
+import org.syncany.plugins.transfer.features.RemoteFileFactories;
 import org.syncany.plugins.transfer.files.CleanupRemoteFile;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 
@@ -153,7 +155,7 @@ public class DownOperation extends AbstractTransferOperation {
 		SortedMap<DatabaseRemoteFile, List<DatabaseVersion>> remoteDatabaseHeaders = readUnknownDatabaseVersionHeaders(unknownRemoteDatabasesInCache);
 		Map<DatabaseVersionHeader, File> databaseVersionLocations = findDatabaseVersionLocations(remoteDatabaseHeaders, unknownRemoteDatabasesInCache);
 
-		Map<String, CleanupRemoteFile> remoteCleanupFiles = getRemoteCleanupFiles();
+		Collection<CleanupRemoteFile> remoteCleanupFiles = getRemoteCleanupFiles();
 		boolean cleanupOccurred = cleanupOccurred(remoteCleanupFiles);
 
 		List<PartialFileHistory> preDeleteFileHistoriesWithLastVersion = null;
@@ -615,15 +617,15 @@ public class DownOperation extends AbstractTransferOperation {
 		return databaseVersionLocations;
 	}
 
-	private Map<String, CleanupRemoteFile> getRemoteCleanupFiles() throws StorageException {
-		return transferManager.list(CleanupRemoteFile.class);
+	private Collection<CleanupRemoteFile> getRemoteCleanupFiles() throws StorageException {
+		return transferManager.list(PathAwareRemoteFileType.Cleanup, RemoteFileFactories::createCleanupFile);
 	}
 
 	/**
 	 * This method queries the local database and compares the result to existing remoteCleanupFiles to determine
 	 * if cleanup has occurred since the last time it was locally handled. The cleanupNumber is a simple count.
 	 */
-	private boolean cleanupOccurred(Map<String, CleanupRemoteFile> remoteCleanupFiles) throws Exception {
+	private boolean cleanupOccurred(Collection<CleanupRemoteFile> remoteCleanupFiles) throws Exception {
 		Long lastRemoteCleanupNumber = getLastRemoteCleanupNumber(remoteCleanupFiles);
 		Long lastLocalCleanupNumber = localDatabase.getCleanupNumber();
 

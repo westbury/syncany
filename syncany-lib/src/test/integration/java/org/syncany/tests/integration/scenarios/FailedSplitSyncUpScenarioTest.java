@@ -1,17 +1,17 @@
 package org.syncany.tests.integration.scenarios;
 
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.syncany.operations.up.UpOperationOptions;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 import org.syncany.plugins.unreliable_local.UnreliableLocalTransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
-
-import java.io.File;
-import java.util.Arrays;
-
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * This test is designed for the scenario where a sync up consisting of multiple transactions fails during the

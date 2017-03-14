@@ -17,28 +17,28 @@
  */
 package org.syncany.tests.integration.plugins;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
-import org.syncany.plugins.Plugin;
+import org.syncany.api.transfer.TransferPlugin;
 import org.syncany.plugins.Plugins;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class PluginsTest {
 	@Test
 	public void testPluginsList() {
-		Collection<Plugin> pluginList = Plugins.list();
+		Collection<TransferPlugin> pluginList = Plugins.transferPlugins();
 
 		List<String> expectedPluginIds = Arrays.asList(new String[] { "local", "unreliable_local", "dummy" });
 		List<String> actualPluginIds = new ArrayList<String>();
 
-		for (Plugin plugin : pluginList) {
+		for (TransferPlugin plugin : pluginList) {
 			actualPluginIds.add(plugin.getId());
 		}
 		
@@ -48,11 +48,11 @@ public class PluginsTest {
 
 	@Test
 	public void testNonExistingPlugin() {
-		assertNull(Plugins.get("non-existing"));
+		assertNull(Plugins.getTransferPlugin("non-existing"));
 	}
 
 	@Test
 	public void testExistingPlugin() {
-		assertNotNull(Plugins.get("local"));
+		assertNotNull(Plugins.getTransferPlugin("local"));
 	}
 }

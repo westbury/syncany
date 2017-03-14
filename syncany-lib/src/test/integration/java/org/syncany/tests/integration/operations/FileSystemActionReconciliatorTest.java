@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.List;
 
 import org.junit.Test;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.config.Config;
 import org.syncany.database.DatabaseVersion;
 import org.syncany.database.FileVersion;
@@ -32,7 +33,6 @@ import org.syncany.database.PartialFileHistory;
 import org.syncany.operations.down.DownOperationResult;
 import org.syncany.operations.down.FileSystemActionReconciliator;
 import org.syncany.operations.down.actions.FileSystemAction;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 import org.syncany.tests.util.TestDatabaseUtil;

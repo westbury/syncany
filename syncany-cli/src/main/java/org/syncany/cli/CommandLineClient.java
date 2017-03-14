@@ -37,10 +37,6 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -75,6 +71,10 @@ import org.syncany.operations.daemon.messages.api.XmlMessageFactory;
 import org.syncany.util.EnvironmentUtil;
 import org.syncany.util.PidFileUtil;
 import org.syncany.util.StringUtil;
+
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 /**
  * The command line client implements a typical CLI. It represents the first entry
@@ -259,6 +259,21 @@ public class CommandLineClient extends Client {
 			if (config == null) {
 				return showErrorAndExit("Invalid config in " + localDir);
 			}
+
+			/*
+			 * Check that the plugin configured in configTO has been installed.
+			 * I'm not sure why this check was done at Config load time as there
+			 * is no real scenario that is likely to cause this and getting the error
+			 * when the plugin is needed would appear to be fine.
+			 */
+//			ConfigTO configTO = config.getConfigTO();
+//			String pluginId = configTO.getConnection().getType();
+//			TransferPlugin plugin = Plugins.getTransferPlugin(pluginId);
+//
+//			if (plugin == null) {
+//				logger.log(Level.WARNING, "Not loading config! Plugin with id '{0}' does not exist.", pluginId);
+//				throw new ConfigException("Plugin with id '" + pluginId + "' does not exist. Try 'sy plugin install " + pluginId + "'.");
+//			}
 
 			break;
 

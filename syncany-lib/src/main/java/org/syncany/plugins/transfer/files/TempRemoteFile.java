@@ -20,8 +20,9 @@ package org.syncany.plugins.transfer.files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.crypto.CipherUtil;
-import org.syncany.plugins.transfer.StorageException;
 
 /**
  * The temp file represents a temporary file on the remote storage. 
@@ -31,11 +32,11 @@ import org.syncany.plugins.transfer.StorageException;
  * 
  * @author Pim Otte
  */
-public class TempRemoteFile extends RemoteFile {
+public class TempRemoteFile extends AbstractRemoteFile {
 	private static final Pattern NAME_PATTERN = Pattern.compile("temp-([A-Za-z]+)-(.+)");
 	private static final String NAME_FORMAT = "temp-%s-%s";
 
-	private RemoteFile targetRemoteFile;
+	private AbstractRemoteFile targetRemoteFile;
 	
 	/**
 	 * Initializes a new temp file, given a name. 
@@ -52,15 +53,15 @@ public class TempRemoteFile extends RemoteFile {
 	 * 
 	 * @throws StorageException
 	 */
-	public TempRemoteFile(RemoteFile targetRemoteFile) throws StorageException {
+	public TempRemoteFile(AbstractRemoteFile targetRemoteFile) throws StorageException {
 		super(String.format(NAME_FORMAT, CipherUtil.createRandomAlphabeticString(5), targetRemoteFile.getName()));
 	}
 	
 	/**
-	 * Returns the target remote file, i.e. the {@link RemoteFile} this
+	 * Returns the target remote file, i.e. the {@link AbstractRemoteFile} this
 	 * temporary file will be renamed into, or was renamed from.
 	 */
-	public RemoteFile getTargetRemoteFile() {
+	public AbstractRemoteFile getTargetRemoteFile() {
 		return targetRemoteFile;
 	}
 
@@ -73,12 +74,17 @@ public class TempRemoteFile extends RemoteFile {
 		}
 		
 		try {
-			targetRemoteFile = RemoteFile.createRemoteFile(matcher.group(2));
+			targetRemoteFile = AbstractRemoteFile.createRemoteFile(matcher.group(2));
 		}
 		catch (Exception e) {
 			throw new StorageException(name + ": remote filename pattern does not match: " + NAME_PATTERN.pattern() + " expected.");
 		}
 
 		return name;
+	}
+
+	@Override
+	public PathAwareRemoteFileType getPathAwareType() {
+		return PathAwareRemoteFileType.Temp;
 	}
 }

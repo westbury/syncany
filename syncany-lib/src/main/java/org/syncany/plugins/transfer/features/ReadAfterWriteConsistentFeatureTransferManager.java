@@ -20,20 +20,24 @@ package org.syncany.plugins.transfer.features;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.RemoteFile;
+import org.syncany.api.transfer.RemoteFileFactory;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.api.transfer.features.ReadAfterWriteConsistent;
+import org.syncany.api.transfer.features.ReadAfterWriteConsistentFeatureExtension;
 import org.syncany.config.Config;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.files.RemoteFile;
+import org.syncany.plugins.transfer.files.AbstractRemoteFile;
 import org.syncany.util.ReflectionUtil;
 
 /**
  * <p>The ReadWriteConsistentFeatureTransferManager waits specific amount of time after
- * {@link #upload(File, RemoteFile)} and {@link #move(RemoteFile, RemoteFile)} operations
+ * {@link #upload(File, AbstractRemoteFile)} and {@link #move(AbstractRemoteFile, AbstractRemoteFile)} operations
  * because some storage backends do no guarantee that a file immediately exists after
  * creation.
  *
@@ -86,8 +90,8 @@ public class ReadAfterWriteConsistentFeatureTransferManager implements FeatureTr
 	}
 
 	@Override
-	public void init(final boolean createIfRequired) throws StorageException {
-		underlyingTransferManager.init(createIfRequired);
+	public void init(boolean createIfRequired, RemoteFile syncanyRemoteFile) throws StorageException {
+		underlyingTransferManager.init(createIfRequired, syncanyRemoteFile);
 	}
 
 	@Override
@@ -113,18 +117,13 @@ public class ReadAfterWriteConsistentFeatureTransferManager implements FeatureTr
 	}
 
 	@Override
-	public <T extends RemoteFile> Map<String, T> list(final Class<T> remoteFileClass) throws StorageException {
-		return underlyingTransferManager.list(remoteFileClass);
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
+		return underlyingTransferManager.list(remoteFileType, factory);
 	}
 
 	@Override
-	public String getRemoteFilePath(Class<? extends RemoteFile> remoteFileClass) {
-		return underlyingTransferManager.getRemoteFilePath(remoteFileClass);
-	}
-
-	@Override
-	public StorageTestResult test(boolean testCreateTarget) {
-		return underlyingTransferManager.test(testCreateTarget);
+	public String getRemoteFilePath(PathAwareRemoteFileType remoteFileType) {
+		return underlyingTransferManager.getRemoteFilePath(remoteFileType);
 	}
 
 	@Override
@@ -143,8 +142,8 @@ public class ReadAfterWriteConsistentFeatureTransferManager implements FeatureTr
 	}
 
 	@Override
-	public boolean testRepoFileExists() throws StorageException {
-		return underlyingTransferManager.testRepoFileExists();
+	public boolean testRepoFileExists(RemoteFile repoFile) throws StorageException {
+		return underlyingTransferManager.testRepoFileExists(repoFile);
 	}
 
 	private void waitForFile(RemoteFile remoteFile) throws StorageException {

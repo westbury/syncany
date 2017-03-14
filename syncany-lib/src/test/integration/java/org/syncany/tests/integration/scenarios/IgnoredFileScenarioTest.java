@@ -21,11 +21,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 import org.junit.Test;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.config.Config;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;

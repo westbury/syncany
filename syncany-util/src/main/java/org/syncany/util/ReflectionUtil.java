@@ -121,6 +121,14 @@ public abstract class ReflectionUtil {
 				return true;
 			}
 			
+			// Note that immediate interfaces only are processed.
+			// We just want to ensure we get the annotations from TransferManager
+			for (Class<?> interfaze : clazz.getInterfaces()) {
+				if (interfaze.isAnnotationPresent(annotation)) {
+					return true;
+				}
+			}
+			
 			clazz = clazz.getSuperclass();
 		}
 
@@ -131,6 +139,14 @@ public abstract class ReflectionUtil {
 		while (clazz != null) {
 			if (clazz.isAnnotationPresent(annotation)) {
 				return clazz.getAnnotation(annotation);
+			}
+			
+			// Note that immediate interfaces only are processed.
+			// We just want to ensure we get the annotations from TransferManager
+			for (Class<?> interfaze : clazz.getInterfaces()) {
+				if (interfaze.isAnnotationPresent(annotation)) {
+					return interfaze.getAnnotation(annotation);
+				}
 			}
 			
 			clazz = clazz.getSuperclass();

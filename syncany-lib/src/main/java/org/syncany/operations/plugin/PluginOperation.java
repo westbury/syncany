@@ -43,6 +43,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.simpleframework.xml.core.Persister;
 import org.syncany.Client;
+import org.syncany.api.transfer.Plugin;
+import org.syncany.api.transfer.TransferPlugin;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
 import org.syncany.config.UserConfig;
@@ -52,7 +54,6 @@ import org.syncany.operations.daemon.messages.ConnectToHostExternalEvent;
 import org.syncany.operations.daemon.messages.PluginInstallExternalEvent;
 import org.syncany.operations.plugin.PluginOperationOptions.PluginListMode;
 import org.syncany.operations.plugin.PluginOperationResult.PluginResultCode;
-import org.syncany.plugins.Plugin;
 import org.syncany.plugins.Plugins;
 import org.syncany.util.EnvironmentUtil;
 import org.syncany.util.FileUtil;
@@ -81,7 +82,7 @@ import com.google.common.collect.Lists;
  * file and deletes it. Only JAR files inside the user plugin direcory can be
  * deleted.</li>
  * <li><tt>LIST</tt>: Listing refers to a local and a remote list. The locally installed
- * plugins can be queried by {@link Plugins#list()}. These plugins' JAR files must be
+ * plugins can be queried by {@link Plugins#transferPlugins()}. These plugins' JAR files must be
  * in the application's class path. Remotely available plugins are queried through the
  * API.</li>
  * </ul>
@@ -225,7 +226,7 @@ public class PluginOperation extends Operation {
 	}
 
 	private PluginOperationResult executeRemove(String pluginId) throws Exception {
-		Plugin plugin = Plugins.get(pluginId);
+		TransferPlugin plugin = Plugins.getTransferPlugin(pluginId);
 
 		if (plugin == null) {
 			throw new Exception("Plugin not installed.");
@@ -579,7 +580,7 @@ public class PluginOperation extends Operation {
 	private List<PluginInfo> getLocalList() {
 		List<PluginInfo> localPluginInfos = new ArrayList<PluginInfo>();
 
-		for (Plugin plugin : Plugins.list()) {
+		for (Plugin plugin : Plugins.transferPlugins()) {
 			PluginInfo pluginInfo = new PluginInfo();
 
 			pluginInfo.setPluginId(plugin.getId());

@@ -20,7 +20,8 @@ package org.syncany.plugins.transfer.files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.syncany.plugins.transfer.StorageException;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 
 /**
  * Action remote files represent a running transfer operation on the remote storage. Transfer
@@ -34,7 +35,7 @@ import org.syncany.plugins.transfer.StorageException;
  * 
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class ActionRemoteFile extends RemoteFile {
+public class ActionRemoteFile extends AbstractRemoteFile {
 	private static final Pattern NAME_PATTERN = Pattern.compile("action-(up|down|cleanup|restore)-([^-]+)-(\\d+)");
 	private static final String NAME_FORMAT = "action-%s-%s-%010d";
 
@@ -75,5 +76,10 @@ public class ActionRemoteFile extends RemoteFile {
 		timestamp = Long.parseLong(matcher.group(3));
 
 		return name;
+	}
+
+	@Override
+	public PathAwareRemoteFileType getPathAwareType() {
+		return PathAwareRemoteFileType.Action;
 	}
 }

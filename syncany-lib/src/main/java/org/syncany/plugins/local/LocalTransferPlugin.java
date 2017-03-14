@@ -17,8 +17,8 @@
  */
 package org.syncany.plugins.local;
 
-import org.syncany.plugins.Plugin;
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 
 /**
  * Identifies the local storage {@link Plugin} for Syncany.
@@ -33,10 +33,28 @@ import org.syncany.plugins.transfer.TransferPlugin;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class LocalTransferPlugin extends TransferPlugin {
+public class LocalTransferPlugin implements TransferPlugin {
 	public static final String ID = "local";
 
-	public LocalTransferPlugin() {
-		super(ID);
+	@Override
+	public String getId() {
+		return ID;
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getVersion() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TransferSettings createEmptySettings() {
+		return new LocalTransferSettings();
 	}
 }

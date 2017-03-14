@@ -18,7 +18,13 @@
 package org.syncany.api.transfer;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
+
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.api.transfer.features.Retriable;
+import org.syncany.api.transfer.features.TransactionAware;
+
+
 
 /**
  * The transfer manager synchronously connects to the remote storage. It is
@@ -41,6 +47,8 @@ import java.util.Map;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
+@TransactionAware
+@Retriable(numberRetries = 3, sleepInterval = 3000)
 public interface TransferManager {
 	/**
 	 * Establish a connection with the remote storage.
@@ -69,7 +77,7 @@ public interface TransferManager {
 	 * @throws StorageException If the connection drops, or any other
 	 *         exception occurs.
 	 */
-	public void init(boolean createIfRequired) throws StorageException;
+	public void init(boolean createIfRequired, RemoteFile syncanyRemoteFile) throws StorageException;
 
 	/**
 	 * Download an existing remote file to the local disk.
@@ -141,36 +149,13 @@ public interface TransferManager {
 	 * Retrieves a list of all files in the remote repository, filtered by
 	 * the type of the desired file, i.e. by a sub-class of {@link RemoteFile}.
 	 *
-	 * @param remoteFileClass Filter class: <tt>RemoteFile</tt> or a sub-type thereof
+	 * @param database Filter class: <tt>RemoteFile</tt> or a sub-type thereof
 	 * @return Returns a list of remote files. In the map, the key is the file name,
 	 *         the value the entire {@link RemoteFile} object.
 	 * @throws StorageException If the connection fails due to no Internet connection,
 	 *         authentication errors, etc
 	 */
-	public <T extends RemoteFile> Map<String, T> list(Class<T> remoteFileClass) throws StorageException;
-
-	/**
-	 * Tests whether the repository parameters are valid. In particular, the method tests
-	 * whether a target (folder, bucket, etc.) exists or, if not, whether it can be created.
-	 * It furthermore tests whether a repository at the target already exists by checking if the
-	 * {@link SyncanyRemoteFile} exists.
-	 *
-	 * <p>The relevant result is determined by the following methods:
-	 *
-	 * <ul>
-	 *  <li>{@link #testTargetExists()}: Tests whether the target exists.</li>
-	 *  <li>{@link #testTargetCanWrite()}: Tests whether the target is writable.</li>
-	 *  <li>{@link #testTargetCanCreate()}: Tests whether the target can be created if it does not
-	 *      exist already. This is only called if <tt>testCreateTarget</tt> is set.</li>
-	 *  <li>{@link #testRepoFileExists()}: Tests whether the repo file exists.</li>
-	 * </ul>
-	 *
-	 * @return Returns the result of testing the repository.
-	 * @param testCreateTarget If <tt>true</tt>, the test will test if the target can be created in case
-	 *        it does not exist. If <tt>false</tt>, this test will be skipped.
-	 * @see StorageTestResult
-	 */
-	public StorageTestResult test(boolean testCreateTarget);
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException;
 
 	/**
 	 * Tests whether the target path/folder <b>exists</b>. This might be done by listing the parent path/folder
@@ -225,15 +210,15 @@ public interface TransferManager {
 	 * @return Returns <tt>true</tt> if the repository is valid, <tt>false</tt> otherwise
 	 * @throws StorageException If the test cannot be performed, e.g. due to a connection failure
 	 */
-	public boolean testRepoFileExists() throws StorageException;
+	public boolean testRepoFileExists(RemoteFile repoFile) throws StorageException;
 
 	/**
-	 * Return the path for a concrete {@link org.syncany.api.transfer.plugins.transfer.files.RemoteFile} implementation as it is stored on the
+	 * Return the path for a concrete {@link org.syncany.plugins.transfer.files.RemoteFile} implementation as it is stored on the
 	 * remote side
 	 * *
 	 * @param remoteFileClass The class to provide the path for
 	 * @return A string pointing to the folder where a file is stored
 	 */
-	public String getRemoteFilePath(Class<? extends RemoteFile> remoteFileClass);
+	public String getRemoteFilePath(PathAwareRemoteFileType remoteFileType);
 	
 }

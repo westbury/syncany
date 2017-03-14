@@ -23,7 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.syncany.api.transfer.StorageTestResult;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.config.to.DefaultRepoTOFactory;
 import org.syncany.config.to.RepoTO;
 import org.syncany.config.to.RepoTOFactory;
@@ -36,8 +40,8 @@ import org.syncany.operations.init.InitOperation;
 import org.syncany.operations.init.InitOperationOptions;
 import org.syncany.operations.init.InitOperationResult;
 import org.syncany.operations.init.InitOperationResult.InitResultCode;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.Plugins;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -74,7 +78,13 @@ public class InitCommand extends AbstractInitCommand {
 				performOperation = isInteractive && askRetryConnection();
 
 				if (performOperation) {
-					updateTransferSettings(operationOptions.getConfigTO().getTransferSettings());
+					Connection connection = operationOptions.getConfigTO().getConnection();
+					
+					TransferPlugin plugin = Plugins.getTransferPlugin(connection.getType());
+					TransferSettings transferSettings = plugin.createEmptySettings();
+					connection.fillTransferSettings(transferSettings);
+					
+					updateTransferSettings(transferSettings);
 				}
 			}
 		}

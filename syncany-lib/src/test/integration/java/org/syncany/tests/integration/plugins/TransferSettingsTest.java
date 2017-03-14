@@ -25,37 +25,41 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.ElementException;
 import org.simpleframework.xml.core.Persister;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.config.Config;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.operations.init.InitOperationOptions;
 import org.syncany.plugins.Plugins;
-import org.syncany.plugins.dummy.DummyTransferManager;
-import org.syncany.plugins.dummy.DummyTransferPlugin;
 import org.syncany.plugins.dummy.DummyTransferSettings;
+import org.syncany.plugins.local.LocalTransferPlugin;
 import org.syncany.plugins.local.LocalTransferSettings;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferPlugin;
-import org.syncany.plugins.transfer.TransferPluginUtil;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.EnumTransferPluginOption;
+import org.syncany.plugins.transfer.TransferPluginOption;
+import org.syncany.plugins.transfer.TransferPluginOptions;
 import org.syncany.tests.util.TestConfigUtil;
 
 public class TransferSettingsTest {
 	private File tmpFile;
 	private Config config;
+	private TransferPlugin localTransferPlugin = new LocalTransferPlugin();
 
 	@Before
 	public void before() throws Exception {
 		tmpFile = File.createTempFile("syncany-transfer-settings-test", "tmp");
 		config = TestConfigUtil.createTestLocalConfig();
-		assertNotNull(Plugins.get("dummy"));
+		assertNotNull(Plugins.getTransferPlugin("dummy"));
 		assertNotNull(config);
 	}
 
@@ -79,10 +83,14 @@ public class TransferSettingsTest {
 		final InitOperationOptions initOperationOptions = TestConfigUtil.createTestInitOperationOptions("syncanytest");
 		final ConfigTO conf = initOperationOptions.getConfigTO();
 
-		File repoDir = ((LocalTransferSettings) initOperationOptions.getConfigTO().getTransferSettings()).getPath();
+		LocalTransferSettings settings = (LocalTransferSettings)localTransferPlugin.createEmptySettings();
+		Connection connection = initOperationOptions.getConfigTO().getConnection();
+		connection.fillTransferSettings(settings);
+		File repoDir = settings.getPath();
+		
 		File localDir = initOperationOptions.getLocalDir();
 
-		conf.setTransferSettings(ts);
+		conf.setConnection(connection);
 
 		ts.foo = fooTest;
 		ts.baz = bazTest;
@@ -97,13 +105,15 @@ public class TransferSettingsTest {
 		System.out.println(new String(Files.readAllBytes(Paths.get(tmpFile.toURI()))));
 
 		ConfigTO confRestored = ConfigTO.load(tmpFile);
-		TransferPlugin plugin = Plugins.get(confRestored.getTransferSettings().getType(), TransferPlugin.class);
+		TransferPlugin plugin = Plugins.getTransferPlugin(confRestored.getConnection().getType());
 		assertNotNull(plugin);
 
-		TransferSettings tsRestored = confRestored.getTransferSettings();
-		assertNotNull(tsRestored);
+		Connection connRestored = confRestored.getConnection();
+		assertNotNull(connRestored);
 
-		DummyTransferManager transferManager = plugin.createTransferManager(tsRestored, config);
+		TransferSettings tsRestored = plugin.createEmptySettings();
+		connRestored.fillTransferSettings(tsRestored);
+		TransferManager transferManager = tsRestored.createTransferManager(null);
 		assertNotNull(transferManager);
 
 		// Tear down
@@ -113,8 +123,8 @@ public class TransferSettingsTest {
 
 	@Test
 	public void createNewValidConnectionTO() throws Exception {
-		TransferPlugin p = Plugins.get("dummy", TransferPlugin.class);
-		DummyTransferSettings ts = p.createEmptySettings();
+		TransferPlugin p = Plugins.getTransferPlugin("dummy");
+		DummyTransferSettings ts = (DummyTransferSettings)p.createEmptySettings();
 		ts.foo = "foo-value";
 		ts.number = 5;
 
@@ -123,44 +133,36 @@ public class TransferSettingsTest {
 
 	@Test
 	public void createNewInvalidConnectionTO() throws Exception {
-		TransferPlugin p = Plugins.get("dummy", TransferPlugin.class);
-		DummyTransferSettings ts = p.createEmptySettings();
+		TransferPlugin p = Plugins.getTransferPlugin("dummy");
+		DummyTransferSettings ts = (DummyTransferSettings)p.createEmptySettings();
 
 		assertFalse(ts.isValid());
 	}
 
 	@Test
 	public void testDeserializeCorrectClass() throws Exception {
-		Serializer serializer = new Persister();
 		InitOperationOptions initOperationOptions = TestConfigUtil.createTestInitOperationOptions("syncanytest");
 		// Always LocalTransferSettings
-		serializer.write(initOperationOptions.getConfigTO(), tmpFile);
+		initOperationOptions.getConfigTO().save(tmpFile);
 
 		ConfigTO confRestored = ConfigTO.load(tmpFile);
 
-		assertEquals(LocalTransferSettings.class, confRestored.getTransferSettings().getClass());
+		assertEquals("local", confRestored.getConnection().getType());
 
 		// Tear down
 		FileUtils.deleteDirectory(initOperationOptions.getLocalDir());
-		FileUtils.deleteDirectory(((LocalTransferSettings) initOperationOptions.getConfigTO().getTransferSettings()).getPath());
-	}
+		
+		LocalTransferSettings settings = (LocalTransferSettings)localTransferPlugin.createEmptySettings();
+		Connection connection = initOperationOptions.getConfigTO().getConnection();
+		connection.fillTransferSettings(settings);
+		File repoDir = settings.getPath();
 
-	@Test(expected = ElementException.class)
-	public void testDeserializeWrongClass() throws Exception {
-
-		LocalTransferSettings lts = new LocalTransferSettings();
-		lts.setPath(tmpFile);
-
-		Serializer serializer = new Persister();
-		serializer.write(lts, tmpFile);
-
-		// This shouldn't blow up!
-		serializer.read(DummyTransferSettings.class, tmpFile);
+		FileUtils.deleteDirectory(repoDir);
 	}
 
 	@Test
 	public void testGetSettingsAndManagerFromPlugin() throws Exception {
-		Class<? extends TransferSettings> settingsClass = TransferPluginUtil.getTransferSettingsClass(DummyTransferPlugin.class);
+		Class<? extends TransferSettings> settingsClass = Plugins.getTransferPlugin("dummy").createEmptySettings().getClass();
 		assertEquals(DummyTransferSettings.class, settingsClass);
 	}
 
@@ -169,13 +171,17 @@ public class TransferSettingsTest {
 		final String enumValue = "A";
 
 		DummyTransferSettings testTransferSettings = new DummyTransferSettings();
-		testTransferSettings.setField("enumField", enumValue);
+		
+		List<TransferPluginOption> orderedOptions = TransferPluginOptions.getOrderedOptions(testTransferSettings);
+		assertEquals("enumField", orderedOptions.get(5).getId());
+		EnumTransferPluginOption<?> enumField = (EnumTransferPluginOption<?>)orderedOptions.get(5);
+		
+		enumField.setStringValue(enumValue);
 		assertEquals(DummyTransferSettings.DummyEnum.A, testTransferSettings.enumField);
 
 		final String enumValueLower = "a";
 
-		testTransferSettings = new DummyTransferSettings();
-		testTransferSettings.setField("enumField", enumValueLower);
+		enumField.setStringValue(enumValueLower);
 		assertEquals(DummyTransferSettings.DummyEnum.A, testTransferSettings.enumField);
 	}
 
@@ -184,6 +190,11 @@ public class TransferSettingsTest {
 		final String enumValue = "C"; // does not exist
 
 		DummyTransferSettings testTransferSettings = new DummyTransferSettings();
-		testTransferSettings.setField("enumField", enumValue);
+
+		List<TransferPluginOption> orderedOptions = TransferPluginOptions.getOrderedOptions(testTransferSettings);
+		assertEquals("enumField", orderedOptions.get(5).getId());
+		EnumTransferPluginOption<?> enumField = (EnumTransferPluginOption<?>)orderedOptions.get(5);
+		
+		enumField.setStringValue(enumValue);
 	}
 }

@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.StorageException;
 import org.syncany.config.Config;
 import org.syncany.database.FileContent.FileChecksum;
 import org.syncany.database.FileVersion;
@@ -35,7 +36,6 @@ import org.syncany.operations.AbstractTransferOperation;
 import org.syncany.operations.Assembler;
 import org.syncany.operations.Downloader;
 import org.syncany.operations.restore.RestoreOperationResult.RestoreResultCode;
-import org.syncany.plugins.transfer.StorageException;
 
 public class RestoreOperation extends AbstractTransferOperation {
 	private static final Logger logger = Logger.getLogger(RestoreOperation.class.getSimpleName());

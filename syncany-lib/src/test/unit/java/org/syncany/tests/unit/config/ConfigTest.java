@@ -59,11 +59,21 @@ public class ConfigTest {
 		Config config = new Config(localDir, configTO, repoTO);
 
 		// Test
-		assertEquals("/some/folder/.syncany", config.getAppDir().getAbsolutePath());
-		assertEquals("/some/folder/.syncany/cache", config.getCacheDir().getAbsolutePath());
-		assertEquals("/some/folder/.syncany/db", config.getDatabaseDir().getAbsolutePath());
-		assertEquals("/some/folder/.syncany/db/local.db", config.getDatabaseFile().getAbsolutePath());
-
+		
+		String os = System.getProperty("os.name");
+		if (os.toLowerCase().contains("linux")) {
+			assertEquals("/some/folder/.syncany", config.getAppDir().getAbsolutePath());
+			assertEquals("/some/folder/.syncany/cache", config.getCacheDir().getAbsolutePath());
+			assertEquals("/some/folder/.syncany/db", config.getDatabaseDir().getAbsolutePath());
+			assertEquals("/some/folder/.syncany/db/local.db", config.getDatabaseFile().getAbsolutePath());
+		} else if (os.toLowerCase().contains("windows")) {
+			assertEquals("C:\\some\\folder\\.syncany", config.getAppDir().getAbsolutePath());
+			assertEquals("C:\\some\\folder\\.syncany\\cache", config.getCacheDir().getAbsolutePath());
+			assertEquals("C:\\some\\folder\\.syncany\\db", config.getDatabaseDir().getAbsolutePath());
+			assertEquals("C:\\some\\folder\\.syncany\\db\\local.db", config.getDatabaseFile().getAbsolutePath());
+		} else {
+			fail("Tests are running on unknown operating system: " + os);
+		}
 		assertNotNull(config.getChunker());
 		assertEquals("FixedChunker", config.getChunker().getClass().getSimpleName());
 		assertEquals("SHA1", config.getChunker().getChecksumAlgorithm());

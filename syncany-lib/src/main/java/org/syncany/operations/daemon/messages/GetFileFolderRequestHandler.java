@@ -22,13 +22,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.syncany.api.transfer.TransferManager;
 import org.syncany.config.Config;
 import org.syncany.config.LocalEventBus;
+import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.FileContent;
 import org.syncany.database.FileVersion;
-import org.syncany.database.ObjectId;
-import org.syncany.database.ChunkEntry.ChunkChecksum;
 import org.syncany.database.MultiChunkEntry.MultiChunkId;
+import org.syncany.database.ObjectId;
 import org.syncany.database.PartialFileHistory.FileHistoryId;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.Assembler;
@@ -36,7 +37,6 @@ import org.syncany.operations.Downloader;
 import org.syncany.operations.daemon.messages.api.FolderRequest;
 import org.syncany.operations.daemon.messages.api.FolderRequestHandler;
 import org.syncany.operations.daemon.messages.api.Response;
-import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.util.StringUtil;
 
 public class GetFileFolderRequestHandler extends FolderRequestHandler {
@@ -62,7 +62,7 @@ public class GetFileFolderRequestHandler extends FolderRequestHandler {
 			FileContent fileContent = localDatabase.getFileContent(fileVersion.getChecksum(), true);
 			Map<ChunkChecksum, MultiChunkId> multiChunks = localDatabase.getMultiChunkIdsByChecksums(fileContent.getChunks());
 
-			TransferManager transferManager = config.getTransferPlugin().createTransferManager(config.getConnection(), config);
+			TransferManager transferManager = config.getConnection().createTransferManager(config.getCache());
 			Downloader downloader = new Downloader(config, transferManager);
 			Assembler assembler = new Assembler(config, localDatabase);
 

@@ -48,7 +48,6 @@ import org.syncany.tests.integration.scenarios.Issue288ScenarioTest;
 import org.syncany.tests.integration.scenarios.Issue303ScenarioTest;
 import org.syncany.tests.integration.scenarios.Issue316ScenarioTest;
 import org.syncany.tests.integration.scenarios.Issue374Pre1965DateScenarioTest;
-import org.syncany.tests.integration.scenarios.Issue429ScenarioTest;
 import org.syncany.tests.integration.scenarios.Issue520NoResumeOnCorruptXmlScenarioTest;
 import org.syncany.tests.integration.scenarios.ManyRenamesScenarioTest;
 import org.syncany.tests.integration.scenarios.ManySyncUpsAndDatabaseFileCleanupScenarioTest;

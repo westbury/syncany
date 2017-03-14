@@ -23,39 +23,41 @@ import java.util.List;
 
 import org.junit.Test;
 import org.simpleframework.xml.Element;
+import org.syncany.api.transfer.LocalDiskCache;
+import org.syncany.api.transfer.PropertyVisitor;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.plugins.dummy.DummyTransferSettings;
 import org.syncany.plugins.transfer.Setup;
 import org.syncany.plugins.transfer.TransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOptionCallback;
 import org.syncany.plugins.transfer.TransferPluginOptions;
-import org.syncany.plugins.transfer.TransferSettings;
 
 public class TransferPluginOptionsTest {
 	@Test
 	public void testGetOrderedOptionsWithDummyPlugin() {
-		List<TransferPluginOption> orderedOptions = TransferPluginOptions.getOrderedOptions(DummyTransferSettings.class);
+		List<TransferPluginOption> orderedOptions = TransferPluginOptions.getOrderedOptions(new DummyTransferSettings());
 		
 		assertEquals(6, orderedOptions.size());
-		assertEquals("foo", orderedOptions.get(0).getName());
-		assertEquals("number", orderedOptions.get(1).getName());
-		assertEquals("baz", orderedOptions.get(2).getName());
-		assertEquals("nest", orderedOptions.get(3).getName());
-		assertEquals("nest2", orderedOptions.get(4).getName());
-		assertEquals("enumField", orderedOptions.get(5).getName());
+		assertEquals("foo", orderedOptions.get(0).getId());
+		assertEquals("number", orderedOptions.get(1).getId());
+		assertEquals("baz", orderedOptions.get(2).getId());
+		assertEquals("nest", orderedOptions.get(3).getId());
+		assertEquals("nest2", orderedOptions.get(4).getId());
+		assertEquals("enumField", orderedOptions.get(5).getId());
 	}
 	
 	@Test
 	public void testGetOrderedOptionsWithAnotherDummyPlugin() {
-		List<TransferPluginOption> orderedOptions = TransferPluginOptions.getOrderedOptions(AnotherDummyTransferSettings.class);
+		List<TransferPluginOption> orderedOptions = TransferPluginOptions.getOrderedOptions(new AnotherDummyTransferSettings());
 		
-		assertEquals(4, orderedOptions.size());
-		assertEquals("noSetupAnnotation", orderedOptions.get(0).getName());
-		assertEquals("singularNonVisible", orderedOptions.get(1).getName());
-		assertEquals("someCallback", orderedOptions.get(2).getName());		
-		assertEquals("someInvalidCallback", orderedOptions.get(3).getName());		
+		assertEquals(3, orderedOptions.size());
+		assertEquals("noSetupAnnotation", orderedOptions.get(0).getId());
+		assertEquals("singularNonVisible", orderedOptions.get(1).getId());
+		assertEquals("someCallback", orderedOptions.get(2).getId());		
 	}
 	
-	public static class AnotherDummyTransferSettings extends TransferSettings {
+	public static class AnotherDummyTransferSettings implements TransferSettings {
 		@Element(required = true)
 		public String noSetupAnnotation;
 		
@@ -66,10 +68,57 @@ public class TransferPluginOptionsTest {
 		@Element(required = true)
 		@Setup(callback = TransferPluginOptionCallback.class)
 		public String someCallback;
+
+		private String getNoSetupAnnotation() {
+			return noSetupAnnotation;
+		}
 		
-		@Element(required = true)
-		@Setup(callback = InvalidTransferPluginOptionCallback.class)
-		public String someInvalidCallback;		
+		private void setNoSetupAnnotation(String value) {
+			noSetupAnnotation = value;
+		}
+
+		private String getSingularNonVisible() {
+			return singularNonVisible;
+		}
+		
+		private void setSingularNonVisible(String value) {
+			singularNonVisible = value;
+		}
+		
+		private String getSomeCallback() {
+			return someCallback;
+		}
+		
+		private void setSomeCallback(String value) {
+			someCallback = value;
+		}
+
+		@Override
+		public void visitProperties(PropertyVisitor visitor) {
+			visitor.stringProperty("noSetupAnnotation", "noSetupAnnotation", true, true, true, false, true, this::getNoSetupAnnotation, this::setNoSetupAnnotation);
+			visitor.stringProperty("singularNonVisible", "singularNonVisible", true, true, true, false, true, this::getSingularNonVisible, this::setSingularNonVisible);
+			visitor.stringProperty("someCallback", "someCallback", true, true, true, false, true, this::getSomeCallback, this::setSomeCallback);
+		}
+
+		@Override
+		public TransferManager createTransferManager(LocalDiskCache cache) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getType() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean isValid() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getReasonForLastValidationFail() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	public static class AnotherDummyTransferPluginOptionCallback implements TransferPluginOptionCallback {
@@ -82,9 +131,5 @@ public class TransferPluginOptionsTest {
 		public String postQueryCallback(String optionValue) {
 			return "bye there";
 		}		
-	}
-	
-	public static interface InvalidTransferPluginOptionCallback extends TransferPluginOptionCallback {
-		// This should be a class
 	}
 }

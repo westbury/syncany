@@ -4,26 +4,28 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
-
+/**
+ * A transfer plugin can be used to store Syncany's repository files on any remote location. 
+ * Implementations of the <tt>TransferPlugin</tt> interfaces identify a storage/transfer plugin.
+ * 
+ * The transfer plugin is responsible for transferring files
+ * to the remote storage. Implementations must provide implementations for
+ * {@link TransferPlugin} (this class), {@link TransferSettings} (connection
+ * details) and {@link TransferManager} (transfer methods).<br/><br/>
+ *
+ * @author Philipp C. Heckel <philipp.heckel@gmail.com>
+ * @author Christian Roth <christian.roth@port17.de>
+ */
 public interface TransferPlugin extends Plugin {
 
 	/**
-	 * I'm not sure whether to keep this method.  Currently plugin and config
-	 * dependencies were split by passing a list of Element objects in the API.
-	 * However settings can be configured from config.xml by setting each
-	 * field individually.
+	 * Creates an empty plugin-specific {@link TransferSettings} instance.
 	 * 
-	 * @param settings
-	 * @return
-	 */
-	TransferSettings createTransferSettings(List<Element> settings);
-	
-	/**
 	 * Create transfer settings object.  None of the fields will be
 	 * set initially.  One must visit and set each field value.
 	 * 
 	 * @return
 	 */
-	TransferSettings createTransferSettings();
+	TransferSettings createEmptySettings();
 		
 }

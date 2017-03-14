@@ -17,11 +17,11 @@
  */
 package org.syncany.tests.integration.scenarios;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.syncany.tests.util.TestAssertUtil.assertFileEquals;
 
 import org.junit.Test;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 

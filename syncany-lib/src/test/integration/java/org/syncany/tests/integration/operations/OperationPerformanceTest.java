@@ -23,10 +23,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Test;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.config.Config;
 import org.syncany.operations.down.DownOperation;
 import org.syncany.operations.up.UpOperation;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.tests.unit.util.TestFileUtil;
 import org.syncany.tests.util.TestConfigUtil;
 

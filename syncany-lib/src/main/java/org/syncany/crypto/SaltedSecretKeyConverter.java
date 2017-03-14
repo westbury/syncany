@@ -18,10 +18,9 @@
 package org.syncany.crypto;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.simpleframework.xml.convert.Converter;
-import org.simpleframework.xml.stream.InputNode;
-import org.simpleframework.xml.stream.OutputNode;
+import org.syncany.config.to.EncryptedKey;
 import org.syncany.util.StringUtil;
 
 /**
@@ -30,16 +29,28 @@ import org.syncany.util.StringUtil;
  * 
  * @author Christian Roth <christian.roth@port17.de>
  */
-public class SaltedSecretKeyConverter implements Converter<SaltedSecretKey> {
-	public SaltedSecretKey read(InputNode node) throws Exception {
-		byte[] saltBytes = StringUtil.fromHex(node.getAttribute("salt").getValue());
-		byte[] keyBytes = StringUtil.fromHex(node.getAttribute("key").getValue());
+
+public class SaltedSecretKeyConverter extends XmlAdapter<EncryptedKey, SaltedSecretKey>
+{
+
+	@Override
+	public EncryptedKey marshal(SaltedSecretKey saltedSecretKey) throws Exception {
+		if (saltedSecretKey == null) {
+			return null;
+		} else {
+			EncryptedKey result = new EncryptedKey();
+			result.setSalt(StringUtil.toHex(saltedSecretKey.getSalt()));
+			result.setKey(StringUtil.toHex(saltedSecretKey.getEncoded()));
+			return result;
+		}
+	}
+
+	@Override
+	public SaltedSecretKey unmarshal(EncryptedKey v) throws Exception {
+		byte[] saltBytes = StringUtil.fromHex(v.getSalt());
+		byte[] keyBytes = StringUtil.fromHex(v.getKey());
 
 		return new SaltedSecretKey(new SecretKeySpec(keyBytes, CipherParams.MASTER_KEY_DERIVATION_FUNCTION), saltBytes);
 	}
 
-	public void write(OutputNode node, SaltedSecretKey saltedSecretKey) {
-		node.setAttribute("salt", StringUtil.toHex(saltedSecretKey.getSalt()));
-		node.setAttribute("key", StringUtil.toHex(saltedSecretKey.getEncoded()));
-	}
 }

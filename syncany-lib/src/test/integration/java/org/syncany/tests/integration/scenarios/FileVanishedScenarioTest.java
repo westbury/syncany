@@ -28,9 +28,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Test;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.database.SqlDatabase;
 import org.syncany.operations.cleanup.CleanupOperationOptions;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.tests.util.TestClient;
 import org.syncany.tests.util.TestConfigUtil;
 

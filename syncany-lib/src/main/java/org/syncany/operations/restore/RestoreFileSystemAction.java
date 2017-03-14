@@ -22,7 +22,6 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.syncany.config.Config;
 import org.syncany.database.FileVersion;
-import org.syncany.database.FileVersion.FileStatus;
 import org.syncany.database.FileVersion.FileType;
 import org.syncany.database.MemoryDatabase;
 import org.syncany.operations.Assembler;

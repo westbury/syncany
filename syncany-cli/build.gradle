@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 dependencies {
+	compile			project(':syncany-api')
 	compile			project(":syncany-lib")
 	compile			project(":syncany-util")
 	compile			"net.sf.jopt-simple:jopt-simple:4.5"      

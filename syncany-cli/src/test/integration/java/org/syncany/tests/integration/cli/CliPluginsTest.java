@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
-import org.syncany.plugins.Plugin;
+import org.syncany.api.transfer.Plugin;
 import org.syncany.plugins.Plugins;
 
 import static org.junit.Assert.assertNotNull;
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class CliPluginsTest {
 	@Test
 	public void testPluginsList() {
-		Collection<Plugin> pluginList = Plugins.list();
+		Collection<? extends Plugin> pluginList = Plugins.transferPlugins();
 
 		List<String> expectedPluginIds = Arrays.asList(new String[] { "local", "unreliable_local", "dummy" });
 		List<String> actualPluginIds = new ArrayList<String>();

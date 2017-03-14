@@ -3,6 +3,7 @@ package org.syncany.plugins.transfer.oauth;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
+
 import io.undertow.util.StatusCodes;
 
 /**

@@ -17,7 +17,9 @@
  */
 package org.syncany.plugins.transfer.files;
 
-import org.syncany.plugins.transfer.StorageException;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.plugins.transfer.features.RemoteFileFactories;
 
 /**
  * The master file represents the file that stores the salt for the master
@@ -29,7 +31,7 @@ import org.syncany.plugins.transfer.StorageException;
  * 
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class MasterRemoteFile extends RemoteFile {
+public class MasterRemoteFile extends AbstractRemoteFile {
 	private static final String NAME_FORMAT = "master";
 
 	/**
@@ -42,8 +44,8 @@ public class MasterRemoteFile extends RemoteFile {
 	
 	/**
 	 * Initializes a new master file, given a name. This constructor might 
-	 * be called by the {@link RemoteFileFactory#createRemoteFile(String, Class) createRemoteFile()}
-	 * method of the {@link RemoteFileFactory}. 
+	 * be called by the {@link RemoteFileFactories#createRemoteFile(String, Class) createRemoteFile()}
+	 * method of the {@link RemoteFileFactories}. 
 	 *  
 	 * @param name Master file name; <b>must</b> always be <b>master</b> 
 	 * @throws StorageException If the name is not <b>master</b>
@@ -59,5 +61,10 @@ public class MasterRemoteFile extends RemoteFile {
 		}
 		
 		return name;
+	}
+
+	@Override
+	public PathAwareRemoteFileType getPathAwareType() {
+		return PathAwareRemoteFileType.Master;
 	}
 }

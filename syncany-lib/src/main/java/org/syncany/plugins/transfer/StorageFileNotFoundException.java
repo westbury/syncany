@@ -17,6 +17,8 @@
  */
 package org.syncany.plugins.transfer;
 
+import org.syncany.api.transfer.StorageException;
+
 /**
  * The StorageFileNotFoundException is thrown if a TransferManager cannot
  * find a file. If relevant, then a TransactionAwareTransferManager can catch

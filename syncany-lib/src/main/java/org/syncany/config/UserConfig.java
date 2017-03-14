@@ -17,12 +17,13 @@
  */
 package org.syncany.config;
 
-import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.util.Map;
+
+import javax.net.ssl.SSLContext;
 
 import org.syncany.config.to.UserConfigTO;
 import org.syncany.crypto.CipherException;

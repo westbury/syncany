@@ -33,32 +33,29 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.StorageTestResult;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.cli.util.InitConsole;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.crypto.CipherUtil;
 import org.syncany.operations.daemon.messages.ShowMessageExternalEvent;
 import org.syncany.operations.init.GenlinkOperationResult;
 import org.syncany.plugins.Plugins;
 import org.syncany.plugins.UserInteractionListener;
 import org.syncany.plugins.transfer.NestedTransferPluginOption;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.plugins.transfer.ScalarTransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOption;
 import org.syncany.plugins.transfer.TransferPluginOption.ValidationResult;
 import org.syncany.plugins.transfer.TransferPluginOptionCallback;
 import org.syncany.plugins.transfer.TransferPluginOptionConverter;
 import org.syncany.plugins.transfer.TransferPluginOptions;
-import org.syncany.plugins.transfer.TransferPluginUtil;
-import org.syncany.plugins.transfer.TransferSettings;
 import org.syncany.plugins.transfer.oauth.OAuth;
 import org.syncany.plugins.transfer.oauth.OAuthGenerator;
 import org.syncany.plugins.transfer.oauth.OAuthTokenFinish;
 import org.syncany.plugins.transfer.oauth.OAuthTokenWebListener;
-import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
 import org.syncany.util.StringUtil.StringJoinListener;
 
@@ -66,6 +63,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.eventbus.Subscribe;
+
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 /**
  * The abstract init command provides multiple shared methods for the 'init'
@@ -98,7 +98,14 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		configTO.setDisplayName(getDefaultDisplayName());
 		configTO.setMachineName(getRandomMachineName());
 		configTO.setMasterKey(null);
-		configTO.setTransferSettings(transferSettings); // can be null
+		
+		 // transferSettings can be null???
+		
+		Connection connection = new Connection();
+		connection.setType(transferSettings.getType());
+		connection.setTransferSettings(transferSettings);
+
+		configTO.setConnection(connection);
 
 		return configTO;
 	}
@@ -142,7 +149,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 	}
 
 	private TransferPlugin initPlugin(String pluginStr) throws Exception {
-		TransferPlugin plugin = Plugins.get(pluginStr, TransferPlugin.class);
+		TransferPlugin plugin = Plugins.getTransferPlugin(pluginStr);
 
 		if (plugin == null) {
 			throw new Exception("ERROR: Plugin '" + pluginStr + "' does not exist.");
@@ -165,7 +172,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 			printOAuthInformation(settings);
 
 			// Ask for plugin settings
-			List<TransferPluginOption> pluginOptions = TransferPluginOptions.getOrderedOptions(settings.getClass());
+			List<TransferPluginOption> pluginOptions = TransferPluginOptions.getOrderedOptions(settings);
 
 			for (TransferPluginOption option : pluginOptions) {
 				askPluginSettings(settings, option, knownPluginSettings, "");
@@ -281,22 +288,23 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 			NoSuchMethodException, SecurityException {
 
 		if (option instanceof NestedTransferPluginOption) {
-			Class<?> childPluginTransferSettingsClass = ReflectionUtil.getClassFromType(option.getType());
+			NestedTransferPluginOption<?> nestedOption = (NestedTransferPluginOption<?>)option;
+			Class<?> childPluginTransferSettingsClass = nestedOption.getTransferSettingsClass();
 			boolean isGenericChildPlugin = TransferSettings.class.equals(childPluginTransferSettingsClass);
 
 			if (isGenericChildPlugin) {
-				askGenericChildPluginSettings(settings, option, knownPluginSettings, nestPrefix);
+				askGenericChildPluginSettings(settings, nestedOption, knownPluginSettings, nestPrefix);
 			}
 			else {
-				askConreteChildPluginSettings(settings, (NestedTransferPluginOption) option, knownPluginSettings, nestPrefix);
+				askConreteChildPluginSettings(settings, nestedOption, knownPluginSettings, nestPrefix);
 			}
 		}
 		else {
-			askNormalPluginSettings(settings, option, knownPluginSettings, nestPrefix);
+			askNormalPluginSettings(settings, (ScalarTransferPluginOption)option, knownPluginSettings, nestPrefix);
 		}
 	}
 
-	private void askNormalPluginSettings(TransferSettings settings, TransferPluginOption option, Map<String, String> knownPluginSettings,
+	private void askNormalPluginSettings(TransferSettings settings, ScalarTransferPluginOption option, Map<String, String> knownPluginSettings,
 			String nestPrefix)
 			throws StorageException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
@@ -304,11 +312,11 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		TransferPluginOptionCallback optionCallback = createOptionCallback(settings, option.getCallback());
 		TransferPluginOptionConverter optionConverter = createOptionConverter(settings, option.getConverter());
 
-		if (!isInteractive && !knownPluginSettings.containsKey(nestPrefix + option.getName())) {
-			throw new IllegalArgumentException("Missing plugin option (" + nestPrefix + option.getName() + ") in non-interactive mode.");
+		if (!isInteractive && !knownPluginSettings.containsKey(nestPrefix + option.getId())) {
+			throw new IllegalArgumentException("Missing plugin option (" + nestPrefix + option.getId() + ") in non-interactive mode.");
 		}
-		else if (knownPluginSettings.containsKey(nestPrefix + option.getName())) {
-			settings.setField(option.getField().getName(), knownPluginSettings.get(nestPrefix + option.getName()));
+		else if (knownPluginSettings.containsKey(nestPrefix + option.getId())) {
+			option.setStringValue(knownPluginSettings.get(nestPrefix + option.getId()));
 		}
 		else if (!option.isVisible()) {
 			// Do nothing. Invisible option!
@@ -322,7 +330,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 				optionValue = optionConverter.convert(optionValue);
 			}
 
-			settings.setField(option.getField().getName(), optionValue);
+			option.setStringValue(optionValue);
 
 			callAndPrintPostQueryCallback(optionCallback, optionValue);
 		}
@@ -335,7 +343,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 	 * <p>This case is triggered by a field looking like this:
 	 * <tt>private TransferSettings childPluginSettings;</tt>
 	 */
-	private void askGenericChildPluginSettings(TransferSettings settings, TransferPluginOption option, Map<String, String> knownPluginSettings,
+	private <T extends TransferSettings> void askGenericChildPluginSettings(TransferSettings settings, NestedTransferPluginOption<T> option, Map<String, String> knownPluginSettings,
 			String nestPrefix)
 			throws StorageException, IllegalAccessException, InstantiationException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
@@ -350,15 +358,15 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 
 		TransferPlugin childPlugin = null;
-		Class<? extends TransferPlugin> pluginClass = TransferPluginUtil.getTransferPluginClass(settings.getClass());
+		Class<? extends TransferPlugin> pluginClass = Plugins.getTransferPlugin(settings.getType()).getClass();
 
 		// Non-interactive: Plugin settings might be given via command line
 		try {
-			childPlugin = initPlugin(knownPluginSettings.get(nestPrefix + option.getName() + GENERIC_PLUGIN_TYPE_IDENTIFIER));
+			childPlugin = initPlugin(knownPluginSettings.get(nestPrefix + option.getId() + GENERIC_PLUGIN_TYPE_IDENTIFIER));
 		}
 		catch (Exception e) {
 			if (!isInteractive) {
-				throw new IllegalArgumentException("Missing nested plugin type (" + nestPrefix + option.getName() + GENERIC_PLUGIN_TYPE_IDENTIFIER
+				throw new IllegalArgumentException("Missing nested plugin type (" + nestPrefix + option.getId() + GENERIC_PLUGIN_TYPE_IDENTIFIER
 						+ ") in non-interactive mode.");
 			}
 		}
@@ -375,10 +383,10 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		// Create nested/child settings
 		TransferSettings childSettings = childPlugin.createEmptySettings();
 
-		settings.setField(option.getField().getName(), childSettings);
-		nestPrefix = nestPrefix + option.getName() + NESTED_OPTIONS_SEPARATOR;
+		option.setNestedSettings(childSettings);
+		nestPrefix = nestPrefix + option.getId() + NESTED_OPTIONS_SEPARATOR;
 
-		for (TransferPluginOption nestedOption : TransferPluginOptions.getOrderedOptions(childSettings.getClass())) {
+		for (TransferPluginOption nestedOption : TransferPluginOptions.getOrderedOptions(childSettings)) {
 			askPluginSettings(childSettings, nestedOption, knownPluginSettings, nestPrefix);
 		}
 
@@ -393,7 +401,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 	 * <p>This case is triggered by a field looking like this:
 	 * <tt>private LocalTransferSettings localChildPluginSettings;</tt>
 	 */
-	private void askConreteChildPluginSettings(TransferSettings settings, NestedTransferPluginOption option, Map<String, String> knownPluginSettings,
+	private <T extends TransferSettings> void askConreteChildPluginSettings(TransferSettings settings, NestedTransferPluginOption<T> option, Map<String, String> knownPluginSettings,
 			String nestPrefix) throws StorageException, IllegalAccessException, InstantiationException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
 
@@ -406,18 +414,14 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 			out.println(option.getDescription() + ":");
 		}
 
+		Class<T> nestedTransferSettingsClass = option.getTransferSettingsClass();
+
+		T nestedSettings = nestedTransferSettingsClass.newInstance();
+
+		option.setNestedSettings(nestedSettings);
+		nestPrefix = nestPrefix + option.getId() + NESTED_OPTIONS_SEPARATOR;
+
 		for (TransferPluginOption nestedPluginOption : option.getOptions()) {
-			Class<?> nestedTransferSettingsClass = ReflectionUtil.getClassFromType(option.getType());
-
-			if (nestedTransferSettingsClass == null) {
-				throw new RuntimeException("No class found for type: " + option.getType());
-			}
-
-			TransferSettings nestedSettings = (TransferSettings) nestedTransferSettingsClass.newInstance();
-
-			settings.setField(option.getField().getName(), nestedSettings);
-			nestPrefix = nestPrefix + option.getName() + NESTED_OPTIONS_SEPARATOR;
-
 			askPluginSettings(nestedSettings, nestedPluginOption, knownPluginSettings, nestPrefix);
 		}
 
@@ -446,7 +450,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 	}
 
-	private String askPluginOption(TransferSettings settings, TransferPluginOption option) throws StorageException {
+	private String askPluginOption(TransferSettings settings, ScalarTransferPluginOption option) throws StorageException {
 		while (true) {
 			String value;
 
@@ -491,8 +495,8 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		}
 	}
 
-	private String askPluginOptionNormal(TransferSettings settings, TransferPluginOption option) throws StorageException {
-		String knownOptionValue = settings.getField(option.getField().getName());
+	private String askPluginOptionNormal(TransferSettings settings, ScalarTransferPluginOption option) throws StorageException {
+		String knownOptionValue = option.getStringValue();
 		String value = knownOptionValue;
 
 		if (option.isSingular() || knownOptionValue == null || "".equals(knownOptionValue)) {
@@ -511,12 +515,12 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		return value;
 	}
 
-	private String askPluginOptionOptional(TransferSettings settings, TransferPluginOption option) throws StorageException {
-		String knownOptionValue = settings.getField(option.getField().getName());
+	private String askPluginOptionOptional(TransferSettings settings, ScalarTransferPluginOption option) throws StorageException {
+		String knownOptionValue = option.getStringValue();
 		String value = knownOptionValue;
 
 		if (knownOptionValue == null || "".equals(knownOptionValue)) {
-			String defaultValueDescription = settings.getField(option.getField().getName());
+			String defaultValueDescription = option.getStringValue();
 
 			if (defaultValueDescription == null) {
 				defaultValueDescription = "none";
@@ -537,8 +541,8 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 		return value;
 	}
 
-	private String askPluginOptionSensitive(TransferSettings settings, TransferPluginOption option) throws StorageException {
-		String knownOptionValue = settings.getField(option.getField().getName());
+	private String askPluginOptionSensitive(TransferSettings settings, ScalarTransferPluginOption option) throws StorageException {
+		String knownOptionValue = option.getStringValue();
 		String value = knownOptionValue;
 		String optionalIndicator = option.isRequired() ? "" : ", optional";
 
@@ -559,22 +563,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 	}
 
 	private String getDescription(TransferSettings settings, TransferPluginOption option) {
-		Class<?> clazzForType = ReflectionUtil.getClassFromType(option.getType());
-
-		if (clazzForType != null && Enum.class.isAssignableFrom(clazzForType)) {
-			Object[] enumValues = clazzForType.getEnumConstants();
-
-			if (enumValues == null) {
-				throw new RuntimeException("Invalid TransferSettings class found: Enum at " + settings + " has no values");
-			}
-
-			logger.log(Level.FINE, "Found enum option, values are: " + StringUtil.join(enumValues, ", "));
-
-			return String.format("%s, choose from %s", option.getDescription(), StringUtil.join(enumValues, ", "));
-		}
-		else {
-			return option.getDescription();
-		}
+		return option.getDescription();
 	}
 
 	protected TransferPlugin askPlugin() {
@@ -583,7 +572,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 
 	protected TransferPlugin askPlugin(final Class<? extends TransferPlugin> ignoreTransferPluginClass) {
 		TransferPlugin plugin = null;
-		final List<TransferPlugin> plugins = Plugins.list(TransferPlugin.class);
+		final List<TransferPlugin> plugins = Plugins.transferPlugins();
 
 		Iterables.removeIf(plugins, new Predicate<TransferPlugin>() {
 			@Override
@@ -604,7 +593,7 @@ public abstract class AbstractInitCommand extends Command implements UserInterac
 			out.print("Plugin: ");
 			String pluginStr = console.readLine();
 
-			plugin = Plugins.get(pluginStr, TransferPlugin.class);
+			plugin = Plugins.getTransferPlugin(pluginStr);
 
 			if (plugin == null || ignoreTransferPluginClass == plugin.getClass()) {
 				out.println("ERROR: Plugin does not exist or cannot be used.");

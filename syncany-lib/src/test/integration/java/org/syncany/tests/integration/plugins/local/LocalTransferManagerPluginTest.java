@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.syncany.tests.integration.plugins.AbstractTransferManagerTest;
+import org.syncany.plugins.tests.AbstractTransferManagerTest;
 import org.syncany.tests.unit.util.TestFileUtil;
 
 /**

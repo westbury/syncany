@@ -23,15 +23,19 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import org.syncany.api.transfer.Plugin;
+import org.syncany.api.transfer.StorageTestResult;
+import org.syncany.api.transfer.TransferPlugin;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.init.ConnectOperation;
 import org.syncany.operations.init.ConnectOperationOptions;
 import org.syncany.operations.init.ConnectOperationOptions.ConnectOptionsStrategy;
 import org.syncany.operations.init.ConnectOperationResult;
 import org.syncany.operations.init.ConnectOperationResult.ConnectResultCode;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.Plugins;
+import org.syncany.api.transfer.TransferSettings;
 
 import static java.util.Arrays.asList;
 
@@ -68,7 +72,13 @@ public class ConnectCommand extends AbstractInitCommand {
 				performOperation = isInteractive && askRetryConnection();
 
 				if (performOperation) {
-					updateTransferSettings(operationOptions.getConfigTO().getTransferSettings());
+					// TODO check this
+					
+					Connection connection = operationOptions.getConfigTO().getConnection();
+					TransferPlugin plugin = Plugins.getTransferPlugin(connection.getType());
+					TransferSettings settings = plugin.createEmptySettings();
+					connection.fillTransferSettings(settings);
+					updateTransferSettings(settings);
 				}
 			}
 		}

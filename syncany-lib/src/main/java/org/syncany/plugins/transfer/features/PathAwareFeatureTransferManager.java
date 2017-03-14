@@ -22,26 +22,39 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.FileType;
+import org.syncany.api.transfer.RemoteFile;
+import org.syncany.api.transfer.RemoteFileFactory;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.features.PathAware;
+import org.syncany.api.transfer.features.PathAwareFeatureExtension;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.config.Config;
-import org.syncany.plugins.transfer.FileType;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.plugins.transfer.files.AbstractRemoteFile;
+import org.syncany.plugins.transfer.files.AbstractRemoteFileAttributes;
+import org.syncany.plugins.transfer.files.ActionRemoteFile;
+import org.syncany.plugins.transfer.files.CleanupRemoteFile;
+import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
+import org.syncany.plugins.transfer.files.MasterRemoteFile;
 import org.syncany.plugins.transfer.files.MultichunkRemoteFile;
-import org.syncany.plugins.transfer.files.RemoteFile;
-import org.syncany.plugins.transfer.files.RemoteFileAttributes;
+import org.syncany.plugins.transfer.files.SyncanyRemoteFile;
+import org.syncany.plugins.transfer.files.TempRemoteFile;
+import org.syncany.plugins.transfer.files.TransactionRemoteFile;
 import org.syncany.util.ReflectionUtil;
 import org.syncany.util.StringUtil;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 
 /**
@@ -54,8 +67,8 @@ import com.google.common.hash.Hashing;
  * has to be annotated with the {@link PathAware} annotation, and a {@link PathAwareFeatureExtension}
  * has to be provided.
  * 
- * <p>The sub-path for a {@link RemoteFile} can then be accessed via the
- * {@link PathAwareRemoteFileAttributes} using the {@link RemoteFile#getAttributes(Class)} method.
+ * <p>The sub-path for a {@link AbstractRemoteFile} can then be accessed via the
+ * {@link PathAwareRemoteFileAttributes} using the {@link AbstractRemoteFile#getAttributes(Class)} method.
  * 
  * @see PathAware
  * @see PathAwareFeatureExtension
@@ -79,7 +92,21 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 		this.subfolderDepth = pathAwareAnnotation.subfolderDepth();
 		this.bytesPerFolder = pathAwareAnnotation.bytesPerFolder();
 		this.folderSeparator = pathAwareAnnotation.folderSeparator();
-		this.affectedFiles = ImmutableList.copyOf(pathAwareAnnotation.affected());
+		
+		Set<Class<? extends RemoteFile>> affectedFileClasses = new HashSet<>();
+		for (PathAwareRemoteFileType affectedFileType : pathAwareAnnotation.affected()) {
+			switch (affectedFileType) {
+			case Action:      affectedFileClasses.add(ActionRemoteFile.class); break;
+			case Cleanup:     affectedFileClasses.add(CleanupRemoteFile.class); break;
+			case Database:    affectedFileClasses.add(DatabaseRemoteFile.class); break;
+			case Master:      affectedFileClasses.add(MasterRemoteFile.class); break;
+			case Multichunk:  affectedFileClasses.add(MultichunkRemoteFile.class); break;
+			case Syncany:     affectedFileClasses.add(SyncanyRemoteFile.class); break;
+			case Temp:        affectedFileClasses.add(TempRemoteFile.class); break;
+			case Transaction: affectedFileClasses.add(TransactionRemoteFile.class); break;
+			}
+		}
+		this.affectedFiles = ImmutableList.copyOf(affectedFileClasses);
 
 		this.pathAwareFeatureExtension = getPathAwareFeatureExtension(originalTransferManager, pathAwareAnnotation);
 	}
@@ -114,8 +141,8 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 	}
 
 	@Override
-	public void init(final boolean createIfRequired) throws StorageException {
-		underlyingTransferManager.init(createIfRequired);
+	public void init(boolean createIfRequired, RemoteFile syncanyRemoteFile) throws StorageException {
+		underlyingTransferManager.init(createIfRequired, syncanyRemoteFile);
 	}
 
 	@Override
@@ -158,17 +185,17 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 	}
 
 	@Override
-	public <T extends RemoteFile> Map<String, T> list(final Class<T> remoteFileClass) throws StorageException {
-		Map<String, T> filesInFolder = Maps.newHashMap();
-		String remoteFilePath = getRemoteFilePath(remoteFileClass);
+	public <T extends RemoteFile> Collection<T> list(PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
+		Collection<T> filesInFolder = new HashSet<>();
+		String remoteFilePath = getRemoteFilePath(remoteFileType);
 
-		list(remoteFilePath, filesInFolder, remoteFileClass);
+		list(remoteFilePath, filesInFolder, remoteFileType, factory);
 
 		return filesInFolder;
 	}
 
-	private <T extends RemoteFile> void list(String remoteFilePath, Map<String, T> remoteFiles, Class<T> remoteFileClass) throws StorageException {
-		logger.log(Level.INFO, "Listing folder for files matching " + remoteFileClass.getSimpleName() + ": " + remoteFilePath);
+	private <T extends RemoteFile> void list(String remoteFilePath, Collection<T> remoteFiles, PathAwareRemoteFileType remoteFileType, RemoteFileFactory<T> factory) throws StorageException {
+		logger.log(Level.INFO, "Listing folder for files matching " + remoteFileType + ": " + remoteFilePath);
 		Map<String, FileType> folderList = pathAwareFeatureExtension.listFolder(remoteFilePath);
 		
 		for (Map.Entry<String, FileType> folderListEntry : folderList.entrySet()) {
@@ -176,31 +203,21 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 			FileType fileType = folderListEntry.getValue();
 			
 			if (fileType == FileType.FILE) {
-				try {
-					remoteFiles.put(fileName, RemoteFile.createRemoteFile(fileName, remoteFileClass));
-					logger.log(Level.INFO, "- File: " + fileName);					
-				}
-				catch (StorageException e) {
-					// We don't care and ignore non-matching files!
-				}
+				remoteFiles.add(factory.createRemoteFile(fileName));
+				logger.log(Level.INFO, "- File: " + fileName);					
 			}
 			else if (fileType == FileType.FOLDER) {
 				logger.log(Level.INFO, "- Folder: " + fileName);
 
 				String newRemoteFilePath = remoteFilePath + folderSeparator + fileName;
-				list(newRemoteFilePath, remoteFiles, remoteFileClass);
+				list(newRemoteFilePath, remoteFiles, remoteFileType, factory);
 			}
 		}
 	}
 
 	@Override
-	public String getRemoteFilePath(Class<? extends RemoteFile> remoteFileClass) {
-		return underlyingTransferManager.getRemoteFilePath(remoteFileClass);
-	}
-
-	@Override
-	public StorageTestResult test(boolean testCreateTarget) {
-		return underlyingTransferManager.test(testCreateTarget);
+	public String getRemoteFilePath(PathAwareRemoteFileType remoteFileType) {
+		return underlyingTransferManager.getRemoteFilePath(remoteFileType);
 	}
 
 	@Override
@@ -219,8 +236,8 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 	}
 
 	@Override
-	public boolean testRepoFileExists() throws StorageException {
-		return underlyingTransferManager.testRepoFileExists();
+	public boolean testRepoFileExists(RemoteFile repoFile) throws StorageException {
+		return underlyingTransferManager.testRepoFileExists(repoFile);
 	}
 
 	private boolean isFolderizable(Class<? extends RemoteFile> remoteFileClass) {
@@ -283,7 +300,7 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 			return true;
 		} 
 		else {
-			String remoteFilePath = pathToString(Paths.get(underlyingTransferManager.getRemoteFilePath(remoteFile.getClass()), pathAwareRemoteFileAttributes.getPath()));
+			String remoteFilePath = pathToString(Paths.get(underlyingTransferManager.getRemoteFilePath(remoteFile.getPathAwareType()), pathAwareRemoteFileAttributes.getPath()));
 	
 			logger.log(Level.INFO, "Remote file is path aware, creating folder " + remoteFilePath);
 			boolean success = pathAwareFeatureExtension.createPath(remoteFilePath);
@@ -300,7 +317,7 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 			return true;
 		}
 		else {
-			String remoteFilePath = pathToString(Paths.get(underlyingTransferManager.getRemoteFilePath(remoteFile.getClass()), pathAwareRemoteFileAttributes.getPath()));
+			String remoteFilePath = pathToString(Paths.get(underlyingTransferManager.getRemoteFilePath(remoteFile.getPathAwareType()), pathAwareRemoteFileAttributes.getPath()));
 
 			logger.log(Level.INFO, "Remote file is path aware, cleaning empty folders at " + remoteFilePath);
 			boolean success = removeFolder(remoteFilePath);
@@ -327,7 +344,7 @@ public class PathAwareFeatureTransferManager implements FeatureTransferManager {
 		return true;
 	}
 
-	public static class PathAwareRemoteFileAttributes extends RemoteFileAttributes {
+	public static class PathAwareRemoteFileAttributes extends AbstractRemoteFileAttributes {
 		private String path;
 
 		public boolean hasPath() {

@@ -20,7 +20,9 @@ package org.syncany.plugins.transfer.files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.syncany.plugins.transfer.StorageException;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.plugins.transfer.features.RemoteFileFactories;
 
 /**
  * The database file represents a delta database.
@@ -34,7 +36,7 @@ import org.syncany.plugins.transfer.StorageException;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class DatabaseRemoteFile extends RemoteFile implements Comparable<DatabaseRemoteFile> {
+public class DatabaseRemoteFile extends AbstractRemoteFile implements Comparable<DatabaseRemoteFile> {
 	private static final Pattern NAME_PATTERN = Pattern.compile("database-([^-]+)-(\\d+)");
 	private static final String NAME_FORMAT = "database-%s-%010d";
 
@@ -43,8 +45,8 @@ public class DatabaseRemoteFile extends RemoteFile implements Comparable<Databas
 
 	/**
 	 * Initializes a new database file, given a name. This constructor might
-	 * be called by the {@link RemoteFileFactory#createRemoteFile(String, Class) createRemoteFile()}
-	 * method of the {@link RemoteFileFactory}.
+	 * be called by the {@link RemoteFileFactories#createRemoteFile(String, Class) createRemoteFile()}
+	 * method of the {@link RemoteFileFactories}.
 	 *
 	 * <p>If the pattern matches, the client name and the client version are set, and can be
 	 * queried by {@link #getClientName()} and {@link #getClientVersion()}.
@@ -140,6 +142,11 @@ public class DatabaseRemoteFile extends RemoteFile implements Comparable<Databas
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public PathAwareRemoteFileType getPathAwareType() {
+		return PathAwareRemoteFileType.Database;
 	}
 
 }

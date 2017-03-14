@@ -19,13 +19,13 @@ package org.syncany.cli;
 
 import java.util.List;
 
+import org.syncany.api.transfer.RemoteFile;
 import org.syncany.operations.OperationOptions;
 import org.syncany.operations.OperationResult;
 import org.syncany.operations.daemon.messages.LsRemoteStartSyncExternalEvent;
 import org.syncany.operations.ls_remote.LsRemoteOperation;
 import org.syncany.operations.ls_remote.LsRemoteOperationResult;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
-import org.syncany.plugins.transfer.files.RemoteFile;
 
 import com.google.common.eventbus.Subscribe;
 

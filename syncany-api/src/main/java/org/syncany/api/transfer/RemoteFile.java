@@ -17,6 +17,8 @@
  */
 package org.syncany.api.transfer;
 
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+
 /**
  * A remote file represents a file object on a remote storage. Its purpose is to
  * identify a file and allow {@link TransferManager}s to upload/download local files.
@@ -53,5 +55,7 @@ public interface RemoteFile {
 	 * or null if there is no attribute with the given class.
 	 */
 	<T extends RemoteFileAttributes> T getAttributes(Class<T> remoteFileAttributesClass);
+
+	PathAwareRemoteFileType getPathAwareType();
 
 }

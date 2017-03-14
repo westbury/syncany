@@ -24,18 +24,20 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.simpleframework.xml.core.Persister;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
+import org.syncany.api.transfer.features.TransactionAware;
 import org.syncany.operations.up.UpOperationOptions;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.TransferManager;
 import org.syncany.plugins.transfer.TransferManagerFactory;
-import org.syncany.plugins.transfer.features.TransactionAware;
+import org.syncany.plugins.transfer.features.RemoteFileFactories;
 import org.syncany.plugins.transfer.files.MultichunkRemoteFile;
 import org.syncany.plugins.transfer.to.TransactionTO;
 import org.syncany.plugins.unreliable_local.UnreliableLocalTransferSettings;
@@ -345,7 +347,7 @@ public class UploadInterruptedTest {
 
 		// 2. Double check if list() does not return the multichunk
 		TransferManager transferManager = TransferManagerFactory.build(clientA.getConfig()).withFeature(TransactionAware.class).asDefault();
-		Map<String, MultichunkRemoteFile> multiChunkList = transferManager.list(MultichunkRemoteFile.class);
+		Collection<MultichunkRemoteFile> multiChunkList = transferManager.list(PathAwareRemoteFileType.Multichunk, RemoteFileFactories::createMultichunkFile);
 		assertEquals(0, multiChunkList.size());
 
 		// 3. Second try fails in the beginning, to see if cleanTransactions was successful
@@ -454,7 +456,7 @@ public class UploadInterruptedTest {
 
 		// 2. Double check if list() does not return the multichunk
 		TransferManager transferManager = TransferManagerFactory.build(clientA.getConfig()).withFeature(TransactionAware.class).asDefault();
-		Map<String, MultichunkRemoteFile> multiChunkList = transferManager.list(MultichunkRemoteFile.class);
+		Collection<MultichunkRemoteFile> multiChunkList = transferManager.list(PathAwareRemoteFileType.Multichunk, RemoteFileFactories::createMultichunkFile);
 		assertEquals(0, multiChunkList.size());
 
 		// 3. Second try fails in the beginning, to see if cleanTransactions was successful

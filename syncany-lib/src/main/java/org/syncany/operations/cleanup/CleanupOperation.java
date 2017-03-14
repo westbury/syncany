@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +32,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.features.PathAwareRemoteFileType;
 import org.syncany.chunk.Chunk;
 import org.syncany.chunk.MultiChunk;
 import org.syncany.config.Config;
@@ -58,11 +61,11 @@ import org.syncany.operations.status.StatusOperationResult;
 import org.syncany.operations.up.BlockingTransfersException;
 import org.syncany.operations.up.UpOperation;
 import org.syncany.plugins.transfer.RemoteTransaction;
-import org.syncany.plugins.transfer.StorageException;
+import org.syncany.plugins.transfer.features.RemoteFileFactories;
+import org.syncany.plugins.transfer.files.AbstractRemoteFile;
 import org.syncany.plugins.transfer.files.CleanupRemoteFile;
 import org.syncany.plugins.transfer.files.DatabaseRemoteFile;
 import org.syncany.plugins.transfer.files.MultichunkRemoteFile;
-import org.syncany.plugins.transfer.files.RemoteFile;
 
 /**
  * The purpose of the cleanup operation is to keep the local database and the
@@ -442,14 +445,14 @@ public class CleanupOperation extends AbstractTransferOperation {
 		// 3. Prepare transaction
 
 		// Queue old databases for deletion
-		for (RemoteFile toDeleteRemoteFile : allToDeleteDatabaseFiles) {
+		for (AbstractRemoteFile toDeleteRemoteFile : allToDeleteDatabaseFiles) {
 			logger.log(Level.INFO, "   + Deleting remote file " + toDeleteRemoteFile + " ...");
 			remoteTransaction.delete(toDeleteRemoteFile);
 		}
 
 		// Queue new databases for uploading
 		for (File lastLocalMergeDatabaseFile : allMergedDatabaseFiles.keySet()) {
-			RemoteFile lastRemoteMergeDatabaseFile = allMergedDatabaseFiles.get(lastLocalMergeDatabaseFile);
+			AbstractRemoteFile lastRemoteMergeDatabaseFile = allMergedDatabaseFiles.get(lastLocalMergeDatabaseFile);
 
 			logger.log(Level.INFO, "   + Uploading new file {0} from local file {1} ...", new Object[] { lastRemoteMergeDatabaseFile,
 					lastLocalMergeDatabaseFile });
@@ -561,16 +564,18 @@ public class CleanupOperation extends AbstractTransferOperation {
 	 */
 	private Map<String, List<DatabaseRemoteFile>> retrieveAllRemoteDatabaseFiles() throws StorageException {
 		SortedMap<String, List<DatabaseRemoteFile>> allDatabaseRemoteFilesMap = new TreeMap<String, List<DatabaseRemoteFile>>();
-		Map<String, DatabaseRemoteFile> allDatabaseRemoteFiles = transferManager.list(DatabaseRemoteFile.class);
+		Collection<DatabaseRemoteFile> allDatabaseRemoteFiles = transferManager.list(PathAwareRemoteFileType.Database, RemoteFileFactories::createDatabaseFile);
 
-		for (Map.Entry<String, DatabaseRemoteFile> entry : allDatabaseRemoteFiles.entrySet()) {
-			String clientName = entry.getValue().getClientName();
+		for (DatabaseRemoteFile remoteFile : allDatabaseRemoteFiles) {
+			String clientName = remoteFile.getClientName();
 
-			if (allDatabaseRemoteFilesMap.get(clientName) == null) {
-				allDatabaseRemoteFilesMap.put(clientName, new ArrayList<DatabaseRemoteFile>());
+			List<DatabaseRemoteFile> filesForClient = allDatabaseRemoteFilesMap.get(clientName);
+			if (filesForClient == null) {
+				filesForClient = new ArrayList<>();
+				allDatabaseRemoteFilesMap.put(clientName, filesForClient);
 			}
 
-			allDatabaseRemoteFilesMap.get(clientName).add(entry.getValue());
+			filesForClient.add(remoteFile);
 		}
 
 		return allDatabaseRemoteFilesMap;
@@ -586,12 +591,12 @@ public class CleanupOperation extends AbstractTransferOperation {
 			return;
 		}
 		// Find all existing cleanup files
-		Map<String, CleanupRemoteFile> cleanupFiles = transferManager.list(CleanupRemoteFile.class);
+		Collection<CleanupRemoteFile> cleanupFiles = transferManager.list(PathAwareRemoteFileType.Cleanup, RemoteFileFactories::createCleanupFile);
 
 		long lastRemoteCleanupNumber = getLastRemoteCleanupNumber(cleanupFiles);
 
 		// Schedule any existing cleanup files for deletion
-		for (CleanupRemoteFile cleanupRemoteFile : cleanupFiles.values()) {
+		for (CleanupRemoteFile cleanupRemoteFile : cleanupFiles) {
 			remoteTransaction.delete(cleanupRemoteFile);
 		}
 

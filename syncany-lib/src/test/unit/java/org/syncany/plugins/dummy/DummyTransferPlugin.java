@@ -17,13 +17,32 @@
  */
 package org.syncany.plugins.dummy;
 
-import org.syncany.plugins.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferPlugin;
+import org.syncany.api.transfer.TransferSettings;
 
 /**
  * @author Christian Roth <christian.roth@port17.de>
  */
-public class DummyTransferPlugin extends TransferPlugin {
-	public DummyTransferPlugin() {
-		super("dummy");
+public class DummyTransferPlugin implements TransferPlugin {
+
+	@Override
+	public String getId() {
+		return "dummy";
+	}
+
+	@Override
+	public String getName() {
+		return "Dummy";
+	}
+
+	@Override
+	public String getVersion() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TransferSettings createEmptySettings() {
+		return new DummyTransferSettings();
 	}
 }

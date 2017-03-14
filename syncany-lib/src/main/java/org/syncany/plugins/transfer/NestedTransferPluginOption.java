@@ -17,9 +17,11 @@
  */
 package org.syncany.plugins.transfer;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.List;
+
+import org.syncany.api.transfer.TransferSettings;
+import org.syncany.api.transfer.TransferSettingsSetter;
+import org.w3c.dom.Element;
 
 /**
  * A nested plugin option is a special {@link TransferPluginOption} -- namely an
@@ -30,18 +32,39 @@ import java.util.List;
  *
  * @author Christian Roth <christian.roth@port17.de>
  */
-public class NestedTransferPluginOption extends TransferPluginOption {
-	private final List<TransferPluginOption> options;
+public class NestedTransferPluginOption<T extends TransferSettings> extends TransferPluginOption {
+	private TransferSettingsSetter<T> setter;
+	private int level;
 
-	public NestedTransferPluginOption(Field field, String name, String description, Type type, FileType fileType, boolean encrypted, boolean sensitive,
-			boolean singular, boolean visible, boolean required, Class<? extends TransferPluginOptionCallback> callback,
-			Class<? extends TransferPluginOptionConverter> converter, List<TransferPluginOption> nestedOptions) {
+	public NestedTransferPluginOption(String id, String displayName,
+			boolean required,
+			TransferSettingsSetter<T> setter, Class<? extends TransferPluginOptionCallback> callback, int level) {
 
-		super(field, name, description, type, fileType, encrypted, sensitive, singular, visible, required, callback, converter);
-		this.options = nestedOptions;
+		super(id, displayName, true, required, callback);
+		this.setter = setter;
+		this.level = level;
 	}
 
 	public List<TransferPluginOption> getOptions() {
-		return options;
+		T nestedSettings = setter.getValue();
+		List<TransferPluginOption> nestedOptions = TransferPluginOptions.getOrderedOptions(nestedSettings, level+1);
+		return nestedOptions;
 	}
+
+	@Override
+	public void setValueFromXml(Element element) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Class<T> getTransferSettingsClass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setNestedSettings(TransferSettings childSettings) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -1,0 +1,2 @@
+include ':syncany-api'
+project(':syncany-api').projectDir = new File(settingsDir, '../syncany-api')

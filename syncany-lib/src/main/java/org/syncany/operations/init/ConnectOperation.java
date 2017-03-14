@@ -25,9 +25,14 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
+import org.syncany.api.transfer.StorageException;
+import org.syncany.api.transfer.StorageTestResult;
+import org.syncany.api.transfer.TransferManager;
+import org.syncany.api.transfer.TransferSettings;
 import org.syncany.config.Config;
 import org.syncany.config.DaemonConfigHelper;
 import org.syncany.config.to.ConfigTO;
+import org.syncany.config.to.Connection;
 import org.syncany.config.to.MasterTO;
 import org.syncany.config.to.RepoTO;
 import org.syncany.crypto.CipherException;
@@ -37,12 +42,9 @@ import org.syncany.operations.daemon.messages.ShowMessageExternalEvent;
 import org.syncany.operations.init.ConnectOperationOptions.ConnectOptionsStrategy;
 import org.syncany.operations.init.ConnectOperationResult.ConnectResultCode;
 import org.syncany.plugins.UserInteractionListener;
-import org.syncany.plugins.transfer.StorageException;
-import org.syncany.plugins.transfer.StorageTestResult;
-import org.syncany.plugins.transfer.TransferManager;
-import org.syncany.plugins.transfer.TransferSettings;
+import org.syncany.plugins.transfer.AbstractTransferManager;
+import org.syncany.plugins.transfer.files.AbstractRemoteFile;
 import org.syncany.plugins.transfer.files.MasterRemoteFile;
-import org.syncany.plugins.transfer.files.RemoteFile;
 import org.syncany.plugins.transfer.files.SyncanyRemoteFile;
 
 /**
@@ -242,8 +244,12 @@ public class ConnectOperation extends AbstractInitOperation {
 					SaltedSecretKey masterKey = createMasterKeyFromPassword(masterPassword, applicationLink.getMasterKeySalt());
 					TransferSettings transferSettings = applicationLink.createTransferSettings(masterKey);
 
+					Connection connection = new Connection();
+					connection.setType(transferSettings.getType());
+					connection.setTransferSettings(transferSettings);
+					
 					configTO.setMasterKey(masterKey);
-					configTO.setTransferSettings(transferSettings);
+					configTO.setConnection(connection);
 				}
 				else {
 					logger.log(Level.INFO, " - Link is encrypted. Asking for password.");
@@ -261,8 +267,12 @@ public class ConnectOperation extends AbstractInitOperation {
 						try {
 							TransferSettings transferSettings = applicationLink.createTransferSettings(masterKey);
 
+							Connection connection = new Connection();
+							connection.setType(transferSettings.getType());
+							connection.setTransferSettings(transferSettings);
+							
 							configTO.setMasterKey(masterKey);
-							configTO.setTransferSettings(transferSettings);
+							configTO.setConnection(connection);
 
 							retryPassword = false;
 						}
@@ -272,7 +282,7 @@ public class ConnectOperation extends AbstractInitOperation {
 					}
 				}
 
-				if (configTO.getTransferSettings() == null) {
+				if (configTO.getConnection() == null) {
 					throw new CipherException("Unable to decrypt link.");
 				}
 			}
@@ -280,7 +290,12 @@ public class ConnectOperation extends AbstractInitOperation {
 				logger.log(Level.INFO, " - Link is NOT encrypted. No password needed.");
 
 				TransferSettings transferSettings = applicationLink.createTransferSettings();
-				configTO.setTransferSettings(transferSettings);
+
+				Connection connection = new Connection();
+				connection.setType(transferSettings.getType());
+				connection.setTransferSettings(transferSettings);
+				
+				configTO.setConnection(connection);
 			}
 		}
 		catch (Exception e) {
@@ -291,7 +306,8 @@ public class ConnectOperation extends AbstractInitOperation {
 	}
 
 	private boolean performRepoTest(TransferManager transferManager) {
-		StorageTestResult testResult = transferManager.test(false);
+		
+		StorageTestResult testResult = new AbstractTransferManager(transferManager).test(false);
 
 		logger.log(Level.INFO, "Storage test result ist " + testResult);
 
@@ -337,7 +353,7 @@ public class ConnectOperation extends AbstractInitOperation {
 		}
 	}
 
-	protected File downloadFile(TransferManager transferManager, RemoteFile remoteFile) throws StorageException {
+	protected File downloadFile(TransferManager transferManager, AbstractRemoteFile remoteFile) throws StorageException {
 		try {
 			File tmpRepoFile = File.createTempFile("syncanyfile", "tmp");
 
